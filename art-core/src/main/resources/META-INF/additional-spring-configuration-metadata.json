@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "art.auth.tokenExpireTime",
+      "type": "java.lang.Integer",
+      "description": "Token expire time in minutes."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+pluginManagement {
+    repositories {
+        maven {
+            url 'https://maven.aliyun.com/repository/gradle-plugin'
+        }
+        gradlePluginPortal()
+    }
+}
+// 根项目名称
+rootProject.name = 'art-engine'
+
+// 子项目名称
+include 'art-core'
+include 'art-business'
+include 'art-system'
+include 'art-runner'
+include 'art-websocket'
+

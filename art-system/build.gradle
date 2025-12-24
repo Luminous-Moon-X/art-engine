@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(":art-core")
+
+    implementation 'org.springframework.security:spring-security-crypto'
+}

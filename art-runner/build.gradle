@@ -1,0 +1,18 @@
+plugins {
+    id 'io.spring.dependency-management' version "${SPRING_DEPENDENCY_MANAGEMENT_VERSION}"
+    id 'org.springframework.boot' version "${SPRING_BOOT_VERSION}"
+}
+dependencies {
+    implementation project(":art-core")
+    implementation project(":art-business")
+    implementation project(":art-system")
+    implementation project(":art-websocket")
+}
+
+jar {
+    enabled = false
+}
+
+bootJar {
+    archiveFileName = "${project.name}-${project.version}.jar"
+}

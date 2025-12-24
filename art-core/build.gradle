@@ -1,0 +1,24 @@
+dependencies {
+
+    api "${lib.'jjwt-api'}"
+    api "${lib.'jjwt-impl'}"
+    api "${lib.'jjwt-jackson'}"
+    api "${lib.'commons-lang3'}"
+    api "${lib.'lombok'}"
+    api "${lib.'transmittable-thread-local'}"
+    api "${lib.'mysql-connect-java'}"
+    api "${lib.'reflections'}"
+    api "${lib.'sa-token'}"
+    api "${lib.'sa-token-jwt'}"
+    api "${lib.'sa-token-redis'}"
+    api "${lib.'sa-token-fastjson2'}"
+
+    api 'org.springframework.boot:spring-boot-starter'
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-jdbc'
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    api "${lib.'mybatis-flex'}"
+    api "${lib.'fastjson'}"
+    api "${lib.'hutool'}"
+    api "${lib.'hikari-cp'}"
+}

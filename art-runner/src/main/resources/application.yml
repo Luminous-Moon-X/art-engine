@@ -1,0 +1,60 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+spring:
+  main:
+    # 由于虚拟线程是守护线程，如果所有线程都是虚拟线程，JVM会直接推出，官方建议开启以下属性避免主线程退出JVM
+    keep-alive: true
+  threads:
+    virtual:
+      # 开启虚拟线程
+      enabled: true
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://47.95.206.93:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: xuaihao1234A!
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 5
+      connection-timeout: 60000
+      idle-timeout: 500000
+      max-lifetime: 1800000
+      pool-name: hikari-cp
+  data:
+    redis:
+      host: 47.95.206.93
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          time-between-eviction-runs: 30000
+      database: 0
+      password: xuaihao1234
+  elasticsearch:
+    uris: http://localhost:9200
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: deepseek-r1:8b
+          temperature: 0.7
+
+
+art:
+  auth:
+    # token过期时间 单位：分钟
+    token-expire-time: 60
+
+# mybatis-flex指定mapper.xml文件位置
+mybatis-flex:
+  mapper-locations:
+    - classpath*:/mapper/*.xml
+sa-token:
+  jwt-secret-key: c7ee264fd80c4e169f473df493bf67fd
+  is-read-cookie: false

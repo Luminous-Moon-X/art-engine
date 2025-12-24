@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':art-core')
+    implementation project(':art-system')
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
