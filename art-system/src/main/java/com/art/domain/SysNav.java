@@ -133,4 +133,10 @@ public class SysNav {
      */
     @Column("menu_type")
     private String menuType;
+
+    /**
+     * 是否固定
+     */
+    @Column("fixed_flag")
+    private Boolean fixedFlag;
 }

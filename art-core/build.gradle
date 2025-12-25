@@ -16,6 +16,7 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework.boot:spring-boot-starter-web'
     api 'org.springframework.boot:spring-boot-starter-jdbc'
+    api 'org.apache.commons:commons-pool2'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     api "${lib.'mybatis-flex'}"
     api "${lib.'fastjson'}"
