@@ -16,3 +16,5 @@ include 'art-system'
 include 'art-runner'
 include 'art-websocket'
 
+
+include 'art-generator'

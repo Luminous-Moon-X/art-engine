@@ -42,6 +42,7 @@ ext {
             "jjwt-impl"                          : "io.jsonwebtoken:jjwt-impl:${jwtVersion}",
             "jjwt-jackson"                       : "io.jsonwebtoken:jjwt-jackson:${jwtVersion}",
             "mybatis-flex"                       : "com.mybatis-flex:mybatis-flex-spring-boot3-starter:${mybatisFlexVersion}",
+            "mybatis-flex-codegen"               : "com.mybatis-flex:mybatis-flex-codegen:${mybatisFlexVersion}",
             "mysql-connect-java"                 : "mysql:mysql-connector-java:${mysqlConnectJavaVersion}",
             "druid"                              : "com.alibaba:druid-spring-boot-3-starter:${druidVersion}",
             "reflections"                        : "org.reflections:reflections:${reflections}",
