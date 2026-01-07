@@ -51,9 +51,7 @@ ext {
             "mybatis"                            : "org.mybatis:mybatis-spring:${mybatisVersion}",
             "hikari-cp"                          : "com.zaxxer:HikariCP:${hikariCP}",
             "sa-token"                           : "cn.dev33:sa-token-spring-boot3-starter:${saToken}",
-            "sa-token-jwt"                       : "cn.dev33:sa-token-jwt:${saToken}",
-            "sa-token-redis"                     : "cn.dev33:sa-token-redis-template:${saToken}",
-            "sa-token-fastjson2"                 : "cn.dev33:sa-token-fastjson2:${saToken}"
+            "sa-token-jwt"                       : "cn.dev33:sa-token-jwt:${saToken}"
     ]
 }
 
