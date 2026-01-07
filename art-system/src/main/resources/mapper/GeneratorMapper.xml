@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.art.mapper.GeneratorMapper">
+
+    <resultMap id="DBTableVOMap" type="com.art.domain.vo.DBTableVO">
+        <result property="id" column="id"/>
+        <result property="tableName" column="table_name"/>
+        <result property="tableDescription" column="table_comment"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="getDBTables" resultMap="DBTableVOMap">
+        SELECT TABLE_NAME    as id,
+               TABLE_NAME    as table_name,
+               TABLE_COMMENT as table_comment,
+               CREATE_TIME   as create_time
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_SCHEMA = DATABASE()
+        ORDER BY CREATE_TIME DESC
+    </select>
+
+</mapper>
