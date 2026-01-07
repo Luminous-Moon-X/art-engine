@@ -1,6 +1,7 @@
 package com.art.art.interceptor;
 
 import com.art.art.common.LoginUser;
+import com.art.art.config.AuthConfiguration;
 import com.art.art.context.SecurityContextHolder;
 import com.art.art.exception.ArtException;
 import com.art.art.constants.ArtErrorMessageConstants;
@@ -13,6 +14,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.time.Duration;
 
 /**
  * 请求统一拦截器
@@ -27,14 +30,20 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
      * Redis客户端
      */
     private final RedisTemplate<String, String> redisTemplate;
+    /**
+     * Token有效期配置
+     */
+    private final AuthConfiguration authConfiguration;
 
     /**
      * 构造器注入
      *
-     * @param redisTemplate Redis客户端
+     * @param redisTemplate     Redis客户端
+     * @param authConfiguration Token有效期配置
      */
-    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate) {
+    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate, AuthConfiguration authConfiguration) {
         this.redisTemplate = redisTemplate;
+        this.authConfiguration = authConfiguration;
     }
 
     /**
@@ -61,6 +70,8 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         }
         // 根据token获取当前用户信息，并将用户信息存储到线程变量中
         String tokenKey = "access_token:" + token;
+        // Token续期
+        redisTemplate.expire(tokenKey, Duration.ofMinutes(authConfiguration.getTokenExpireTime()));
         LoginUser loginUser = JSON.parseObject(redisTemplate.opsForValue().get(tokenKey), LoginUser.class);
         if (loginUser == null) {
             throw new ArtException(ArtErrorMessageConstants.USER_STATUS_EXPIRE, 401);
