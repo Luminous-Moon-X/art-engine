@@ -1,5 +1,6 @@
 package com.art.service.impl;
 
+import com.art.domain.vo.CodeGenVO;
 import com.art.domain.vo.DBTableVO;
 import com.art.mapper.GeneratorMapper;
 import com.art.service.GeneratorService;
@@ -36,5 +37,16 @@ public class GeneratorServiceImpl implements GeneratorService {
     @Override
     public List<DBTableVO> tables() {
         return this.generatorMapper.getDBTables();
+    }
+
+    /**
+     * 生成代码
+     *
+     * @param codeGenVO 代码生成信息
+     * @return 是否成功
+     */
+    @Override
+    public Boolean generateCode(CodeGenVO codeGenVO) {
+        return null;
     }
 }

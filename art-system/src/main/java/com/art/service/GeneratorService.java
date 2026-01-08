@@ -1,5 +1,6 @@
 package com.art.service;
 
+import com.art.domain.vo.CodeGenVO;
 import com.art.domain.vo.DBTableVO;
 
 import java.util.List;
@@ -17,4 +18,12 @@ public interface GeneratorService {
      * @return 数据库表信息
      */
     List<DBTableVO> tables();
+
+    /**
+     * 生成代码
+     *
+     * @param codeGenVO 代码生成信息
+     * @return 是否成功
+     */
+    Boolean generateCode(CodeGenVO codeGenVO);
 }

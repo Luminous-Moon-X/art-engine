@@ -1,11 +1,10 @@
 package com.art.controller;
 
 import com.art.art.common.HttpResult;
+import com.art.domain.vo.CodeGenVO;
 import com.art.domain.vo.DBTableVO;
 import com.art.service.GeneratorService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,5 +39,16 @@ public class GeneratorController {
     @GetMapping("tables")
     public HttpResult<List<DBTableVO>> tables() {
         return HttpResult.success(this.generatorService.tables());
+    }
+
+    /**
+     * 生成代码
+     *
+     * @param codeGenVO 代码生成参数
+     * @return 生成结果
+     */
+    @PostMapping("generateCode")
+    public HttpResult<Boolean> generateCode(@RequestBody CodeGenVO codeGenVO) {
+        return HttpResult.success(this.generatorService.generateCode(codeGenVO));
     }
 }
