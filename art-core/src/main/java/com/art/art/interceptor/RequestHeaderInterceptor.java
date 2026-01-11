@@ -60,13 +60,13 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         String token = request.getHeader(HeaderKeyConstants.TOKEN_HEADER);
         // 判断token是否合法
         if (StringUtil.isBlank(token)) {
-            throw new ArtException(ArtErrorMessageConstants.USER_STATUS_EXPIRE, 401);
+            throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
         }
         if (token.startsWith("Bearer ")) {
             token = token.replace("Bearer ", "");
         }
         if (!verifyToken(token)) {
-            throw new ArtException(ArtErrorMessageConstants.USER_STATUS_EXPIRE, 401);
+            throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
         }
         // 根据token获取当前用户信息，并将用户信息存储到线程变量中
         String tokenKey = "access_token:" + token;
@@ -74,7 +74,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         redisTemplate.expire(tokenKey, Duration.ofMinutes(authConfiguration.getTokenExpireTime()));
         LoginUser loginUser = JSON.parseObject(redisTemplate.opsForValue().get(tokenKey), LoginUser.class);
         if (loginUser == null) {
-            throw new ArtException(ArtErrorMessageConstants.USER_STATUS_EXPIRE, 401);
+            throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
         }
         // 设置线程变量
         SecurityContextHolder.setUserId(loginUser.getUserId());
