@@ -42,7 +42,7 @@ public class CodeGenerator {
      * @param generateType 生成类型
      * @return 生成结果
      */
-    public Boolean generate(String moduleName, String packageName, String[] tables, String authorName, String generateType) {
+    public Boolean generate(String moduleName, String packageName, String[] tables, String authorName, String[] generateType) {
         try {
             // 创建配置内容
             GlobalConfig globalConfig = this.createGlobalConfig(moduleName, packageName, tables, authorName, generateType);
@@ -62,13 +62,13 @@ public class CodeGenerator {
      *
      * @return 配置内容
      */
-    private GlobalConfig createGlobalConfig(String moduleName, String packageName, String[] tables, String authorName, String generateType) {
+    private GlobalConfig createGlobalConfig(String moduleName, String packageName, String[] tables, String authorName, String[] generateType) {
         // 创建配置内容
         GlobalConfig globalConfig = new GlobalConfig();
 
         // 设置根包
         globalConfig.getPackageConfig()
-                .setSourceDir(System.getProperty("user.dir") + "/" + moduleName)
+                .setSourceDir(System.getProperty("user.dir") + "/" + moduleName + "/src/main/java")
                 .setBasePackage(packageName);
         // 设置Java Doc
         globalConfig.getJavadocConfig().setAuthor(authorName);

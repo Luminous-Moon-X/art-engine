@@ -47,7 +47,7 @@ public class GeneratorController {
      * @param codeGenVO 代码生成参数
      * @return 生成结果
      */
-    @PostMapping("generateCode")
+    @PostMapping("generate")
     public HttpResult<Boolean> generateCode(@RequestBody CodeGenVO codeGenVO) {
         return HttpResult.success(this.generatorService.generateCode(codeGenVO));
     }

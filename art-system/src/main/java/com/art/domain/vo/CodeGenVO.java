@@ -29,5 +29,5 @@ public class CodeGenVO {
     /**
      * 根包
      */
-    private String originalPath;
+    private String rootPackage;
 }

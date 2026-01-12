@@ -1,5 +1,6 @@
 package com.art.service.impl;
 
+import com.art.CodeGenerator;
 import com.art.domain.vo.CodeGenVO;
 import com.art.domain.vo.DBTableVO;
 import com.art.mapper.GeneratorMapper;
@@ -20,13 +21,21 @@ public class GeneratorServiceImpl implements GeneratorService {
      * 代码生成器Mapper
      */
     private final GeneratorMapper generatorMapper;
+
+    /**
+     * 代码生成器
+     */
+    private final CodeGenerator codeGenerator;
+
     /**
      * 构造方法
      *
      * @param generatorMapper 代码生成器Mapper
+     * @param codeGenerator   代码生成器
      */
-    public GeneratorServiceImpl(GeneratorMapper generatorMapper) {
+    public GeneratorServiceImpl(GeneratorMapper generatorMapper, CodeGenerator codeGenerator) {
         this.generatorMapper = generatorMapper;
+        this.codeGenerator = codeGenerator;
     }
 
     /**
@@ -47,6 +56,6 @@ public class GeneratorServiceImpl implements GeneratorService {
      */
     @Override
     public Boolean generateCode(CodeGenVO codeGenVO) {
-        return null;
+        return codeGenerator.generate(codeGenVO.getModuleName(), codeGenVO.getRootPackage(), codeGenVO.getTableNames(), codeGenVO.getAuthorName(), codeGenVO.getGenerateTypes());
     }
 }
