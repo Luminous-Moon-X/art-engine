@@ -38,7 +38,7 @@ public class BannerRunner implements ApplicationRunner {
         Path bannerPath = new ClassPathResource("started-banner.txt").getFile().toPath();
         String bannerContent = Files.readString(bannerPath, StandardCharsets.UTF_8);
         System.out.println(bannerContent);
-        System.out.printf("Art Engine服务启动成功(*^_^*)        当前版本：%s%n", version);
+        System.out.printf("启动成功:)        - version：%s%n", version);
     }
 
 }
