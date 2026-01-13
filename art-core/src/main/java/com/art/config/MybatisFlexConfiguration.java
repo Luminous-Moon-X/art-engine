@@ -17,8 +17,6 @@ import org.springframework.context.annotation.Configuration;
 public class MybatisFlexConfiguration {
     // 用于记录 MyBatis-Flex SQL 日志的专用 Logger
     private static final Logger logger = LoggerFactory.getLogger("mybatis-flex-sql");
-    // SQL 分隔线，用于在日志中分隔不同的 SQL 记录
-    private static final String SQL_SEPARATOR = "=".repeat(80);
 
     /**
      * 构造函数 - 启用并配置 MyBatis-Flex 审计功能<br/>
@@ -42,8 +40,7 @@ public class MybatisFlexConfiguration {
             // 如果执行时间超过 1000ms，则标记为慢 SQL
             String warning = elapsedTime > 1000 ? " [⚠️ 慢SQL]" : "";
             // 记录格式化的 SQL 执行日志
-            logger.info("\n{}\n[{}] {} | 耗时: {}ms{}\n{}\n",
-                    SQL_SEPARATOR,           // 分隔线
+            logger.info("\n[{}] {} | 耗时: {}ms{}\n{}\n",
                     operationType,           // SQL 操作类型
                     formatTime(),            // 执行时间
                     elapsedTime,             // 执行耗时
