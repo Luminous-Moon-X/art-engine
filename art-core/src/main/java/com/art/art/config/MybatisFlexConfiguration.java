@@ -1,6 +1,5 @@
 package com.art.art.config;
 
-
 import com.mybatisflex.core.audit.AuditManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +38,12 @@ public class MybatisFlexConfiguration {
             String warning = elapsedTime > 1000 ? " [⚠️ 慢SQL]" : "";
             // 记录格式化的 SQL 执行日志
             logger.info("\n{}\n[{}] {} | 耗时: {}ms{}\n{}\n",
-                    SQL_SEPARATOR,
-                    operationType,
-                    formatTime(),
-                    elapsedTime,
-                    warning,
-                    formatSql(sql)
+                    SQL_SEPARATOR,           // 分隔线
+                    operationType,           // SQL 操作类型
+                    formatTime(),            // 执行时间
+                    elapsedTime,             // 执行耗时
+                    warning,                 // 性能警告
+                    formatSql(sql)           // 格式化后的 SQL 语句
             );
         });
     }
@@ -58,17 +57,17 @@ public class MybatisFlexConfiguration {
      */
     private String extractOperationType(String sql) {
         if (sql == null || sql.trim().isEmpty()) {
-            return "UNKNOWN";
+            return "UNKNOWN"; // SQL 为空或无效时返回 UNKNOWN
         }
-        String upperSql = sql.trim().toUpperCase();
-        if (upperSql.startsWith("SELECT")) return "SELECT";
-        if (upperSql.startsWith("INSERT")) return "INSERT";
-        if (upperSql.startsWith("UPDATE")) return "UPDATE";
-        if (upperSql.startsWith("DELETE")) return "DELETE";
-        if (upperSql.startsWith("CREATE")) return "DDL";
-        if (upperSql.startsWith("ALTER")) return "DDL";
-        if (upperSql.startsWith("DROP")) return "DDL";
-        return "OTHER";
+        String upperSql = sql.trim().toUpperCase(); // 将 SQL 转换为大写以便匹配
+        if (upperSql.startsWith("SELECT")) return "SELECT"; // 查询操作
+        if (upperSql.startsWith("INSERT")) return "INSERT"; // 插入操作
+        if (upperSql.startsWith("UPDATE")) return "UPDATE"; // 更新操作
+        if (upperSql.startsWith("DELETE")) return "DELETE"; // 删除操作
+        if (upperSql.startsWith("CREATE")) return "DDL";    // 数据定义语言（创建表等）
+        if (upperSql.startsWith("ALTER")) return "DDL";     // 数据定义语言（修改表结构等）
+        if (upperSql.startsWith("DROP")) return "DDL";      // 数据定义语言（删除表等）
+        return "OTHER"; // 其他未明确分类的操作类型
     }
 
     /**
@@ -92,8 +91,8 @@ public class MybatisFlexConfiguration {
      */
     private String formatSql(String sql) {
         if (sql == null) {
-            return "";
+            return ""; // SQL 为 null 时返回空字符串
         }
-        return sql.replaceAll("\\s+", " ").trim();
+        return sql.replaceAll("\\s+", " ").trim(); // 将多个空白字符替换为单个空格并去除首尾空白
     }
 }
