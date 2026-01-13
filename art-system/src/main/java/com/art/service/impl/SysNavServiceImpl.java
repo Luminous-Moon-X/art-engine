@@ -23,6 +23,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,7 @@ import static com.art.domain.table.SysNavTableDef.SYS_NAV;
 @Slf4j
 @Service
 @AllArgsConstructor
+@DependsOn("hikariLoader")
 public class SysNavServiceImpl extends ServiceImpl<SysNavMapper, SysNav> implements SysNavService {
     /**
      * Redis模板
