@@ -74,9 +74,15 @@ configure(subprojects) { project ->
     apply(['plugin': 'maven-publish'])
     apply(['plugin': 'idea'])
     apply(['plugin': 'io.spring.dependency-management'])
+    apply(['plugin': 'org.springframework.boot'])
 
     sourceCompatibility = "${javaVersion}"
     targetCompatibility = "${javaVersion}"
+
+    // 编译项目版本信息
+    springBoot {
+        buildInfo()
+    }
 
     // Maven仓库
     repositories {
