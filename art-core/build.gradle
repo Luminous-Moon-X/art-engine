@@ -10,6 +10,7 @@ dependencies {
     api "${lib.'reflections'}"
     api "${lib.'sa-token'}"
     api "${lib.'sa-token-jwt'}"
+    api "${lib.'open-api'}"
 
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework.boot:spring-boot-starter-web'

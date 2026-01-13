@@ -30,6 +30,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 注册拦截器，应用到所有路径
         registry.addInterceptor(requestHeaderInterceptor)
                 .addPathPatterns("/**")  // 拦截所有请求
+                .excludePathPatterns("/swagger-ui/**")
+                .excludePathPatterns("/api-docs/**")
+                .excludePathPatterns("/swagger-ui.html")
                 .excludePathPatterns("/auth/login")  // 但排除登录接口
                 .excludePathPatterns("/auth/logout"); // 以及登出接口
     }

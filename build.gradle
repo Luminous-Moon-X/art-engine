@@ -30,7 +30,8 @@ ext {
             fastjson = "2.0.57",
             hutool = "5.8.38",
             hikariCP = "5.1.0",
-            saToken = "1.44.0"
+            saToken = "1.44.0",
+            openApi = "2.8.5"
     ]
     lib = [
             "spring-boot-dependencies"           : "org.springframework.boot:spring-boot-dependencies:${SPRING_BOOT_VERSION}",
@@ -51,7 +52,8 @@ ext {
             "mybatis"                            : "org.mybatis:mybatis-spring:${mybatisVersion}",
             "hikari-cp"                          : "com.zaxxer:HikariCP:${hikariCP}",
             "sa-token"                           : "cn.dev33:sa-token-spring-boot3-starter:${saToken}",
-            "sa-token-jwt"                       : "cn.dev33:sa-token-jwt:${saToken}"
+            "sa-token-jwt"                       : "cn.dev33:sa-token-jwt:${saToken}",
+            "open-api"                           : "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApi}"
     ]
 }
 

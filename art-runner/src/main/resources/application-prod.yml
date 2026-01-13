@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://47.95.206.93:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: xuaihao1234A!
+    hikari:
+      # 连接最大生命周期
+      max-lifetime: 1800000      # 30分钟
+      # 空闲超时应小于 maxLifetime
+      idle-timeout: 600000       # 10分钟
+      minimum-idle: 5            # 最小空闲连接数
+      maximum-pool-size: 100     # 最大连接数
+      connection-timeout: 30000  # 获取连接超时时间
+      connection-test-query: SELECT 1  # 验证查询
+      # 连接存活检查
+      keepalive-time: 30000
+  data:
+    redis:
+      host: 47.95.206.93
+      port: 6379
+      password: xuaihao1234
+      database: 0
+      timeout: 10s
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 1000ms
+          time-between-eviction-runs: 10s
+        shutdown-timeout: 200ms

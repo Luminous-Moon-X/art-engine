@@ -10,50 +10,29 @@ spring:
     virtual:
       # 开启虚拟线程
       enabled: true
-  # 数据源配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.95.206.93:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-    username: root
-    password: xuaihao1234A!
-    hikari:
-      # 连接最大生命周期
-      max-lifetime: 1800000      # 30分钟
-      # 空闲超时应小于 maxLifetime
-      idle-timeout: 600000       # 10分钟
-      minimum-idle: 5            # 最小空闲连接数
-      maximum-pool-size: 100     # 最大连接数
-      connection-timeout: 30000  # 获取连接超时时间
-      connection-test-query: SELECT 1  # 验证查询
-      # 连接存活检查
-      keepalive-time: 30000
-  data:
-    redis:
-      host: 47.95.206.93
-      port: 6379
-      password: xuaihao1234
-      database: 0
-      timeout: 10s
-      lettuce:
-        pool:
-          enabled: true
-          max-active: 8
-          max-idle: 8
-          min-idle: 2
-          max-wait: 1000ms
-          time-between-eviction-runs: 10s
-        shutdown-timeout: 200ms
-
-
+  profiles:
+    active: dev
+# swagger配置
+springdoc:
+  # 访问路径
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    # OpenApi描述文档路径，默认为 /v3/api-docs
+    path: /api-docs
+  # 打印控制台日志
+  show-actuator: false
+# Art平台配置
 art:
   auth:
     # token过期时间 单位：分钟
     token-expire-time: 60
-
 # mybatis-flex指定mapper.xml文件位置
 mybatis-flex:
   mapper-locations:
     - classpath*:/mapper/*.xml
+# Sa-Token配置
 sa-token:
   jwt-secret-key: c7ee264fd80c4e169f473df493bf67fd
   is-read-cookie: false
