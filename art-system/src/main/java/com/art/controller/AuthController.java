@@ -1,12 +1,11 @@
 package com.art.controller;
 
-import com.art.art.common.HttpResult;
-import com.art.art.config.AuthConfiguration;
-import com.art.art.exception.ArtException;
+import com.art.common.HttpResult;
+import com.art.config.AuthConfiguration;
+import com.art.exception.ArtException;
 import com.art.domain.SysUser;
 import com.art.domain.vo.LoginResultVO;
 import com.art.domain.vo.LoginVO;
-import com.art.domain.vo.LogoutVO;
 import com.art.service.SysUserService;
 import com.alibaba.fastjson2.JSON;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -91,11 +90,10 @@ public class AuthController {
     /**
      * 注销登出用户
      *
-     * @param logoutVO 注销登出VO
      * @return 注销登出结果
      */
     @PostMapping("/logout")
-    public HttpResult<Boolean> logout(@RequestBody LogoutVO logoutVO) {
+    public HttpResult<Boolean> logout() {
         String token = StpUtil.getTokenInfo().getTokenValue();
         if (StringUtils.isBlank(token)) {
             return HttpResult.success(true);

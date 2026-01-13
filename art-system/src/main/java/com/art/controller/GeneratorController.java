@@ -1,6 +1,6 @@
 package com.art.controller;
 
-import com.art.art.common.HttpResult;
+import com.art.common.HttpResult;
 import com.art.domain.vo.CodeGenVO;
 import com.art.domain.vo.DBTableVO;
 import com.art.service.GeneratorService;

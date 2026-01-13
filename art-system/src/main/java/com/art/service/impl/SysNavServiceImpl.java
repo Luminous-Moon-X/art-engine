@@ -5,11 +5,11 @@ import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.art.art.common.CommonDataVO;
-import com.art.art.common.CommonSearchVO;
-import com.art.art.exception.ArtException;
-import com.art.art.kits.ConvertUtil;
-import com.art.art.kits.WrapperUtil;
+import com.art.common.CommonDataVO;
+import com.art.common.CommonSearchVO;
+import com.art.exception.ArtException;
+import com.art.kits.ConvertUtil;
+import com.art.kits.WrapperUtil;
 import com.art.domain.SysNav;
 import com.art.domain.vo.MenuMetaVO;
 import com.art.domain.vo.NavTreeVO;

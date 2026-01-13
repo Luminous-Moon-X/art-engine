@@ -1,7 +1,7 @@
 package com.art.service;
 
-import com.art.art.common.CommonDataVO;
-import com.art.art.common.CommonSearchVO;
+import com.art.common.CommonDataVO;
+import com.art.common.CommonSearchVO;
 import com.art.domain.SysNav;
 import com.art.domain.vo.NavTreeVO;
 import com.art.domain.vo.SystemNavVO;

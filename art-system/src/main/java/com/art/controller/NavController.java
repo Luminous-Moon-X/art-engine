@@ -1,10 +1,10 @@
 package com.art.controller;
 
-import com.art.art.common.CommonDataVO;
-import com.art.art.common.CommonSearchVO;
-import com.art.art.common.HttpResult;
-import com.art.art.common.TableRowVO;
-import com.art.art.kits.ConvertUtil;
+import com.art.common.CommonDataVO;
+import com.art.common.CommonSearchVO;
+import com.art.common.HttpResult;
+import com.art.common.TableRowVO;
+import com.art.kits.ConvertUtil;
 import com.art.domain.vo.NavTreeVO;
 import com.art.domain.vo.SystemNavVO;
 import com.art.service.SysNavService;

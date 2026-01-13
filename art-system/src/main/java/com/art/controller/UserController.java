@@ -1,6 +1,6 @@
 package com.art.controller;
 
-import com.art.art.common.HttpResult;
+import com.art.common.HttpResult;
 import com.art.domain.vo.UserInfoVO;
 import com.art.service.SysUserService;
 import lombok.AllArgsConstructor;

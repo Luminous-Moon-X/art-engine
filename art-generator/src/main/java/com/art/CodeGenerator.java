@@ -1,7 +1,7 @@
 package com.art;
 
-import com.art.art.common.BaseEntity;
-import com.art.art.exception.ArtException;
+import com.art.common.BaseEntity;
+import com.art.exception.ArtException;
 import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.ColumnConfig;
 import com.mybatisflex.codegen.config.GlobalConfig;
