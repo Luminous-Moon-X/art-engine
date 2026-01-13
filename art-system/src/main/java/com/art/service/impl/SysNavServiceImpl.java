@@ -1,6 +1,8 @@
 package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.art.annotation.IgnoreSqlLog;
+import com.art.context.IgnoreSqlLogContextHolder;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -151,7 +153,9 @@ public class SysNavServiceImpl extends ServiceImpl<SysNavMapper, SysNav> impleme
     public void initMenuCache() {
         log.info("初始化菜单树结构数据缓存");
         long start = System.currentTimeMillis();
+        IgnoreSqlLogContextHolder.enable();
         List<NavTreeVO> menuTreeList = this.queryMenuTreeDB();
+        IgnoreSqlLogContextHolder.disable();
         redisTemplate.opsForValue().set("navTree", JSON.toJSONString(menuTreeList));
         long end = System.currentTimeMillis();
         log.info("菜单树结构数据缓存初始化成功，耗时：{}ms", end - start);

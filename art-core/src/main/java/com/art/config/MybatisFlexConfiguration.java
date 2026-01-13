@@ -1,5 +1,6 @@
 package com.art.config;
 
+import com.art.context.IgnoreSqlLogContextHolder;
 import com.mybatisflex.core.audit.AuditManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,10 @@ public class MybatisFlexConfiguration {
         AuditManager.setAuditEnable(true);
         // 设置消息收集器，用于记录 SQL 执行信息
         AuditManager.setMessageCollector(auditMessage -> {
+            // 如果当前线程已启用忽略 SQL 日志，则不记录日志
+            if (IgnoreSqlLogContextHolder.ignore() != null && IgnoreSqlLogContextHolder.ignore()) {
+                return;
+            }
             // 获取完整 SQL 语句
             String sql = auditMessage.getFullSql();
             // 获取执行耗时（毫秒）
