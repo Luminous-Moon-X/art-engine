@@ -25,9 +25,9 @@ spring:
       lettuce:
         pool:
           enabled: true
-          max-active: 8
-          max-idle: 8
-          min-idle: 2
-          max-wait: 1000ms
+          max-active: 100
+          max-idle: 20
+          min-idle: 5
+          max-wait: 3000ms
           time-between-eviction-runs: 10s
         shutdown-timeout: 200ms

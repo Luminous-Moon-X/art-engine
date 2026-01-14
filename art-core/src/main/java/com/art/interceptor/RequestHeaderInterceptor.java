@@ -65,14 +65,20 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         if (token.startsWith("Bearer ")) {
             token = token.replace("Bearer ", "");
         }
-        if (!verifyToken(token)) {
-            throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
-        }
+        
         // 根据token获取当前用户信息，并将用户信息存储到线程变量中
         String tokenKey = "access_token:" + token;
+        
+        // 优化：直接获取用户信息，如果为空则说明Token无效或已过期
+        String userInfoJson = redisTemplate.opsForValue().get(tokenKey);
+        if (StringUtil.isBlank(userInfoJson)) {
+            throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
+        }
+        
         // Token续期
         redisTemplate.expire(tokenKey, Duration.ofMinutes(authConfiguration.getTokenExpireTime()));
-        LoginUser loginUser = JSON.parseObject(redisTemplate.opsForValue().get(tokenKey), LoginUser.class);
+        
+        LoginUser loginUser = JSON.parseObject(userInfoJson, LoginUser.class);
         if (loginUser == null) {
             throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
         }
@@ -83,15 +89,5 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         SecurityContextHolder.setUserType(loginUser.getUserType());
         SecurityContextHolder.setToken(token);
         return true;
-    }
-
-    /**
-     * 判断该token是否合法
-     *
-     * @param token token
-     * @return token是否合法
-     */
-    private boolean verifyToken(String token) {
-        return redisTemplate.hasKey("access_token:" + token);
     }
 }
