@@ -1,6 +1,5 @@
 package com.art.service.impl;
 
-import com.art.common.HttpResult;
 import com.art.domain.Tenant;
 import com.art.domain.vo.TenantVO;
 import com.art.exception.ArtException;
