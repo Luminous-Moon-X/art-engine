@@ -17,5 +17,5 @@ public class TableRowVO {
      * 表格选中主键集合
      */
     @JsonProperty("ids")
-    private List<String> idList;
+    private List<Long> idList;
 }

@@ -1,12 +1,9 @@
 package com.art.controller;
 
-import com.art.common.CommonDataVO;
-import com.art.common.CommonSearchVO;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.Tenant;
 import com.art.domain.vo.TenantVO;
-import com.art.kits.ConvertUtil;
 import com.art.service.TenantService;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -108,7 +105,7 @@ public class TenantController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除租户", description = "根据ID删除租户")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
-        return HttpResult.success(tenantService.removeByIds(tableRowVO.getIdList()));
+        return HttpResult.success(this.tenantService.delete(tableRowVO.getIdList()));
     }
 
     /**
