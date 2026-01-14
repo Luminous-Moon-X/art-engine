@@ -100,6 +100,11 @@ configure(subprojects) { project ->
         annotationProcessor "${lib.'lombok'}"
         implementation "${lib.'mybatis'}"
         implementation "org.springframework.boot:spring-boot-starter-data-redis"
+        testImplementation "org.springframework.boot:spring-boot-starter-test"
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     // 配置缓存实时更新
