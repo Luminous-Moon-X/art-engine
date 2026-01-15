@@ -1,0 +1,33 @@
+package com.art.domain.vo;
+
+import com.art.annotation.Query;
+import lombok.Data;
+
+/**
+ * 角色VO对象
+ *
+ * @author Luminous.X
+ * @since 0.0.1-SNAPSHOT
+ */
+@Data
+public class RoleVO {
+    /**
+     * 角色ID
+     */
+    private Long id;
+    /**
+     * 角色名称
+     */
+    @Query(type = Query.Type.LIKE)
+    private String roleName;
+    /**
+     * 角色编码
+     */
+    @Query(type = Query.Type.LIKE)
+    private String roleCode;
+    /**
+     * 角色描述
+     */
+    @Query(type = Query.Type.LIKE)
+    private String roleDescription;
+}
