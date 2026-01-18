@@ -30,4 +30,8 @@ public class RoleVO {
      */
     @Query(type = Query.Type.LIKE)
     private String roleDescription;
+    /**
+     * 是否启用
+     */
+    private Boolean enableFlag;
 }

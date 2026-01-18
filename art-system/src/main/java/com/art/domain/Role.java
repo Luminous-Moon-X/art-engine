@@ -2,6 +2,7 @@ package com.art.domain;
 
 import com.art.common.BaseEntity;
 import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,6 +13,7 @@ import lombok.EqualsAndHashCode;
  * @since 0.0.1-SNAPSHOT
  */
 @Data
+@Table("p_sys_role")
 @EqualsAndHashCode(callSuper = true)
 public class Role extends BaseEntity {
     /**
@@ -29,4 +31,9 @@ public class Role extends BaseEntity {
      */
     @Column("role_description")
     private String roleDescription;
+    /**
+     * 是否启用
+     */
+    @Column("enable_flag")
+    private Boolean enableFlag;
 }
