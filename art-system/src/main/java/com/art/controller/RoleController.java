@@ -57,7 +57,7 @@ public class RoleController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询角色信息", description = "分页查询角色信息")
-    public HttpResult<Page<Role>> page(Page<Role> page, RoleVO vo) {
+    public HttpResult<Page<RoleVO>> page(Page<RoleVO> page, RoleVO vo) {
         return HttpResult.success(this.roleService.queryPage(page, vo));
     }
 
@@ -90,7 +90,7 @@ public class RoleController {
      * @param vo 角色信息
      * @return 编辑结果
      */
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @Operation(summary = "编辑角色", description = "编辑角色")
     public HttpResult<Boolean> edit(@RequestBody RoleVO vo) {
         return HttpResult.success(roleService.edit(vo));

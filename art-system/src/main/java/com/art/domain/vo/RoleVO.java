@@ -31,6 +31,10 @@ public class RoleVO {
     @Query(type = Query.Type.LIKE)
     private String roleDescription;
     /**
+     * 创建时间
+     */
+    private String createTime;
+    /**
      * 是否启用
      */
     private Boolean enableFlag;

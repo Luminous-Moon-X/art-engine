@@ -83,7 +83,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
             throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
         }
         // 设置线程变量
-        SecurityContextHolder.setUserId(loginUser.getUserId());
+        SecurityContextHolder.setUserId(loginUser.getId());
         SecurityContextHolder.setUserName(loginUser.getUserName());
         SecurityContextHolder.setUserAllName(loginUser.getUserAllName());
         SecurityContextHolder.setUserType(loginUser.getUserType());

@@ -13,7 +13,7 @@ public class LoginUser {
     /**
      * 用户ID
      */
-    private String userId;
+    private Long id;
     /**
      * 用户名
      */

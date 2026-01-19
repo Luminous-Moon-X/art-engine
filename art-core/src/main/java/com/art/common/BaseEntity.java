@@ -24,7 +24,7 @@ public class BaseEntity {
      * 创建人
      */
     @Column("create_id")
-    private String createId;
+    private Long createId;
     /**
      * 创建时间
      */
@@ -34,7 +34,7 @@ public class BaseEntity {
      * 修改人
      */
     @Column("update_id")
-    private String updateId;
+    private Long updateId;
     /**
      * 修改时间
      */

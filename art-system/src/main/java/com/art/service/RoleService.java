@@ -29,7 +29,7 @@ public interface RoleService extends IService<Role> {
      * @param vo   查询条件对象
      * @return 角色信息
      */
-    Page<Role> queryPage(Page<Role> page, RoleVO vo);
+    Page<RoleVO> queryPage(Page<RoleVO> page, RoleVO vo);
 
     /**
      * 查询所有角色信息

@@ -15,7 +15,7 @@ public class SecurityUtil {
      *
      * @return 当前登录用户id
      */
-    public static String getUserId() {
+    public static Long getUserId() {
         return SecurityContextHolder.getUserId();
     }
 

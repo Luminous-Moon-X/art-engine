@@ -41,9 +41,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 角色信息
      */
     @Override
-    public Page<Role> queryPage(Page<Role> page, RoleVO vo) {
+    public Page<RoleVO> queryPage(Page<RoleVO> page, RoleVO vo) {
         QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
-        return this.getMapper().paginate(page, wrapper);
+        return this.getMapper().paginateAs(page, wrapper, RoleVO.class);
     }
 
     /**

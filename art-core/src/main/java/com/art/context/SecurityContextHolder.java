@@ -4,6 +4,7 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 import com.art.constants.SecurityConstants;
 import com.art.kits.ConvertUtil;
 import com.art.kits.StringUtil;
+import io.micrometer.common.util.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,7 +65,7 @@ public class SecurityContextHolder {
      *
      * @param userId 用户id
      */
-    public static void setUserId(String userId) {
+    public static void setUserId(Long userId) {
         set(SecurityConstants.USER_ID, userId);
     }
 
@@ -73,8 +74,8 @@ public class SecurityContextHolder {
      *
      * @return 用户id
      */
-    public static String getUserId() {
-        return get(SecurityConstants.USER_ID);
+    public static Long getUserId() {
+        return StringUtils.isBlank(get(SecurityConstants.USER_ID)) ? null : Long.parseLong(get(SecurityConstants.USER_ID));
     }
 
     /**
