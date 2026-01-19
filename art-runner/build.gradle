@@ -9,6 +9,11 @@ dependencies {
     implementation project(":art-websocket")
 }
 
+// 编译项目版本信息
+springBoot {
+    buildInfo()
+}
+
 jar {
     enabled = false
 }
