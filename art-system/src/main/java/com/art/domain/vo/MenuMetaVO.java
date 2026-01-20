@@ -2,12 +2,14 @@ package com.art.domain.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 菜单元数据VO对象
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class MenuMetaVO {
     /**
      * 菜单图标
@@ -29,10 +31,6 @@ public class MenuMetaVO {
      * 是否显示徽标
      */
     private Boolean showBadge;
-    /**
-     * 显示的徽标文本
-     */
-    private String showTextBadge;
     /**
      * 是否隐藏
      */

@@ -1,6 +1,7 @@
 package com.art.service;
 
 import com.art.domain.Menu;
+import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
@@ -61,4 +62,11 @@ public interface MenuService extends IService<Menu> {
      * @return 删除结果
      */
     Boolean delete(List<Long> idList);
+
+    /**
+     * 获取菜单树
+     *
+     * @return 菜单树
+     */
+    List<MenuTreeVO> menuTree();
 }
