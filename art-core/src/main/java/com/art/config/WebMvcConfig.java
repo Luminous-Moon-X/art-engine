@@ -2,6 +2,7 @@ package com.art.config;
 
 import com.art.interceptor.RequestHeaderInterceptor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author Luminous.X
  * @since 0.0.1-SNAPSHOT
  */
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -19,6 +21,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
      * 拦截器
      */
     private final RequestHeaderInterceptor requestHeaderInterceptor;
+
+    /**
+     * 认证配置
+     */
+    private final AuthConfiguration authConfiguration;
 
     /**
      * 添加拦截器
@@ -29,11 +36,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册拦截器，应用到所有路径
         registry.addInterceptor(requestHeaderInterceptor)
-                .addPathPatterns("/**")  // 拦截所有请求
-                .excludePathPatterns("/swagger-ui/**")
-                .excludePathPatterns("/api-docs/**")
-                .excludePathPatterns("/swagger-ui.html")
-                .excludePathPatterns("/auth/login")  // 但排除登录接口
-                .excludePathPatterns("/auth/logout"); // 以及登出接口
+                .addPathPatterns("/**")
+                .excludePathPatterns(authConfiguration.getWhiteList());
+        log.info("初始化拦截器和请求白名单成功");
     }
 }

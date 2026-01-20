@@ -28,6 +28,12 @@ art:
   auth:
     # token过期时间 单位：分钟
     token-expire-time: 60
+    white-list:
+      - /auth/login
+      - /auth/logout
+      - /swagger-ui.html
+      - /api-docs/**
+      - /swagger-ui/**
 # mybatis-flex指定mapper.xml文件位置
 mybatis-flex:
   mapper-locations:
