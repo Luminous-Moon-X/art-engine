@@ -1,8 +1,8 @@
 package com.art;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -35,9 +35,16 @@ public class BannerRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String version = buildProperties.getVersion();
-        Path bannerPath = new ClassPathResource("started-banner.txt").getFile().toPath();
-        String bannerContent = Files.readString(bannerPath, StandardCharsets.UTF_8);
-        System.out.println(bannerContent);
+        ClassPathResource resource = new ClassPathResource("started-banner.txt");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder contentBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                contentBuilder.append(line).append("\n");
+            }
+            String bannerContent = contentBuilder.toString();
+            System.out.print(bannerContent);
+        }
         System.out.printf("启动成功:)        - version：%s%n", version);
     }
 
