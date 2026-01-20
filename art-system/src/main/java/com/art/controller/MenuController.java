@@ -36,7 +36,7 @@ public class MenuController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取菜单信息", description = "根据ID获取菜单信息")
-    public HttpResult<Menu> getById(@PathVariable("id") Long id) {
+    public HttpResult<MenuVO> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.menuService.selectById(id));
     }
 

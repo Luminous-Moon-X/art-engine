@@ -20,7 +20,7 @@ public interface MenuService extends IService<Menu> {
      * @param id 菜单ID
      * @return 菜单信息
      */
-    Menu selectById(Long id);
+    MenuVO selectById(Long id);
 
     /**
      * 分页查询菜单信息

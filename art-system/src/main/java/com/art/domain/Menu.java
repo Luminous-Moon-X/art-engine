@@ -66,4 +66,44 @@ public class Menu extends BaseEntity {
      */
     @Column("activation_path")
     private String activationPath;
+    /**
+     * 是否缓存
+     */
+    @Column("keep_alive")
+    private Boolean keepAlive;
+    /**
+     * 是否隐藏
+     */
+    @Column("hide_flag")
+    private Boolean hideFlag;
+    /**
+     * 是否内嵌
+     */
+    @Column("iframe_flag")
+    private Boolean iframeFlag;
+    /**
+     * 是否显示徽标
+     */
+    @Column("show_badge")
+    private Boolean showBadge;
+    /**
+     * 是否固定
+     */
+    @Column("fixed_tab")
+    private Boolean fixedTab;
+    /**
+     * 是否隐藏标签
+     */
+    @Column("hide_tab")
+    private Boolean hideTab;
+    /**
+     * 是否全屏
+     */
+    @Column("full_screen")
+    private Boolean fullScreen;
+    /**
+     * 父级ID
+     */
+    @Column("parent_id")
+    private Long parentId;
 }

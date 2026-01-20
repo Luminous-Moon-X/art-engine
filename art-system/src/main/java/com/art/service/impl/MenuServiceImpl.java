@@ -11,6 +11,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,8 +30,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 菜单信息
      */
     @Override
-    public Menu selectById(Long id) {
-        return this.getById(id);
+    public MenuVO selectById(Long id) {
+        return this.getMapper().selectOneWithRelationsByIdAs(id, MenuVO.class);
     }
 
     /**
@@ -43,7 +44,31 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public Page<MenuVO> queryPage(Page<MenuVO> page, MenuVO vo) {
         QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
-        return this.getMapper().paginateAs(page, wrapper, MenuVO.class);
+        wrapper.eq(Menu::getParentId, -1);
+        Page<MenuVO> menuPage = this.getMapper().paginateAs(page, wrapper, MenuVO.class);
+        List<MenuVO> records = menuPage.getRecords();
+        List<MenuVO> recordsWidthChildren = this.handleChildren(records);
+        menuPage.setRecords(recordsWidthChildren);
+        return menuPage;
+    }
+
+    /**
+     * 处理子菜单
+     *
+     * @param records 菜单信息
+     * @return 处理后的菜单信息
+     */
+    private List<MenuVO> handleChildren(List<MenuVO> records) {
+        for (MenuVO menuVO : records) {
+            QueryWrapper wrapper = QueryWrapper.create();
+            wrapper.eq(Menu::getParentId, menuVO.getId());
+            List<MenuVO> children = this.getMapper().selectListByQueryAs(wrapper, MenuVO.class);
+            if (!children.isEmpty()) {
+                menuVO.setChildren(children);
+                this.handleChildren(children);
+            }
+        }
+        return records;
     }
 
     /**
@@ -63,6 +88,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 添加结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean add(MenuVO vo) {
         if (vo == null) {
             throw new ArtException("数据为空，请检查！");
@@ -78,6 +104,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 编辑结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean edit(MenuVO vo) {
         if (vo == null) {
             throw new ArtException("数据为空，请检查！");
@@ -93,7 +120,16 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 删除结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
+        for (Long id : idList) {
+            QueryWrapper wrapper = QueryWrapper.create();
+            wrapper.eq(Menu::getParentId, id);
+            long childCount = this.getMapper().selectCountByQuery(wrapper);
+            if (childCount > 0) {
+                throw new ArtException("该菜单有下级，无法删除！");
+            }
+        }
         return this.removeByIds(idList);
     }
 }

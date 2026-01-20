@@ -1,6 +1,9 @@
 package com.art.domain.vo;
 
+import com.art.annotation.Query;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * 菜单VO类
@@ -25,10 +28,12 @@ public class MenuVO {
     /**
      * 菜单名称
      */
+    @Query(type = Query.Type.LIKE)
     private String menuName;
     /**
      * 路由地址
      */
+    @Query(type = Query.Type.LIKE)
     private String routePath;
     /**
      * 权限标识
@@ -54,4 +59,40 @@ public class MenuVO {
      * 激活路径
      */
     private String activationPath;
+    /**
+     * 是否缓存
+     */
+    private Boolean keepAlive;
+    /**
+     * 是否隐藏
+     */
+    private Boolean hideFlag;
+    /**
+     * 是否内嵌
+     */
+    private Boolean iframeFlag;
+    /**
+     * 是否显示徽标
+     */
+    private Boolean showBadge;
+    /**
+     * 是否固定
+     */
+    private Boolean fixedTab;
+    /**
+     * 是否隐藏标签
+     */
+    private Boolean hideTab;
+    /**
+     * 是否全屏
+     */
+    private Boolean fullScreen;
+    /**
+     * 父级ID
+     */
+    private Long parentId;
+    /**
+     * 子菜单
+     */
+    private List<MenuVO> children;
 }
