@@ -1,10 +1,7 @@
 package com.art.service.impl;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.art.context.IgnoreSqlLogContextHolder;
+import com.art.cache.MenuCache;
 import com.art.domain.Menu;
-import com.art.domain.vo.MenuMetaVO;
 import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
 import com.art.exception.ArtException;
@@ -16,14 +13,10 @@ import com.art.service.MenuService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,19 +27,20 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@DependsOn("hikariLoader")
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
     /**
-     * Redis模板
+     * 菜单缓存
      */
-    private final RedisTemplate<String, String> redisTemplate;
+    private final MenuCache menuCache;
 
     /**
-     * 根菜单树
+     * 构造函数
+     *
+     * @param menuCache     菜单缓存
      */
-    public MenuServiceImpl(RedisTemplate<String, String> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public MenuServiceImpl(MenuCache menuCache) {
+        this.menuCache = menuCache;
     }
 
     /**
@@ -122,7 +116,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             throw new ArtException("数据为空，请检查！");
         }
         Menu entity = ConvertUtil.convert(vo, Menu.class);
-        return this.save(entity);
+        boolean save = this.save(entity);
+        if (save) {
+            Thread.ofVirtual().start(menuCache::init);
+        }
+        return save;
     }
 
     /**
@@ -138,7 +136,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             throw new ArtException("数据为空，请检查！");
         }
         Menu entity = ConvertUtil.convert(vo, Menu.class);
-        return this.updateById(entity);
+        boolean edit = this.updateById(entity);
+        if (edit) {
+            Thread.ofVirtual().start(menuCache::init);
+        }
+        return edit;
     }
 
     /**
@@ -168,80 +170,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     public List<MenuTreeVO> menuTree() {
-        List<MenuTreeVO> menuTreeList;
-        // 先查缓存
-        String menuTreeJsonString = redisTemplate.opsForValue().get("menuTree");
-        if (StringUtil.isNotBlank(menuTreeJsonString)) {
-            menuTreeList = JSONArray.parseArray(menuTreeJsonString, MenuTreeVO.class);
-        } else {
-            // 缓存没有，查库并刷新缓存
-            menuTreeList = this.initMenuTree();
-        }
-        return menuTreeList;
-    }
-
-    /**
-     * 初始化菜单树
-     *
-     * @return 菜单树
-     */
-    @PostConstruct
-    public List<MenuTreeVO> initMenuTree() {
-        IgnoreSqlLogContextHolder.enable();
-        QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getParentId, -1);
-        List<MenuVO> menuList = this.getMapper().selectListByQueryAs(wrapper, MenuVO.class);
-        List<MenuTreeVO> menuTreeList = this.handleMenuTree(menuList);
-        redisTemplate.opsForValue().set("menuTree", JSON.toJSONString(menuTreeList));
-        IgnoreSqlLogContextHolder.disable();
-        log.info("初始化菜单数据成功");
-        return menuTreeList;
-    }
-
-    /**
-     * 处理菜单树
-     *
-     * @param menuList 菜单信息
-     * @return 处理后的菜单树
-     */
-    private List<MenuTreeVO> handleMenuTree(List<MenuVO> menuList) {
-        List<MenuTreeVO> menuTreeList = new ArrayList<>();
-        for (MenuVO menuVO : menuList) {
-            MenuTreeVO menuTreeVO = new MenuTreeVO();
-            menuTreeVO.setName(menuVO.getId().toString());
-            menuTreeVO.setPath(menuVO.getRoutePath());
-            menuTreeVO.setComponent(menuVO.getComponentPath());
-            // 封装Meta
-            MenuMetaVO meta = getMenuMetaVO(menuVO);
-            menuTreeVO.setMeta(meta);
-            // 判断是否有子菜单
-            List<MenuVO> childMenuList = this.getMapper().selectListByQueryAs(QueryWrapper.create().eq(Menu::getParentId, menuVO.getId()), MenuVO.class);
-            if (!childMenuList.isEmpty()) {
-                menuTreeVO.setChildren(this.handleMenuTree(childMenuList));
-            }
-            menuTreeList.add(menuTreeVO);
-        }
-        return menuTreeList;
-    }
-
-    /**
-     * 封装Meta对象
-     *
-     * @param menuVO 菜单信息
-     * @return 菜单Meta
-     */
-    private static MenuMetaVO getMenuMetaVO(MenuVO menuVO) {
-        MenuMetaVO meta = new MenuMetaVO();
-        meta.setIcon(menuVO.getMenuIcon());
-        meta.setActivePath(menuVO.getActivationPath());
-        meta.setTitle(menuVO.getMenuName());
-        meta.setKeepAlive(menuVO.getKeepAlive());
-        meta.setFixedTab(menuVO.getFixedTab());
-        meta.setShowBadge(menuVO.getShowBadge());
-        meta.setIsHide(menuVO.getHideFlag());
-        meta.setIsHideTab(menuVO.getHideTab());
-        meta.setLink(menuVO.getExternalLink());
-        meta.setIsIframe(menuVO.getIframeFlag());
-        meta.setIsFullScreen(menuVO.getFullScreen());
-        return meta;
+        return menuCache.get();
     }
 }
