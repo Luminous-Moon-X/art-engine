@@ -14,6 +14,12 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 菜单数据二级缓存实现
+ *
+ * @author Luminous.X
+ * @since 0.0.1-SNAPSHOT
+ */
 @Component
 public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
 
@@ -26,7 +32,7 @@ public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
      * 构造函数
      *
      * @param redisTemplate Redis客户端
-     * @param menuMapper   菜单服务
+     * @param menuMapper    菜单服务
      */
     public MenuCache(RedisTemplate<String, Object> redisTemplate, MenuMapper menuMapper) {
         super(redisTemplate);
