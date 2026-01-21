@@ -45,7 +45,7 @@ public class BannerRunner implements ApplicationRunner {
             String bannerContent = contentBuilder.toString();
             System.out.print(bannerContent);
         }
-        System.out.printf("启动成功:)        - version：%s%n", version);
+        System.out.printf(":: 启动成功 ::        - version：%s%n", version);
     }
 
 }
