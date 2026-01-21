@@ -71,7 +71,7 @@ public abstract class ArtCache<String, V> {
         if (data != null) {
             redisTemplate.opsForValue().set(getRedisKey(), data);
             caffeineCache.put(getRedisKey(), data);
-            log.info("预热二级缓存成功：{}", getCacheName());
+            log.info("加载二级缓存成功：{}", getCacheName());
         }
     }
 
