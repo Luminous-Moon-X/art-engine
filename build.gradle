@@ -31,7 +31,8 @@ ext {
             hutool = "5.8.38",
             hikariCP = "5.1.0",
             saToken = "1.44.0",
-            openApi = "2.8.5"
+            openApi = "2.8.5",
+            redisson = "3.24.3"
     ]
     lib = [
             "spring-boot-dependencies"           : "org.springframework.boot:spring-boot-dependencies:${SPRING_BOOT_VERSION}",
@@ -53,7 +54,8 @@ ext {
             "hikari-cp"                          : "com.zaxxer:HikariCP:${hikariCP}",
             "sa-token"                           : "cn.dev33:sa-token-spring-boot3-starter:${saToken}",
             "sa-token-jwt"                       : "cn.dev33:sa-token-jwt:${saToken}",
-            "open-api"                           : "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApi}"
+            "open-api"                           : "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApi}",
+            "redisson"                           : "org.redisson:redisson-spring-boot-starter:${redisson}"
     ]
 }
 

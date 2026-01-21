@@ -11,6 +11,7 @@ dependencies {
     api "${lib.'sa-token'}"
     api "${lib.'sa-token-jwt'}"
     api "${lib.'open-api'}"
+    api "${lib.'redisson'}"
 
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework.boot:spring-boot-starter-web'
