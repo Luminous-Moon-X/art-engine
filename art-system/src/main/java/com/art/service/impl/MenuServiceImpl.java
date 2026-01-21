@@ -64,6 +64,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public Page<MenuVO> queryPage(Page<MenuVO> page, MenuVO vo) {
         QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
+        wrapper.orderBy(Menu::getOrderNum, true);
         if (StringUtil.isAllBlank(vo.getMenuName(), vo.getRoutePath())) {
             wrapper.eq(Menu::getParentId, -1);
         }

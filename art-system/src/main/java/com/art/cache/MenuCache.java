@@ -52,6 +52,7 @@ public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
     @Override
     protected List<MenuTreeVO> getCacheData() {
         QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getParentId, -1);
+        wrapper.orderBy(Menu::getOrderNum, true);
         List<MenuVO> menuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
         return this.handleMenuTree(menuList);
     }
@@ -73,7 +74,10 @@ public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
             MenuMetaVO meta = getMenuMetaVO(menuVO);
             menuTreeVO.setMeta(meta);
             // 判断是否有子菜单
-            List<MenuVO> childMenuList = menuMapper.selectListByQueryAs(QueryWrapper.create().eq(Menu::getParentId, menuVO.getId()), MenuVO.class);
+            QueryWrapper wrapper = QueryWrapper.create()
+                    .eq(Menu::getParentId, menuVO.getId())
+                    .orderBy(Menu::getOrderNum, true);
+            List<MenuVO> childMenuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
             if (!childMenuList.isEmpty()) {
                 menuTreeVO.setChildren(this.handleMenuTree(childMenuList));
             }
