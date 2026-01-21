@@ -11,6 +11,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,6 +64,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 添加结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean add(RoleVO vo) {
         if (vo == null) {
             throw new ArtException("数据为空，请检查！");
@@ -78,6 +80,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 编辑结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean edit(RoleVO vo) {
         if (vo == null) {
             throw new ArtException("数据为空，请检查！");
@@ -93,6 +96,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 删除结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
         return this.removeByIds(idList);
     }
