@@ -6,7 +6,7 @@ import com.art.context.SecurityContextHolder;
 import com.art.exception.ArtException;
 import com.art.constants.ArtErrorMessageConstants;
 import com.art.constants.HeaderKeyConstants;
-import com.art.kits.StringUtil;
+import com.art.utils.StringUtil;
 import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

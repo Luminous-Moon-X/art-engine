@@ -1,7 +1,7 @@
 package com.art.config;
 
 import com.art.common.BaseEntity;
-import com.art.kits.SecurityUtil;
+import com.art.utils.SecurityUtil;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
 import com.mybatisflex.core.FlexGlobalConfig;

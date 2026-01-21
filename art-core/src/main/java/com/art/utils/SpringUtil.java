@@ -1,4 +1,4 @@
-package com.art.kits;
+package com.art.utils;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

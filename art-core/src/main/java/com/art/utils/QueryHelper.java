@@ -1,4 +1,4 @@
-package com.art.kits;
+package com.art.utils;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;

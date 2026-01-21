@@ -1,4 +1,4 @@
-package com.art.kits;
+package com.art.utils;
 
 import com.art.exception.ArtException;
 import com.art.constants.ArtErrorMessageConstants;

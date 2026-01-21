@@ -1,4 +1,4 @@
-package com.art.kits;
+package com.art.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
