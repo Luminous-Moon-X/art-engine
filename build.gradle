@@ -23,7 +23,7 @@ ext {
             transmittableThreadLocalVersion = "2.14.5",
             jwtVersion = "0.12.3",
             mybatisVersion = "3.0.4",
-            mybatisFlexVersion = "1.10.9",
+            mybatisFlexVersion = "1.11.1",
             mysqlConnectJavaVersion = "8.0.33",
             druidVersion = "1.2.20",
             reflections = "0.10.2",
