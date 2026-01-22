@@ -2,6 +2,7 @@ package com.art.config;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
@@ -37,8 +39,10 @@ public class JacksonConfig {
             javaTimeModule.addSerializer(Long.class, JacksonLongConfiguration.INSTANCE);
             javaTimeModule.addSerializer(Long.TYPE, JacksonLongConfiguration.INSTANCE);
             javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DATE_TIME_FORMATTER));
+            javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DATE_TIME_FORMATTER));
             builder.modules(javaTimeModule);
             builder.timeZone(TimeZone.getDefault());
+            builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             log.info("Jackson配置初始化成功.");
         };
     }
