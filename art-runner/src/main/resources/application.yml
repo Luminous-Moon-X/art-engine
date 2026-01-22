@@ -38,6 +38,11 @@ art:
 mybatis-flex:
   mapper-locations:
     - classpath*:/mapper/*.xml
+  global-config:
+    key-config:
+      before: true
+      key-type: generator
+      value: snowFlakeId
 # Sa-Token配置
 sa-token:
   jwt-secret-key: c7ee264fd80c4e169f473df493bf67fd

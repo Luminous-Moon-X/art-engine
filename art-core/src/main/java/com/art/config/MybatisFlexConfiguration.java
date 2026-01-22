@@ -1,13 +1,9 @@
 package com.art.config;
 
 import com.art.context.IgnoreSqlLogContextHolder;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
-import com.mybatisflex.core.keygen.KeyGenerators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -53,13 +49,6 @@ public class MybatisFlexConfiguration {
                     formatSql(sql)           // 格式化后的 SQL 语句
             );
         });
-
-        // 配置全局主键生成器为雪花算法
-        FlexGlobalConfig.KeyConfig keyConfig = new FlexGlobalConfig.KeyConfig();
-        keyConfig.setKeyType(KeyType.Generator);
-        keyConfig.setValue(KeyGenerators.snowFlakeId);
-        keyConfig.setBefore(true);
-        FlexGlobalConfig.getDefaultConfig().setKeyConfig(keyConfig);
     }
 
     /**
