@@ -44,6 +44,7 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
     @Override
     public Page<DictValueVO> queryPage(Page<DictValueVO> page, DictValueVO vo) {
         QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
+        wrapper.orderBy(DictValue::getOrderNum, true);
         return this.getMapper().paginateAs(page, wrapper, DictValueVO.class);
     }
 

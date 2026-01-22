@@ -1,5 +1,6 @@
 package com.art.domain.vo;
 
+import com.art.annotation.Query;
 import lombok.Data;
 
 @Data
@@ -15,10 +16,12 @@ public class DictValueVO {
     /**
      * 字典标签
      */
+    @Query(type = Query.Type.LIKE)
     private String dictLabel;
     /**
      * 字典值
      */
+    @Query(type = Query.Type.LIKE)
     private String dictValue;
     /**
      * 显示样式

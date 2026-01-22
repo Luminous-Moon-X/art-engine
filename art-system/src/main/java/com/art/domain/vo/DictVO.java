@@ -1,5 +1,6 @@
 package com.art.domain.vo;
 
+import com.art.annotation.Query;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,10 +14,12 @@ public class DictVO {
     /**
      * 字典名称
      */
+    @Query(type = Query.Type.LIKE)
     private String dictName;
     /**
      * 字典编码
      */
+    @Query(type = Query.Type.LIKE)
     private String dictCode;
     /**
      * 字典类型
