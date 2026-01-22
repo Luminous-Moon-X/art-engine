@@ -1,10 +1,12 @@
 package com.art.service.impl;
 
 import com.art.domain.Dict;
+import com.art.domain.DictValue;
 import com.art.domain.vo.DictVO;
 import com.art.exception.ArtException;
 import com.art.mapper.DictMapper;
 import com.art.service.DictService;
+import com.art.service.DictValueService;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
 import com.mybatisflex.core.paginate.Page;
@@ -23,6 +25,21 @@ import java.util.List;
  */
 @Service
 public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements DictService {
+
+    /**
+     * 字典值服务
+     */
+    private final DictValueService dictValueService;
+
+    /**
+     * 构造函数
+     *
+     * @param dictValueService 字典值服务
+     */
+    public DictServiceImpl(DictValueService dictValueService) {
+        this.dictValueService = dictValueService;
+    }
+
     /**
      * 根据ID查询字典信息
      *
@@ -98,6 +115,9 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
+        // 先删除字典项
+        dictValueService.remove(QueryWrapper.create().in(DictValue::getDictId, idList));
+        // 删除字典
         return this.removeByIds(idList);
     }
 
