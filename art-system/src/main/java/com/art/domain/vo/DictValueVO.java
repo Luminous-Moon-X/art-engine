@@ -3,6 +3,12 @@ package com.art.domain.vo;
 import com.art.annotation.Query;
 import lombok.Data;
 
+/**
+ * 字典值表VO
+ *
+ * @author Luminous.X
+ * @since 0.0.1-SNAPSHOT
+ */
 @Data
 public class DictValueVO {
     /**

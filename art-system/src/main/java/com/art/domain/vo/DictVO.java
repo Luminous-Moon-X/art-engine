@@ -5,6 +5,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 字典表VO
+ *
+ * @author Luminous.X
+ * @since 0.0.1-SNAPSHOT
+ */
 @Data
 public class DictVO {
     /**

@@ -1,6 +1,7 @@
 package com.art.service;
 
 import com.art.domain.DictValue;
+import com.art.domain.vo.DictItemVO;
 import com.art.domain.vo.DictValueVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
@@ -61,4 +62,12 @@ public interface DictValueService extends IService<DictValue> {
      * @return 删除结果
      */
     Boolean delete(List<Long> idList);
+
+    /**
+     * 根据字典编码查询字典值信息
+     *
+     * @param dictCode 字典编码
+     * @return 字典值信息
+     */
+    List<DictItemVO> dictByCode(String dictCode);
 }

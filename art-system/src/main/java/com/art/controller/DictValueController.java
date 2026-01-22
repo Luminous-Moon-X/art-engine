@@ -3,6 +3,7 @@ package com.art.controller;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.DictValue;
+import com.art.domain.vo.DictItemVO;
 import com.art.domain.vo.DictValueVO;
 import com.art.service.DictValueService;
 import com.mybatisflex.core.paginate.Page;
@@ -106,5 +107,17 @@ public class DictValueController {
     @Operation(summary = "删除字典值", description = "根据ID删除字典值")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.DictValueService.delete(tableRowVO.getIdList()));
+    }
+
+    /**
+     * 根据字典编码查询字典值
+     *
+     * @param dictCode 字典编码
+     * @return 字典值列表
+     */
+    @GetMapping("/dictByCode/{dictCode}")
+    @Operation(summary = "根据字典编码查询字典值", description = "根据字典编码查询字典值")
+    public HttpResult<List<DictItemVO>> dictByCode(@PathVariable("dictCode") String dictCode) {
+        return HttpResult.success(this.DictValueService.dictByCode(dictCode));
     }
 }

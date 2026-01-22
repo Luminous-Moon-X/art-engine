@@ -1,6 +1,8 @@
 package com.art.service.impl;
 
+import com.art.cache.DictCache;
 import com.art.domain.DictValue;
+import com.art.domain.vo.DictItemVO;
 import com.art.domain.vo.DictValueVO;
 import com.art.exception.ArtException;
 import com.art.mapper.DictValueMapper;
@@ -23,6 +25,20 @@ import java.util.List;
  */
 @Service
 public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue> implements DictValueService {
+    /**
+     * 字典缓存
+     */
+    private final DictCache dictCache;
+
+    /**
+     * 构造函数
+     *
+     * @param dictCache 字典缓存
+     */
+    public DictValueServiceImpl(DictCache dictCache) {
+        this.dictCache = dictCache;
+    }
+
     /**
      * 根据ID查询字典值信息
      *
@@ -100,5 +116,16 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
         return this.removeByIds(idList);
+    }
+
+    /**
+     * 根据字典编码查询字典值信息
+     *
+     * @param dictCode 字典编码
+     * @return 字典值信息
+     */
+    @Override
+    public List<DictItemVO> dictByCode(String dictCode) {
+        return dictCache.getDictByCode(dictCode);
     }
 }
