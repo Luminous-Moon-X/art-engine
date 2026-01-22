@@ -35,7 +35,7 @@ public class Dict extends BaseEntity {
      * 启用标识
      */
     @Column("enable_flag")
-    private String enableFlag;
+    private Boolean enableFlag;
     /**
      * 备注
      */
