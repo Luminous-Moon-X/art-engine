@@ -39,6 +39,7 @@ mybatis-flex:
   mapper-locations:
     - classpath*:/mapper/*.xml
   global-config:
+    # 主键生成策略
     key-config:
       before: true
       key-type: generator
