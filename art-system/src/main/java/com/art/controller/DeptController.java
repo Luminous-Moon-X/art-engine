@@ -3,6 +3,7 @@ package com.art.controller;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.Dept;
+import com.art.domain.vo.DeptTreeSelectVO;
 import com.art.domain.vo.DeptVO;
 import com.art.service.DeptService;
 import com.mybatisflex.core.paginate.Page;
@@ -68,8 +69,19 @@ public class DeptController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有部门信息", description = "查询所有部门信息")
-    public HttpResult<List<Dept>> list() {
+    public HttpResult<List<DeptVO>> list() {
         return HttpResult.success(this.DeptService.selectList());
+    }
+
+    /**
+     * 部门树形下拉列表
+     *
+     * @return 部门树形下拉列表
+     */
+    @GetMapping("/treeSelect")
+    @Operation(summary = "部门树形下拉列表", description = "部门树形下拉列表")
+    public HttpResult<List<DeptTreeSelectVO>> treeSelect() {
+        return HttpResult.success(this.DeptService.treeSelect());
     }
 
     /**

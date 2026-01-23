@@ -46,4 +46,9 @@ public class Dept extends BaseEntity {
      */
     @Column("enable_flag")
     private Boolean enableFlag;
+    /**
+     * 父级部门ID
+     */
+    @Column("parent_id")
+    private Long parentId;
 }

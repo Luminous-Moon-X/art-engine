@@ -1,6 +1,7 @@
 package com.art.service;
 
 import com.art.domain.Dept;
+import com.art.domain.vo.DeptTreeSelectVO;
 import com.art.domain.vo.DeptVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
@@ -36,7 +37,7 @@ public interface DeptService extends IService<Dept> {
      *
      * @return 部门信息
      */
-    List<Dept> selectList();
+    List<DeptVO> selectList();
 
     /**
      * 添加部门信息
@@ -61,4 +62,11 @@ public interface DeptService extends IService<Dept> {
      * @return 删除结果
      */
     Boolean delete(List<Long> idList);
+
+    /**
+     * 部门树形下拉列表
+     *
+     * @return 部门树形下拉列表
+     */
+    List<DeptTreeSelectVO> treeSelect();
 }
