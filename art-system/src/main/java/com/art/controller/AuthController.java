@@ -2,12 +2,12 @@ package com.art.controller;
 
 import com.art.common.HttpResult;
 import com.art.config.AuthConfiguration;
+import com.art.domain.User;
 import com.art.exception.ArtException;
-import com.art.domain.SysUser;
 import com.art.domain.vo.LoginResultVO;
 import com.art.domain.vo.LoginVO;
-import com.art.service.SysUserService;
 import com.alibaba.fastjson2.JSON;
+import com.art.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.CollectionUtil;
 import cn.dev33.satoken.stp.SaTokenInfo;
@@ -28,7 +28,7 @@ public class AuthController {
     /**
      * 用户表Service层逻辑
      */
-    private final SysUserService sysUserService;
+    private final UserService userService;
     /**
      * Redis操作对象
      */
@@ -41,13 +41,13 @@ public class AuthController {
     /**
      * 构造器注入
      *
-     * @param sysUserService    用户表Service层逻辑
+     * @param userService       用户表Service层逻辑
      * @param redisTemplate     Redis操作对象
      * @param authConfiguration 权限配置
      */
-    public AuthController(SysUserService sysUserService, RedisTemplate<String, String> redisTemplate,
-            AuthConfiguration authConfiguration) {
-        this.sysUserService = sysUserService;
+    public AuthController(UserService userService, RedisTemplate<String, String> redisTemplate,
+                          AuthConfiguration authConfiguration) {
+        this.userService = userService;
         this.redisTemplate = redisTemplate;
         this.authConfiguration = authConfiguration;
     }
@@ -66,23 +66,28 @@ public class AuthController {
             throw new ArtException("用户名或密码不能为空！");
         }
         // 根据用户名查询用户信息
-        List<SysUser> userList = sysUserService.list(QueryWrapper.create().eq(SysUser::getUserName, username));
+        List<User> userList = userService.list(QueryWrapper.create().eq(User::getUserName, username));
         if (CollectionUtil.isEmpty(userList)) {
-            throw new ArtException("用户不存在！");
+            throw new ArtException("用户名或密码错误！");
+        }
+
+        User user = userList.getFirst();
+        if (!user.getEnableFlag()) {
+            throw new ArtException("该用户已被禁用，请联系管理员！");
         }
         // 对比密码
-        String realPassword = userList.getFirst().getPassword();
+        String realPassword = user.getPassword();
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         if (!encoder.matches(password, realPassword)) {
-            throw new ArtException("密码错误！");
+            throw new ArtException("用户名或密码错误！");
         }
-        StpUtil.login(userList.getFirst().getId(),
-                new SaLoginParameter().setExtra("name", userList.getFirst().getUserName()));
+        StpUtil.login(user.getId(),
+                new SaLoginParameter().setExtra("name", user.getUserName()));
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
         String token = tokenInfo.getTokenValue();
         // 将token存储到Redis
-        redisTemplate.opsForValue().set("access_token:" + token, JSON.toJSONString(userList.getFirst()),
+        redisTemplate.opsForValue().set("access_token:" + token, JSON.toJSONString(user),
                 authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
         return HttpResult.success(new LoginResultVO(token));
     }

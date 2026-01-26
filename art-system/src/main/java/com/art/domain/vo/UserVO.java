@@ -1,6 +1,9 @@
 package com.art.domain.vo;
 
+import com.art.annotation.Query;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 /**
  * 用户VO类
@@ -21,10 +24,12 @@ public class UserVO {
     /**
      * 用户名
      */
+    @Query(type = Query.Type.LIKE)
     private String userName;
     /**
      * 昵称
      */
+    @Query(type = Query.Type.LIKE)
     private String nickName;
     /**
      * 密码
@@ -66,4 +71,8 @@ public class UserVO {
      * 角色ID列表
      */
     private Long[] roleIds;
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
 }

@@ -87,7 +87,11 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
             throw new ArtException("数据为空，请检查！");
         }
         DictValue entity = ConvertUtil.convert(vo, DictValue.class);
-        return this.save(entity);
+        boolean save = this.save(entity);
+        if (save) {
+            Thread.ofVirtual().start(dictCache::init);
+        }
+        return save;
     }
 
     /**
@@ -103,7 +107,11 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
             throw new ArtException("数据为空，请检查！");
         }
         DictValue entity = ConvertUtil.convert(vo, DictValue.class);
-        return this.updateById(entity);
+        boolean b = this.updateById(entity);
+        if (b) {
+            Thread.ofVirtual().start(dictCache::init);
+        }
+        return b;
     }
 
     /**
@@ -115,7 +123,11 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
-        return this.removeByIds(idList);
+        boolean b = this.removeByIds(idList);
+        if (b) {
+            Thread.ofVirtual().start(dictCache::init);
+        }
+        return b;
     }
 
     /**

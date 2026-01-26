@@ -42,8 +42,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             throw new ArtException("获取用户信息失败，请联系管理员！");
         }
         userInfoVO.setUserId(userInfo.getLong("id"));
-        userInfoVO.setUserName(userInfo.getString("userAllName"));
-        userInfoVO.setEmail("690278565@QQ.com");
+        userInfoVO.setUserName(userInfo.getString("nickName"));
+        userInfoVO.setEmail(userInfo.getString("userEmail"));
         userInfoVO.setRoles(new String[]{"R_SUPER"});
         return userInfoVO;
     }
