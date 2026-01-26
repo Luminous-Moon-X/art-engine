@@ -1,5 +1,6 @@
 package com.art.service.impl;
 
+import com.art.common.SelectVO;
 import com.art.domain.Role;
 import com.art.domain.vo.RoleVO;
 import com.art.exception.ArtException;
@@ -99,6 +100,22 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
         return this.removeByIds(idList);
+    }
+
+    /**
+     * 角色树形下拉列表
+     *
+     * @return 角色树形下拉列表
+     */
+    @Override
+    public List<SelectVO> select() {
+        List<Role> roleList = this.list(QueryWrapper.create().eq(Role::getEnableFlag, true));
+        return roleList.stream().map(role -> {
+            SelectVO selectVO = new SelectVO();
+            selectVO.setLabel(role.getRoleName());
+            selectVO.setValue(role.getId());
+            return selectVO;
+        }).toList();
     }
 
 }

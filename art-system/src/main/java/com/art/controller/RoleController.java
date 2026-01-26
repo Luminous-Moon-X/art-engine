@@ -1,6 +1,7 @@
 package com.art.controller;
 
 import com.art.common.HttpResult;
+import com.art.common.SelectVO;
 import com.art.common.TableRowVO;
 import com.art.domain.Role;
 import com.art.domain.vo.RoleVO;
@@ -70,6 +71,17 @@ public class RoleController {
     @Operation(summary = "查询所有角色信息", description = "查询所有角色信息")
     public HttpResult<List<Role>> list() {
         return HttpResult.success(this.roleService.selectList());
+    }
+
+    /**
+     * 角色下拉列表
+     *
+     * @return 角色信息列表
+     */
+    @GetMapping("/select")
+    @Operation(summary = "角色下拉列表", description = "角色下拉列表")
+    public HttpResult<List<SelectVO>> select() {
+        return HttpResult.success(this.roleService.select());
     }
 
     /**

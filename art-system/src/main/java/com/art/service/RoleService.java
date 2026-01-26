@@ -1,5 +1,6 @@
 package com.art.service;
 
+import com.art.common.SelectVO;
 import com.art.domain.Role;
 import com.art.domain.vo.RoleVO;
 import com.mybatisflex.core.paginate.Page;
@@ -61,4 +62,11 @@ public interface RoleService extends IService<Role> {
      * @return 删除结果
      */
     Boolean delete(List<Long> idList);
+
+    /**
+     * 查询角色下拉信息
+     *
+     * @return 角色下拉信息
+     */
+    List<SelectVO> select();
 }
