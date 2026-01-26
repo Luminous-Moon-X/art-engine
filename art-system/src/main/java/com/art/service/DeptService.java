@@ -69,4 +69,11 @@ public interface DeptService extends IService<Dept> {
      * @return 部门树形下拉列表
      */
     List<DeptTreeSelectVO> treeSelect();
+
+    /**
+     * 部门树形下拉列表(不包含顶级部门)
+     *
+     * @return 部门树形下拉列表
+     */
+    List<DeptTreeSelectVO> treeSelectNoTop();
 }

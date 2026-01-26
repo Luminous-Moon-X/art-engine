@@ -62,4 +62,8 @@ public class UserVO {
      * 用户标签
      */
     private String userTag;
+    /**
+     * 角色ID列表
+     */
+    private Long[] roleIds;
 }

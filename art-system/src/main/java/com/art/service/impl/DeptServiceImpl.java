@@ -151,13 +151,23 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
      */
     @Override
     public List<DeptTreeSelectVO> treeSelect() {
-        List<DeptTreeSelectVO> deptList = this.listAs(QueryWrapper.create().eq(Dept::getParentId, -1), DeptTreeSelectVO.class);
-        List<DeptTreeSelectVO> deptWidthChildList = this.handleTreeChildren(deptList);
+        List<DeptTreeSelectVO> deptWidthChildList = this.treeSelectNoTop();
         DeptTreeSelectVO topTreeSelect = new DeptTreeSelectVO();
         topTreeSelect.setId(-1L);
         topTreeSelect.setDeptName("顶级节点");
         topTreeSelect.setChildren(deptWidthChildList);
         return Collections.singletonList(topTreeSelect);
+    }
+
+    /**
+     * 部门树形下拉列表
+     *
+     * @return 部门树形下拉列表
+     */
+    @Override
+    public List<DeptTreeSelectVO> treeSelectNoTop() {
+        List<DeptTreeSelectVO> deptList = this.listAs(QueryWrapper.create().eq(Dept::getParentId, -1), DeptTreeSelectVO.class);
+        return this.handleTreeChildren(deptList);
     }
 
     /**

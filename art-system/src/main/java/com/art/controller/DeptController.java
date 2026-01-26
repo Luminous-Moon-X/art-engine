@@ -85,6 +85,18 @@ public class DeptController {
     }
 
     /**
+     * 部门树形下拉列表(不包含顶级节点)
+     *
+     * @return 部门树形下拉列表
+     */
+    @GetMapping("/treeSelectNoTop")
+    @Operation(summary = "部门树形下拉列表(不包含顶级节点)", description = "部门树形下拉列表(不包含顶级节点)")
+    public HttpResult<List<DeptTreeSelectVO>> treeSelectNoTop() {
+        return HttpResult.success(this.DeptService.treeSelectNoTop());
+    }
+
+
+    /**
      * 新增部门
      *
      * @param vo 部门信息
