@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table("sys_user")
+@Table("p_sys_user")
 public class User extends BaseEntity {
     /**
      * 启用标识
