@@ -1,12 +1,14 @@
 package com.art.service.impl;
 
 import cn.hutool.crypto.digest.MD5;
+import com.art.domain.Dept;
 import com.art.domain.User;
 import com.art.domain.UserRole;
 import com.art.domain.vo.UserVO;
 import com.art.exception.ArtException;
 import com.art.mapper.UserMapper;
 import com.art.mapper.UserRoleMapper;
+import com.art.service.DeptService;
 import com.art.service.UserService;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,14 +35,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 用户角色关系Mapper
      */
     private final UserRoleMapper userRoleMapper;
+    /**
+     * 部门Mapper
+     */
+    private final DeptService deptService;
 
     /**
      * 构造函数
      *
      * @param userRoleMapper 用户角色Mapper
+     * @param deptService    部门服务
      */
-    public UserServiceImpl(UserRoleMapper userRoleMapper) {
+    public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService) {
         this.userRoleMapper = userRoleMapper;
+        this.deptService = deptService;
     }
 
     /**
@@ -62,7 +71,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Page<UserVO> queryPage(Page<UserVO> page, UserVO vo) {
+        Long deptId = vo.getDeptId();
+        vo.setDeptId(null);
         QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
+        // 查询部门用户范围
+        List<Long> deptIds = new ArrayList<>();
+        if (deptId != null) {
+            this.getDeptRange(deptIds, deptId);
+        }
+        if (!deptIds.isEmpty()) {
+            wrapper.in(User::getDeptId, deptIds);
+        }
         Page<UserVO> pageResult = this.getMapper().paginateAs(page, wrapper, UserVO.class);
         List<UserVO> records = pageResult.getRecords();
         for (UserVO user : records) {
@@ -73,6 +92,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         pageResult.setRecords(records);
         return pageResult;
+    }
+
+    /**
+     * 根据部门ID，获取所有下级部门ID
+     *
+     * @param deptIds 下级部门ID列表
+     * @param deptId  部门ID
+     */
+    private void getDeptRange(List<Long> deptIds, Long deptId) {
+        deptIds.add(deptId);
+        List<Dept> childDeptList = this.deptService.list(QueryWrapper.create().eq(Dept::getParentId, deptId));
+        for (Dept dept : childDeptList) {
+            getDeptRange(deptIds, dept.getId());
+        }
     }
 
     /**
