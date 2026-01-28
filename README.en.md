@@ -1,36 +1,53 @@
-# aether-service
+<img src="docs/logo-title.png" width="598" alt="System Architecture Diagram">
+<p>
+  <a href="https://gitee.com/hiroshi-xh/art-engine/stargazers">
+    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/star.svg?theme=dark" alt="star"/>
+  </a>
+  <a href="https://gitee.com/hiroshi-xh/art-engine/members">
+    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/fork.svg?theme=dark" alt="fork"/>
+  </a>
+</p>
 
-#### Description
-{**When you're done, you can delete the content in this README and update the file with details for others getting started with your repository**}
+---
 
-#### Software Architecture
-Software architecture description
+## Project Introduction
 
-#### Installation
+**Art Engine** is a modern backend foundation engine project built on **Java 21 + Spring Boot 3.x**, dedicated to providing a set of **high-performance, scalable, and easy-to-maintain** general management backend capabilities.
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+In architectural design, the project follows the principles of **modularization, componentization, and low coupling**, and comes with a complete **permission system, data permissions, rule engine, and cache support**, which can serve as a basic framework for enterprise-level projects or a secondary development foundation.
 
-#### Instructions
+---
+## 🚀 Basic Features
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+- ✅ Menu Management
+- ✅ User Management
+- ✅ Department Management
+- ✅ Role Management
+- ✅ Dictionary Management
+- ✅ Functional Permissions
+- ✅ Data Permissions
+- ✅ Rule Management
+---
+## 🎨 Tech Stack & Component Versions
 
-#### Contribution
+| Component    | Version | Component   | Version |
+|--------------|---------|-------------|---------|
+| Java         | 21      | Spring Boot | 3.4.11  |
+| Gradle       | 8.13    | MyBatis     | 3.0.4   |
+| MyBatis-Flex | 1.11.1  | Fastjson2   | 2.0.57  |
+| Hutool       | 5.8.38  | HikariCP    | 5.1.0   |
+| Sa-Token     | 1.44.0  | Redisson    | 3.24.3  |
+| Caffeine     | 3.1.8   | Lombok      | 1.18.30 |
 
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+---
 
+## 📌 Notes
 
-#### Gitee Feature
+- This project is continuously iterating, welcome to Star & Fork
+- If you have any questions or suggestions during use, feel free to submit Issues or PRs
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+---
+
+## 📄 License
+
+This project is open source under the **MIT** license
