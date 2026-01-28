@@ -1,5 +1,5 @@
 <img src="docs/logo-title.png" width="598" alt="系统架构图">
-<p align="center">
+<p>
   <a href="https://gitee.com/hiroshi-xh/art-engine/stargazers">
     <img src="https://gitee.com/hiroshi-xh/art-engine/badge/star.svg?theme=dark" alt="star"/>
   </a>
