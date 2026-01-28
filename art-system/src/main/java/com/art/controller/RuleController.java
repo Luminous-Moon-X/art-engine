@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 规则控制器
+ *
+ * @author Luminous.X
+ * @since 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/rule")
 @Tag(name = "规则管理", description = "规则管理相关接口")
