@@ -1,37 +1,54 @@
-# Aether 快速开发平台 (v0.0.1)
+<img src="docs/logo-title.png" width="598" alt="系统架构图">
+<p align="center">
+  <a href="https://gitee.com/hiroshi-xh/art-engine/stargazers">
+    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/star.svg?theme=dark" alt="star"/>
+  </a>
+  <a href="https://gitee.com/hiroshi-xh/art-engine/members">
+    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/fork.svg?theme=dark" alt="fork"/>
+  </a>
+</p>
 
-[![AUR](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)](https://) [![spring-boot](https://img.shields.io/badge/spring--boot-3.4.5-green.svg)](http://spring.io/projects/spring-boot) [![mybatis-Flex](https://img.shields.io/badge/MyBatis--Flex-1.10.9-blue.svg)](https://mybatis-flex.com) [![Druid](https://img.shields.io/badge/Druid-1.2.20-blue.svg)](https://druid.apache.org) [![fastjson2](https://img.shields.io/badge/fastjson2-2.0.57-blue.svg)](https://github.com/alibaba/fastjson2) [![hutool](https://img.shields.io/badge/hutool-5.8.38-blue.svg)](https://www.hutool.cn) [![Stars](https://gitee.com/hiroshi-xh/Aether-Backend/badge/star.svg)](https://gitee.com/hiroshi-xh/Aether-Backend) [![Forks](https://gitee.com/hiroshi-xh/Aether-Backend/badge/fork.svg)](https://gitee.com/hiroshi-xh/Aether-Backend)
-</div>
+---
 
-## 关于
+## 项目介绍
 
-> Aether 是一款的低代码快速开发平台，基于元数据驱动开发，致力于做更简洁、美观、高效的后台管理系统！
+**Art Engine** 是一个基于 **Java 21 + Spring Boot 3.x** 构建的现代化后台基础引擎项目，致力于提供一套 **高性能、可扩展、易维护** 的通用管理后台基础能力。
 
-> Aether 快速开发平台基于Java、Spring Boot、vue3、Element-plus ，项目采用前后端分离架构，热插拔式业务模块与插件扩展性高 ,代码简洁，功能丰富，开箱即用，帮助Java项目解决70%的重复工作，让开发更关注业务逻辑，既能快速提高效率，节省研发成本，同时又不失灵活性！ 
+项目在架构设计上遵循 **模块化、组件化、低耦合** 的原则，内置了完整的 **权限体系、数据权限、规则引擎、缓存支持**
+，可作为企业级项目的基础框架或二次开发底座。
 
-> 平台起步阶段，Readme 文档正在完善中，敬请期待！
+---
+## 🚀 基础功能
 
-## 地址
+- ✅ 菜单管理
+- ✅ 用户管理
+- ✅ 部门管理
+- ✅ 角色管理
+- ✅ 字典管理
+- ✅ 功能权限
+- ✅ 数据权限
+- ✅ 规则管理
+---
+## 🎨 技术栈 & 组件版本
 
-- 官方网站: <a href="https://www.fast-aether.top" target="_blank">https://www.fast-aether.top</a>
-- 演示地址: <a href="#" target="_blank">敬请期待</a>
-- 文档地址: <a href="#" target="_blank">敬请期待</a>
-- 问题反馈: <a href="https://gitee.com/hiroshi-xh/Aether-Backend/issues" target="_blank">https://gitee.com/hiroshi-xh/Aether-Backend/issues</a>
-- 交流Q群: 敬请期待
+| 组件           | 版本     | 组件          | 版本      |
+|--------------|--------|-------------|---------|
+| Java         | 21     | Spring Boot | 3.4.11  |
+| Gradle       | 8.13   | MyBatis     | 3.0.4   |
+| MyBatis-Flex | 1.11.1 | Fastjson2   | 2.0.57  |
+| Hutool       | 5.8.38 | HikariCP    | 5.1.0   |
+| Sa-Token     | 1.44.0 | Redisson    | 3.24.3  |
+| Caffeine     | 3.1.8  | Lombok      | 1.18.30 |
 
-## 技术选型
+---
 
-### 前端
+## 📌 说明
 
-> 配套前端框架：<a href="https://gitee.com/hiroshi-xh/Aether-Frontend" target="_blank">Aether-Frontend</a>，采用Vue3 + vite + pnpm + Element-Plus构建
+- 本项目持续迭代中，欢迎 Star & Fork
+- 如果你在使用过程中有任何问题或建议，欢迎提 Issue 或 PR
 
-### 后端版本
+---
 
-> 单机版
+## 📄 License
 
-| 名称             | 版本号    |      | 名称              | 版本号        |
-| ---------------- |--------| ---- |-----------------|------------|
-| JDK版本          | 21     |      | Spring Boot版本    | 3.4.5      |
-| Mybatis-Flex版本 | 1.10.9 |      | Druid版本        | 1.2.25 |      
-| fastjson2版本    | 2.0.57 |      | Transmittable版本 | 2.14.5     |
-| Hutool版本      | 5.8.38 |      | Spring Ai版本      | 1.0.0 |
+本项目基于 **MIT** 开源
