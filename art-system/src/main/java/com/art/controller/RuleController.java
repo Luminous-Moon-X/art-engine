@@ -3,6 +3,7 @@ package com.art.controller;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.Rule;
+import com.art.domain.vo.RuleItemVO;
 import com.art.domain.vo.RuleVO;
 import com.art.service.RuleService;
 import com.mybatisflex.core.paginate.Page;
@@ -46,6 +47,18 @@ public class RuleController {
     @Operation(summary = "根据ID获取规则信息", description = "根据ID获取规则信息")
     public HttpResult<Rule> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.RuleService.selectById(id));
+    }
+
+    /**
+     * 根据编码获取规则信息
+     *
+     * @param code 规则编码
+     * @return 规则信息
+     */
+    @GetMapping("/code/{code}")
+    @Operation(summary = "根据编码获取规则信息", description = "根据编码获取规则信息")
+    public HttpResult<RuleItemVO> getByCode(@PathVariable("code") String code) {
+        return HttpResult.success(this.RuleService.getByRuleCode(code));
     }
 
     /**

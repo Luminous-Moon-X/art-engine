@@ -41,4 +41,9 @@ public class Rule extends BaseEntity {
      */
     @Column("rule_value_type")
     private String ruleValueType;
+    /**
+     * 备注
+     */
+    @Column("remark")
+    private String remark;
 }

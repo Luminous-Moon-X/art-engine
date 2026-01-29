@@ -1,6 +1,8 @@
 package com.art.service.impl;
 
+import com.art.cache.RuleCache;
 import com.art.domain.Rule;
+import com.art.domain.vo.RuleItemVO;
 import com.art.domain.vo.RuleVO;
 import com.art.exception.ArtException;
 import com.art.mapper.RuleMapper;
@@ -23,6 +25,21 @@ import java.util.List;
  */
 @Service
 public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements RuleService {
+
+    /**
+     * 规则缓存
+     */
+    private final RuleCache ruleCache;
+
+    /**
+     * 构造函数
+     *
+     * @param ruleCache 规则缓存
+     */
+    public RuleServiceImpl(RuleCache ruleCache) {
+        this.ruleCache = ruleCache;
+    }
+
     /**
      * 根据ID查询规则信息
      *
@@ -99,5 +116,16 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
         return this.removeByIds(idList);
+    }
+
+    /**
+     * 根据编码获取规则信息
+     *
+     * @param code 规则编码
+     * @return 规则信息
+     */
+    @Override
+    public RuleItemVO getByRuleCode(String code) {
+        return ruleCache.getByRuleCode(code);
     }
 }

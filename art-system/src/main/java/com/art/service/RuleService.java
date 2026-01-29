@@ -1,6 +1,7 @@
 package com.art.service;
 
 import com.art.domain.Rule;
+import com.art.domain.vo.RuleItemVO;
 import com.art.domain.vo.RuleVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
@@ -61,4 +62,12 @@ public interface RuleService extends IService<Rule> {
      * @return 删除结果
      */
     Boolean delete(List<Long> idList);
+
+    /**
+     * 根据编码获取规则信息
+     *
+     * @param code 规则编码
+     * @return 规则信息
+     */
+    RuleItemVO getByRuleCode(String code);
 }

@@ -52,4 +52,8 @@ public class RuleVO {
      * 值类型
      */
     private String ruleValueType;
+    /**
+     * 备注
+     */
+    private String remark;
 }
