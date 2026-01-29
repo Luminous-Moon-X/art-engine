@@ -19,18 +19,18 @@ public class QueryHelper {
     /**
      * 自动构建查询条件
      *
-     * @param bo 查询条件对象
+     * @param vo 查询条件对象
      * @return 条件构造器Wrapper
      */
-    public static QueryWrapper buildQueryWrapper(Object bo) {
+    public static QueryWrapper buildQueryWrapper(Object vo) {
         QueryWrapper wrapper = QueryWrapper.create();
-        if (bo == null) return wrapper;
+        if (vo == null) return wrapper;
 
-        Field[] fields = bo.getClass().getDeclaredFields();
+        Field[] fields = vo.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
             try {
-                Object value = field.get(bo);
+                Object value = field.get(vo);
                 // 只有值不为空时才构建条件
                 if (ObjectUtil.isEmpty(value)) continue;
 
