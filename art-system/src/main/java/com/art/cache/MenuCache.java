@@ -18,7 +18,7 @@ import java.util.List;
  * 菜单数据二级缓存实现
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Component
 public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {

@@ -9,7 +9,7 @@ import java.util.List;
  * 通用数据传输VO
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Data
 public class CommonDataVO {

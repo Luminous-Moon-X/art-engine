@@ -7,7 +7,7 @@ import com.mybatisflex.core.BaseMapper;
  * 规则表映射层。
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public interface RuleMapper extends BaseMapper<Rule> {
 }

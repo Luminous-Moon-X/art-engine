@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  * 角色表
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 @Table("p_sys_role")

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * 代码生成器
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Slf4j
 @Component

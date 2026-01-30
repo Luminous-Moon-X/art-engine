@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @param <String> RedisKey
  * @param <V>      缓存数据
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Slf4j
 public abstract class ArtCache<String, V> {

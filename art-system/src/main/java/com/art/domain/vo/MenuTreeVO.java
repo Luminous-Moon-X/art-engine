@@ -11,7 +11,7 @@ import java.util.List;
  * 菜单树VO对象
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 @AllArgsConstructor

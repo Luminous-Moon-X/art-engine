@@ -7,7 +7,7 @@ import lombok.Data;
  * 登录表单请求VO
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Data
 public class LoginVO {

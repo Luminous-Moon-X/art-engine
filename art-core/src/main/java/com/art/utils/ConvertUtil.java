@@ -9,7 +9,7 @@ import java.util.List;
  * 类型转换工具类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @SuppressWarnings("unused")
 public class ConvertUtil {

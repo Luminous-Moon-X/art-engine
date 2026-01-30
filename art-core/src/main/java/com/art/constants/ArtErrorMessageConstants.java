@@ -4,7 +4,7 @@ package com.art.constants;
  * Art平台异常信息常量类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public class ArtErrorMessageConstants {
     /**

@@ -4,7 +4,7 @@ package com.art.constants;
  * 用户信息字段名常量类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public class SecurityConstants {
     /**

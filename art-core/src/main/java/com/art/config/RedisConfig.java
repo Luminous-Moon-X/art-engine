@@ -20,7 +20,7 @@ import java.time.Duration;
  * 用于配置 Redis 连接工厂和 Redis 模板
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Configuration
 public class RedisConfig {

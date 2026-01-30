@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * Hikari数据源加载器
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Component("hikariLoader")
 public class HikariLoader {

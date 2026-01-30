@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 用户表实体类
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Data
 @Table("p_sys_user")

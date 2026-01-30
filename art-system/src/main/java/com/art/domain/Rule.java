@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  * 规则表实体
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

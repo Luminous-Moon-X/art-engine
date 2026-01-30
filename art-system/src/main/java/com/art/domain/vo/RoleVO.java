@@ -7,7 +7,7 @@ import lombok.Data;
  * 角色VO对象
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 public class RoleVO {

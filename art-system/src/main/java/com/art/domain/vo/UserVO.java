@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * 用户VO类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 public class UserVO {

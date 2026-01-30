@@ -9,7 +9,7 @@ import lombok.Data;
  * 用户角色关联表
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 @Table("p_sys_user_role")

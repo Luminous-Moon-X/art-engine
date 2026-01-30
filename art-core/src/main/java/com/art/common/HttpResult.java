@@ -11,7 +11,7 @@ import java.io.Serializable;
  *
  * @param <T> 返回数据类型
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 @SuppressWarnings("unused")

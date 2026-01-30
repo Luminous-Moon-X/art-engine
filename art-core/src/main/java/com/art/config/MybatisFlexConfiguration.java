@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * 用于配置 MyBatis-Flex 的审计功能，实现 SQL 执行日志记录和慢查询监控
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Configuration
 public class MybatisFlexConfiguration {

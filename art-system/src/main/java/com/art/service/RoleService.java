@@ -12,7 +12,7 @@ import java.util.List;
  * 角色服务接口类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public interface RoleService extends IService<Role> {
     /**

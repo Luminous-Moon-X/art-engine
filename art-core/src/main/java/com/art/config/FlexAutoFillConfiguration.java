@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * MyBatis-Flex 全局自动填充配置类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Configuration
 public class FlexAutoFillConfiguration {

@@ -19,7 +19,7 @@ import java.util.TimeZone;
  * Jackson自定义配置
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Configuration
 public class JacksonConfig {

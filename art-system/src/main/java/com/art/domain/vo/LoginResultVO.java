@@ -8,7 +8,7 @@ import lombok.Data;
  * 登录接口返回值VO
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Data
 @AllArgsConstructor

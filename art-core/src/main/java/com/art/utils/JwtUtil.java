@@ -20,7 +20,7 @@ import java.util.UUID;
  * JWT工具类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Slf4j
 @SuppressWarnings("unused")

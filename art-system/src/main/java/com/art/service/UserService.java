@@ -11,7 +11,7 @@ import java.util.List;
  * 用户服务
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public interface UserService extends IService<User> {
     /**

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * 拓展commons-lang3工具类方法
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public class StringUtil extends StringUtils {
 }

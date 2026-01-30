@@ -4,7 +4,7 @@ package com.art.context;
  * 忽略SQL日志上下文
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public class IgnoreSqlLogContextHolder {
     /**

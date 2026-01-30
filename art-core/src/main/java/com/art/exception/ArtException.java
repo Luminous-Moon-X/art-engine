@@ -7,7 +7,7 @@ import lombok.Setter;
  * Art平台异常类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Getter
 @Setter

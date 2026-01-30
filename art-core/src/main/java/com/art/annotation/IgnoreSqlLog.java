@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  * 在对应方法上加上该注解，则屏蔽该方法的SQL日志打印
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

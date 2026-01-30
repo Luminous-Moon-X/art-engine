@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * 查询条件注解
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

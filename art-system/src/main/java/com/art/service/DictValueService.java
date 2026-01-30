@@ -12,7 +12,7 @@ import java.util.List;
  * 字典值服务
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public interface DictValueService extends IService<DictValue> {
     /**

@@ -14,7 +14,7 @@ import java.util.List;
  * 代码生成器 控制器
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @RestController
 @RequestMapping("/generator")

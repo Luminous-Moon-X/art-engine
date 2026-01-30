@@ -21,7 +21,7 @@ import java.time.Duration;
  * 请求统一拦截器
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Component
 @SuppressWarnings("unused")

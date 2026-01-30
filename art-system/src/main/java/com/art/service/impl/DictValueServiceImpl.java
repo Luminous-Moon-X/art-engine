@@ -21,7 +21,7 @@ import java.util.List;
  * 字典值服务实现类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Service
 public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue> implements DictValueService {

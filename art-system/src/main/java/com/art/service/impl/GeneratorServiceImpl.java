@@ -13,7 +13,7 @@ import java.util.List;
  * 代码生成服务实现类
  *
  * @author Luminous
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Service
 public class GeneratorServiceImpl implements GeneratorService {

@@ -11,7 +11,7 @@ import java.util.List;
  * 权限配置
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Getter
 @Setter

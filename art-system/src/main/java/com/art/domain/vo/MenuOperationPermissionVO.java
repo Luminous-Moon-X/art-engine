@@ -6,7 +6,7 @@ import lombok.Data;
  * 菜单操作权限VO类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 public class MenuOperationPermissionVO {

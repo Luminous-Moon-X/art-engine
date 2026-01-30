@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  * 用户表Service增强接口层实现
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Service
 @AllArgsConstructor

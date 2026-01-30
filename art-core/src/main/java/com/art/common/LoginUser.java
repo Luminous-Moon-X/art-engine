@@ -6,7 +6,7 @@ import lombok.Data;
  * 当前登录用户信息
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 public class LoginUser {

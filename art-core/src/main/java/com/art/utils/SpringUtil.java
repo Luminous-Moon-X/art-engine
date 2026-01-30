@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
  * Spring工具类
  *
  * @author Lumonous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @SuppressWarnings("unused")
 public class SpringUtil implements ApplicationContextAware {

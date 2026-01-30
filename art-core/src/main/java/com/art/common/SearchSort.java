@@ -7,7 +7,7 @@ import lombok.Data;
  * 查询排序对象
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Data
 public class SearchSort {

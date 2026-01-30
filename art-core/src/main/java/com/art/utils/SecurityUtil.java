@@ -6,7 +6,7 @@ import com.art.context.SecurityContextHolder;
  * 当前用户信息工具类
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @SuppressWarnings("unused")
 public class SecurityUtil {

@@ -10,7 +10,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  * WebSocket配置类
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @Configuration
 @EnableWebSocketMessageBroker

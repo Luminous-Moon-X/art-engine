@@ -8,7 +8,7 @@ import com.mybatisflex.core.service.IService;
  * 用户表Service增强接口层
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 public interface SysUserService extends IService<SysUser> {
     /**

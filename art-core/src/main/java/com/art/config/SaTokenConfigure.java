@@ -10,7 +10,7 @@ import cn.dev33.satoken.stp.StpLogic;
  * SaToken注入JWT实现
  * 
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Configuration
 public class SaTokenConfigure {

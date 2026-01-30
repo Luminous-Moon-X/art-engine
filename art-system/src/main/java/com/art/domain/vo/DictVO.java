@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * 字典表VO
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Data
 public class DictVO {

@@ -17,7 +17,7 @@ import java.util.List;
  * 角色控制器
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @RestController
 @RequestMapping("/role")

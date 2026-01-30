@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
  * 查询助手
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 public class QueryHelper {
 

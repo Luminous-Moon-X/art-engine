@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 当前登陆人用户信息 线程变量
  *
  * @author Luminous.X
- * @since 0.0.1
+ * @since 1.0.0
  */
 @SuppressWarnings("unused")
 public class SecurityContextHolder {

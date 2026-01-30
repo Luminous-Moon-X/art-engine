@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * 忽略SQL日志切面
  *
  * @author Luminous.X
- * @since 0.0.1-SNAPSHOT
+ * @since 1.0.0
  */
 @Aspect
 @Component
