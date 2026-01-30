@@ -1,5 +1,6 @@
 package com.art.service;
 
+import com.art.common.TreeSelectVO;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
@@ -69,4 +70,11 @@ public interface MenuService extends IService<Menu> {
      * @return 菜单树
      */
     List<MenuTreeVO> menuTree();
+
+    /**
+     * 获取所有菜单树
+     *
+     * @return 所有菜单树
+     */
+    List<TreeSelectVO> allMenuTree();
 }

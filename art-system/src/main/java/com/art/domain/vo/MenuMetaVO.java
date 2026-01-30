@@ -59,4 +59,8 @@ public class MenuMetaVO {
      * 激活路径
      */
     private String activePath;
+    /**
+     * 权限标识
+     */
+    private String permissionSign;
 }

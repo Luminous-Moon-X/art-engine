@@ -2,6 +2,7 @@ package com.art.controller;
 
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
+import com.art.common.TreeSelectVO;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
@@ -99,6 +100,17 @@ public class MenuController {
     @Operation(summary = "删除菜单", description = "根据ID删除菜单")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.menuService.delete(tableRowVO.getIdList()));
+    }
+
+    /**
+     * 获取所有菜单树
+     *
+     * @return 所有菜单树
+     */
+    @GetMapping("/allMenuTree")
+    @Operation(summary = "获取所有菜单树", description = "获取所有菜单树")
+    public HttpResult<List<TreeSelectVO>> allMenuTree() {
+        return HttpResult.success(this.menuService.allMenuTree());
     }
 
     /**

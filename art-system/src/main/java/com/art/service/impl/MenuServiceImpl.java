@@ -1,6 +1,8 @@
 package com.art.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.art.cache.MenuCache;
+import com.art.common.TreeSelectVO;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,7 +40,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /**
      * 构造函数
      *
-     * @param menuCache     菜单缓存
+     * @param menuCache 菜单缓存
      */
     public MenuServiceImpl(MenuCache menuCache) {
         this.menuCache = menuCache;
@@ -172,5 +175,38 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public List<MenuTreeVO> menuTree() {
         return menuCache.get();
+    }
+
+    /**
+     * 获取所有菜单树
+     *
+     * @return 菜单树
+     */
+    @Override
+    public List<TreeSelectVO> allMenuTree() {
+        List<TreeSelectVO> resultList = new ArrayList<>();
+        List<MenuTreeVO> menuTreeVOList = menuCache.get();
+        this.buildAllTree(resultList, menuTreeVOList);
+        return resultList;
+    }
+
+    /**
+     * 构建所有菜单树
+     *
+     * @param resultList     结果列表
+     * @param menuTreeVOList 菜单树VO列表
+     */
+    private void buildAllTree(List<TreeSelectVO> resultList, List<MenuTreeVO> menuTreeVOList) {
+        for (MenuTreeVO menuTreeVO : menuTreeVOList) {
+            TreeSelectVO treeSelectVO = new TreeSelectVO();
+            treeSelectVO.setLabel(menuTreeVO.getMeta().getTitle());
+            treeSelectVO.setValue(menuTreeVO.getMeta().getPermissionSign());
+            if (!CollectionUtil.isEmpty(menuTreeVO.getChildren())) {
+                List<TreeSelectVO> child = new ArrayList<>();
+                buildAllTree(child, menuTreeVO.getChildren());
+                treeSelectVO.setChildren(child);
+            }
+            resultList.add(treeSelectVO);
+        }
     }
 }
