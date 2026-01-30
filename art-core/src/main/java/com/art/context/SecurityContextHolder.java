@@ -6,8 +6,9 @@ import com.art.utils.ConvertUtil;
 import com.art.utils.StringUtil;
 import io.micrometer.common.util.StringUtils;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 当前登陆人用户信息 线程变量
@@ -58,6 +59,52 @@ public class SecurityContextHolder {
             THREAD_LOCAL.set(map);
         }
         return map;
+    }
+
+    /**
+     * 设置角色id
+     *
+     * @param roleIds 角色id
+     */
+    public static void setRoleIds(List<Long> roleIds) {
+        String roleIdsStr = roleIds.stream()
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        set(SecurityConstants.ROLE_IDS, roleIdsStr);
+    }
+
+    /**
+     * 获取角色id
+     *
+     * @return 角色id
+     */
+    public static List<Long> getRoleIds() {
+        List<Long> roleIds = new ArrayList<>();
+        String roleIdsStr = get(SecurityConstants.ROLE_IDS);
+        String[] roleIdStrArr = roleIdsStr.split(",");
+        for (String roleIdStr : roleIdStrArr) {
+            roleIds.add(Long.parseLong(roleIdStr));
+        }
+        return roleIds;
+    }
+
+    /**
+     * 设置部门ID
+     *
+     * @param deptId 部门id
+     */
+    public static void setDeptId(Long deptId) {
+        set(SecurityConstants.DEPT_ID, deptId);
+    }
+
+    /**
+     * 获取部门id
+     *
+     * @return 部门id
+     */
+    public static Long getDeptId() {
+        return StringUtils.isBlank(get(SecurityConstants.DEPT_ID)) ? null : Long.parseLong(get(SecurityConstants.DEPT_ID));
     }
 
     /**

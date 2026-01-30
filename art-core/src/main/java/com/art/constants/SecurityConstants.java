@@ -24,6 +24,14 @@ public class SecurityConstants {
      */
     public static final String USER_TYPE = "userType";
     /**
+     * 角色id
+     */
+    public static final String ROLE_IDS = "roleIds";
+    /**
+     * 部门id
+     */
+    public static final String DEPT_ID = "deptId";
+    /**
      * 时区
      */
     public static final String TIMEZONE = "timezone";

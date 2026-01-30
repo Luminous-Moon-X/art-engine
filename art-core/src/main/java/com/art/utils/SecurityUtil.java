@@ -2,6 +2,8 @@ package com.art.utils;
 
 import com.art.context.SecurityContextHolder;
 
+import java.util.List;
+
 /**
  * 当前用户信息工具类
  *
@@ -17,6 +19,24 @@ public class SecurityUtil {
      */
     public static Long getUserId() {
         return SecurityContextHolder.getUserId();
+    }
+
+    /**
+     * 获取当前登录用户部门id
+     *
+     * @return 当前登录用户部门id
+     */
+    public static Long getDeptId() {
+        return SecurityContextHolder.getDeptId();
+    }
+
+    /**
+     * 获取当前登录用户角色id
+     *
+     * @return 当前登录用户角色id
+     */
+    public static List<Long> getRoleId() {
+        return SecurityContextHolder.getRoleIds();
     }
 
     /**
