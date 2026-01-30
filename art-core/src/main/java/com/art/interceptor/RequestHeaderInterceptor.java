@@ -1,5 +1,6 @@
 package com.art.interceptor;
 
+import com.art.cache.UserRoleCache;
 import com.art.common.LoginUser;
 import com.art.config.AuthConfiguration;
 import com.art.context.SecurityContextHolder;
@@ -35,15 +36,19 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
      */
     private final AuthConfiguration authConfiguration;
 
+    private final UserRoleCache userRoleCache;
+
     /**
      * 构造器注入
      *
      * @param redisTemplate     Redis客户端
      * @param authConfiguration Token有效期配置
+     * @param userRoleCache     用户角色缓存
      */
-    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate, AuthConfiguration authConfiguration) {
+    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate, AuthConfiguration authConfiguration, UserRoleCache userRoleCache) {
         this.redisTemplate = redisTemplate;
         this.authConfiguration = authConfiguration;
+        this.userRoleCache = userRoleCache;
     }
 
     /**
@@ -65,19 +70,19 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         if (token.startsWith("Bearer ")) {
             token = token.replace("Bearer ", "");
         }
-        
+
         // 根据token获取当前用户信息，并将用户信息存储到线程变量中
         String tokenKey = "access_token:" + token;
-        
+
         // 优化：直接获取用户信息，如果为空则说明Token无效或已过期
         String userInfoJson = redisTemplate.opsForValue().get(tokenKey);
         if (StringUtil.isBlank(userInfoJson)) {
             throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
         }
-        
+
         // Token续期
         redisTemplate.expire(tokenKey, Duration.ofMinutes(authConfiguration.getTokenExpireTime()));
-        
+
         LoginUser loginUser = JSON.parseObject(userInfoJson, LoginUser.class);
         if (loginUser == null) {
             throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
@@ -85,8 +90,9 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         // 设置线程变量
         SecurityContextHolder.setUserId(loginUser.getId());
         SecurityContextHolder.setUserName(loginUser.getUserName());
-        SecurityContextHolder.setUserAllName(loginUser.getUserAllName());
-        SecurityContextHolder.setUserType(loginUser.getUserType());
+        SecurityContextHolder.setUserAllName(loginUser.getNickName());
+        SecurityContextHolder.setDeptId(loginUser.getDeptId());
+        SecurityContextHolder.setRoleIds(userRoleCache.getRoleByUserId(loginUser.getId()));
         SecurityContextHolder.setToken(token);
         return true;
     }

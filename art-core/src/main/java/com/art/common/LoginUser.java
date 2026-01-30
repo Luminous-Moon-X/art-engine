@@ -2,11 +2,13 @@ package com.art.common;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 当前登录用户信息
  *
  * @author Luminous.X
- * @since 1.0.0
+ * @since 1.1.0
  */
 @Data
 public class LoginUser {
@@ -15,27 +17,59 @@ public class LoginUser {
      */
     private Long id;
     /**
+     * 启用标识
+     */
+    private Boolean enableFlag;
+    /**
      * 用户名
      */
     private String userName;
     /**
-     * 用户名称
+     * 昵称
      */
-    private String userAllName;
+    private String nickName;
+    /**
+     * 密码
+     */
+    private String password;
+    /**
+     * 部门ID
+     */
+    private Long deptId;
     /**
      * 用户状态
      */
     private String userStatus;
     /**
-     * 用户类型
+     * 用户邮箱
      */
-    private String userType;
+    private String userEmail;
     /**
-     * 所属角色ID
+     * 用户性别
      */
-    private String[] roleIds;
+    private String userGender;
     /**
-     * 所属部门ID
+     * 用户手机
      */
-    private String[] deptIds;
+    private String userPhone;
+    /**
+     * 用户地址
+     */
+    private String userAddress;
+    /**
+     * 用户描述
+     */
+    private String userDescription;
+    /**
+     * 用户标签
+     */
+    private String userTag;
+    /**
+     * 角色ID列表
+     */
+    private Long[] roleIds;
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
 }

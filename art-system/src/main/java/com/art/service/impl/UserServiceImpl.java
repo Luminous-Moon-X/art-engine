@@ -3,7 +3,7 @@ package com.art.service.impl;
 import cn.hutool.crypto.digest.MD5;
 import com.art.domain.Dept;
 import com.art.domain.User;
-import com.art.domain.UserRole;
+import com.art.common.UserRole;
 import com.art.domain.vo.UserVO;
 import com.art.exception.ArtException;
 import com.art.mapper.UserMapper;

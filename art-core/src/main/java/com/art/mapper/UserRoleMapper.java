@@ -1,6 +1,6 @@
 package com.art.mapper;
 
-import com.art.domain.UserRole;
+import com.art.common.UserRole;
 import com.mybatisflex.core.BaseMapper;
 
 /**

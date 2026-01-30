@@ -1,4 +1,4 @@
-package com.art.domain;
+package com.art.common;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
