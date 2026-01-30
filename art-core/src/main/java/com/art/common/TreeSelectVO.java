@@ -21,6 +21,10 @@ public class TreeSelectVO {
      */
     private Object value;
     /**
+     * 是否禁用
+     */
+    private Boolean disabled = false;
+    /**
      * 子级
      */
     private List<TreeSelectVO> children;
