@@ -105,6 +105,7 @@ public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
         meta.setLink(menuVO.getExternalLink());
         meta.setIsIframe(menuVO.getIframeFlag());
         meta.setIsFullScreen(menuVO.getFullScreen());
+        meta.setPermissionSign(menuVO.getPermissionSign());
         return meta;
     }
 }
