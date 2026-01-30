@@ -1,5 +1,6 @@
 package com.art.service;
 
+import com.art.common.TreeSelectVO;
 import com.art.domain.User;
 import com.art.domain.vo.UserVO;
 import com.mybatisflex.core.paginate.Page;
@@ -61,4 +62,18 @@ public interface UserService extends IService<User> {
      * @return 删除结果
      */
     Boolean delete(List<Long> idList);
+
+    /**
+     * 查询部门用户树
+     *
+     * @return 部门用户树
+     */
+    List<TreeSelectVO> deptUserTree();
+
+    /**
+     * 查询用户树
+     *
+     * @return 用户树
+     */
+    List<TreeSelectVO> userTree();
 }

@@ -1,9 +1,12 @@
 package com.art.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.MD5;
+import com.art.common.TreeSelectVO;
 import com.art.domain.Dept;
 import com.art.domain.User;
 import com.art.common.UserRole;
+import com.art.domain.vo.DeptTreeSelectVO;
 import com.art.domain.vo.UserVO;
 import com.art.exception.ArtException;
 import com.art.mapper.UserMapper;
@@ -194,6 +197,69 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Boolean delete(List<Long> idList) {
         this.userRoleMapper.deleteByQuery(QueryWrapper.create().in(UserRole::getUserId, idList));
         return this.removeByIds(idList);
+    }
+
+    /**
+     * 查询部门用户树
+     *
+     * @return 部门用户树
+     */
+    @Override
+    public List<TreeSelectVO> deptUserTree() {
+        List<TreeSelectVO> deptUserTreeList = new ArrayList<>();
+        List<DeptTreeSelectVO> deptTreeList = deptService.treeSelectNoTop();
+        this.handleDeptUserTree(deptUserTreeList, deptTreeList);
+        // 查询无部门用户，放到根节点下
+        List<User> noDeptUserList = this.list(QueryWrapper.create().isNull(User::getDeptId));
+        for (User user : noDeptUserList) {
+            TreeSelectVO treeSelectVO = new TreeSelectVO();
+            treeSelectVO.setLabel(user.getNickName());
+            treeSelectVO.setValue(user.getId());
+            deptUserTreeList.add(treeSelectVO);
+        }
+        return deptUserTreeList;
+    }
+
+    /**
+     * 查询用户树
+     *
+     * @return 用户树
+     */
+    @Override
+    public List<TreeSelectVO> userTree() {
+        List<TreeSelectVO> userTreeList = new ArrayList<>();
+        List<User> userList = this.list();
+        for (User user : userList) {
+            TreeSelectVO treeSelectVO = new TreeSelectVO();
+            treeSelectVO.setLabel(user.getNickName());
+            treeSelectVO.setValue(user.getId());
+            userTreeList.add(treeSelectVO);
+        }
+        return userTreeList;
+    }
+
+    private void handleDeptUserTree(List<TreeSelectVO> deptUserTreeList, List<DeptTreeSelectVO> deptTreeList) {
+        for (DeptTreeSelectVO deptTreeSelectVO : deptTreeList) {
+            TreeSelectVO treeSelectVO = new TreeSelectVO();
+            treeSelectVO.setLabel(deptTreeSelectVO.getDeptName());
+            treeSelectVO.setValue(deptTreeSelectVO.getId());
+            treeSelectVO.setDisabled(true);
+            List<TreeSelectVO> child = new ArrayList<>();
+            // 递归查询子部门用户
+            if (!CollectionUtil.isEmpty(deptTreeSelectVO.getChildren())) {
+                handleDeptUserTree(child, deptTreeSelectVO.getChildren());
+            }
+            // 查询该部门下用户
+            List<User> currentDeptUserList = this.list(QueryWrapper.create().eq(User::getDeptId, deptTreeSelectVO.getId()));
+            for (User user : currentDeptUserList) {
+                TreeSelectVO userSelectVO = new TreeSelectVO();
+                userSelectVO.setLabel(user.getNickName());
+                userSelectVO.setValue(user.getId());
+                child.add(userSelectVO);
+            }
+            treeSelectVO.setChildren(child);
+            deptUserTreeList.add(treeSelectVO);
+        }
     }
 
 }

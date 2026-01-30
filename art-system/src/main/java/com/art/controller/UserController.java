@@ -2,6 +2,7 @@ package com.art.controller;
 
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
+import com.art.common.TreeSelectVO;
 import com.art.domain.User;
 import com.art.domain.vo.UserInfoVO;
 import com.art.domain.vo.UserVO;
@@ -78,6 +79,28 @@ public class UserController {
     @Operation(summary = "查询所有用户信息", description = "查询所有用户信息")
     public HttpResult<List<User>> list() {
         return HttpResult.success(this.UserService.selectList());
+    }
+
+    /**
+     * 查询部门用户树
+     *
+     * @return 部门用户树
+     */
+    @GetMapping("/deptUserTree")
+    @Operation(summary = "查询部门用户树", description = "查询部门用户树")
+    public HttpResult<List<TreeSelectVO>> deptUserTree() {
+        return HttpResult.success(this.UserService.deptUserTree());
+    }
+
+    /**
+     * 查询用户树
+     *
+     * @return 用户树
+     */
+    @GetMapping("/userTree")
+    @Operation(summary = "查询用户树", description = "查询用户树")
+    public HttpResult<List<TreeSelectVO>> userTree() {
+        return HttpResult.success(this.UserService.userTree());
     }
 
     /**
