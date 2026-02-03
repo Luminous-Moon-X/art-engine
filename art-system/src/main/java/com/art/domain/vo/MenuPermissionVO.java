@@ -17,15 +17,15 @@ import java.util.List;
 @NoArgsConstructor
 public class MenuPermissionVO {
     /**
-     * 角色权限
+     * 授权主体类型：role、dept、user
      */
-    private List<String> rolePermission;
+    private String type;
     /**
-     * 部门权限
+     * 授权主体 ID
      */
-    private List<String> deptPermission;
+    private Long id;
     /**
-     * 用户权限
+     * 菜单权限标识列表
      */
-    private List<String> userPermission;
+    private List<String> permissionSignList;
 }

@@ -75,4 +75,16 @@ public class RolePermissionCache extends ArtCache<String, List<RolePermission>> 
                 .filter(rolePermission -> roleIds.contains(rolePermission.getRoleId()))
                 .toList();
     }
+
+    /**
+     * 根据角色ID获取角色权限
+     *
+     * @param roleId 角色ID
+     * @return 角色权限
+     */
+    public List<RolePermission> getByRoleId(Long roleId) {
+        return get().stream()
+                .filter(rolePermission -> rolePermission.getRoleId().equals(roleId))
+                .toList();
+    }
 }

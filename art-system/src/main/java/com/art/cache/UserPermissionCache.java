@@ -70,6 +70,16 @@ public class UserPermissionCache extends ArtCache<String, List<UserPermission>> 
      */
     public List<UserPermission> getByCurrentUser() {
         Long userId = SecurityUtil.getUserId();
+        return this.getByUserId(userId);
+    }
+
+    /**
+     * 根据用户ID获取用户权限
+     *
+     * @param userId 用户ID
+     * @return 用户权限
+     */
+    public List<UserPermission> getByUserId(Long userId) {
         return get().stream()
                 .filter(userPermission -> userPermission.getUserId().equals(userId))
                 .toList();

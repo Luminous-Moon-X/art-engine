@@ -3,9 +3,9 @@ package com.art.controller;
 import com.art.common.HttpResult;
 import com.art.domain.vo.MenuPermissionVO;
 import com.art.service.MenuPermissionService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 菜单权限控制器
@@ -37,8 +37,19 @@ public class MenuPermissionController {
      * @return 菜单权限
      */
     @GetMapping
-    public HttpResult<MenuPermissionVO> getMenuPermission() {
-        return HttpResult.success(this.menuPermissionService.getMenuPermission());
+    public HttpResult<List<String>> getMenuPermission(@RequestParam("type") String type, @RequestParam("id") Long id) {
+        return HttpResult.success(this.menuPermissionService.getMenuPermission(type, id));
+    }
+
+    /**
+     * 设置菜单权限
+     *
+     * @param vo 菜单权限信息
+     * @return 设置结果
+     */
+    @PostMapping()
+    public HttpResult<Boolean> setPermission(@RequestBody MenuPermissionVO vo) {
+        return HttpResult.success(this.menuPermissionService.setPermission(vo));
     }
 
 }

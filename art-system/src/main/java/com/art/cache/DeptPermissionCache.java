@@ -70,6 +70,16 @@ public class DeptPermissionCache extends ArtCache<String, List<DeptPermission>> 
      */
     public List<DeptPermission> getByCurrentDept() {
         Long deptId = SecurityUtil.getDeptId();
+        return this.getByDeptId(deptId);
+    }
+
+    /**
+     * 根据部门ID获取部门权限
+     *
+     * @param deptId 部门ID
+     * @return 部门权限
+     */
+    public List<DeptPermission> getByDeptId(Long deptId) {
         return get().stream()
                 .filter(deptPermission -> deptId.equals(deptPermission.getDeptId()))
                 .toList();

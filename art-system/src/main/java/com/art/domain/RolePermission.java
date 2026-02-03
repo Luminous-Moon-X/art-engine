@@ -3,7 +3,9 @@ package com.art.domain;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 角色权限表
@@ -13,6 +15,8 @@ import lombok.Data;
  */
 @Data
 @Table("p_sys_role_permission")
+@AllArgsConstructor
+@NoArgsConstructor
 public class RolePermission {
     /**
      * 主键
