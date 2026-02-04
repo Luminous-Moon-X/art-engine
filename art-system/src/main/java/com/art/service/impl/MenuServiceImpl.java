@@ -182,7 +182,15 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                 throw new ArtException("该菜单有下级，无法删除！");
             }
         }
-        return this.removeByIds(idList);
+        boolean result = this.removeByIds(idList);
+        if (result) {
+            Thread.ofVirtual().start(() -> {
+                menuCache.init();
+                List<String> deletePermissionSigns = this.listByIds(idList).stream().map(Menu::getPermissionSign).toList();
+                menuPermissionService.deletePermissionByMenu(deletePermissionSigns);
+            });
+        }
+        return result;
     }
 
     /**

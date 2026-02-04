@@ -25,4 +25,11 @@ public interface MenuPermissionService {
      * @return 设置结果
      */
     Boolean setPermission(MenuPermissionVO vo);
+
+    /**
+     * 删除菜单权限信息
+     *
+     * @param menuPermissionSign 菜单权限标识
+     */
+    void deletePermissionByMenu(List<String> menuPermissionSign);
 }

@@ -164,4 +164,16 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
         }
         return true;
     }
+
+    /**
+     * 删除菜单权限
+     *
+     * @param menuPermissionSign 菜单权限标识
+     */
+    @Override
+    public void deletePermissionByMenu(List<String> menuPermissionSign) {
+        this.deptPermissionMapper.deleteByQuery(QueryWrapper.create().in(DeptPermission::getPermissionSign, menuPermissionSign));
+        this.rolePermissionMapper.deleteByQuery(QueryWrapper.create().in(RolePermission::getPermissionSign, menuPermissionSign));
+        this.userPermissionMapper.deleteByQuery(QueryWrapper.create().in(UserPermission::getPermissionSign, menuPermissionSign));
+    }
 }
