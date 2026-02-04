@@ -12,6 +12,7 @@ import com.art.exception.ArtException;
 import com.art.service.MenuPermissionService;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
+import com.art.utils.SecurityUtil;
 import com.art.utils.StringUtil;
 import com.art.mapper.MenuMapper;
 import com.art.service.MenuService;
@@ -201,6 +202,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public List<MenuTreeVO> menuTree() {
         List<MenuTreeVO> menuTreeVOList = menuCache.get();
+        if ("admin".equals(SecurityUtil.getUserType())) {
+            return menuTreeVOList;
+        }
         // 权限过滤
         List<String> menuPermission = this.menuPermissionService.getMenuPermission(null, null);
         return this.handleMenuPermission(menuTreeVOList, menuPermission);

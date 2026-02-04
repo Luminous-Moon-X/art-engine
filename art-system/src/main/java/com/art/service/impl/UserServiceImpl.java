@@ -147,6 +147,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String md5Pwd = MD5.create().digestHex(password);
         String encodePwd = encoder.encode(md5Pwd);
         entity.setPassword(encodePwd);
+        entity.setUserType("normal");
         boolean result = this.save(entity);
         // 保存角色关系
         Long[] roleIds = vo.getRoleIds();

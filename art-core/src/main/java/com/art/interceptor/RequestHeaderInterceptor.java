@@ -92,6 +92,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         SecurityContextHolder.setUserName(loginUser.getUserName());
         SecurityContextHolder.setUserAllName(loginUser.getNickName());
         SecurityContextHolder.setDeptId(loginUser.getDeptId());
+        SecurityContextHolder.setUserType(loginUser.getUserType());
         SecurityContextHolder.setRoleIds(userRoleCache.getRoleByUserId(loginUser.getId()));
         SecurityContextHolder.setToken(token);
         return true;
