@@ -219,7 +219,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     private List<MenuTreeVO> handleMenuPermission(List<MenuTreeVO> menuTreeVOList, List<String> menuPermission) {
         List<MenuTreeVO> permissionMenuList = new ArrayList<>();
-        for (MenuTreeVO menuTreeVO : menuTreeVOList) {
+        for (MenuTreeVO originMenuTreeVO : menuTreeVOList) {
+            MenuTreeVO menuTreeVO = new MenuTreeVO(originMenuTreeVO.getName(), originMenuTreeVO.getPath(),
+                    originMenuTreeVO.getComponent(), originMenuTreeVO.getMeta(), originMenuTreeVO.getChildren());
             // 首页跳过权限判断
             if ("/home".equals(menuTreeVO.getPath())) {
                 permissionMenuList.add(menuTreeVO);
@@ -259,6 +261,12 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             for (MenuTreeVO menuTreeVO : menuTree.getChildren()) {
                 getAllSignByMenu(menuTreeVO, signList);
             }
+        } else {
+            // 菜单按钮
+            List<MenuVO> menuButtons = this.menuButtonCache.getByMenuId(Long.valueOf(menuTree.getName()));
+            if (!menuButtons.isEmpty()) {
+                signList.addAll(menuButtons.stream().map(MenuVO::getPermissionSign).toList());
+            }
         }
     }
 
@@ -286,11 +294,19 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             TreeSelectVO treeSelectVO = new TreeSelectVO();
             treeSelectVO.setLabel(menuTreeVO.getMeta().getTitle());
             treeSelectVO.setValue(menuTreeVO.getMeta().getPermissionSign());
+            List<TreeSelectVO> child = new ArrayList<>();
             if (!CollectionUtil.isEmpty(menuTreeVO.getChildren())) {
-                List<TreeSelectVO> child = new ArrayList<>();
                 buildAllTree(child, menuTreeVO.getChildren());
-                treeSelectVO.setChildren(child);
+            } else {
+                // 查询按钮
+                List<TreeSelectVO> menuButtons = this.menuButtonCache.getByMenuId(Long.valueOf(menuTreeVO.getName()))
+                        .stream().map(menuVO -> new TreeSelectVO(menuVO.getMenuName(), menuVO.getPermissionSign(), false, null))
+                        .toList();
+                if (!menuButtons.isEmpty()) {
+                    child.addAll(menuButtons);
+                }
             }
+            treeSelectVO.setChildren(child);
             resultList.add(treeSelectVO);
         }
     }
