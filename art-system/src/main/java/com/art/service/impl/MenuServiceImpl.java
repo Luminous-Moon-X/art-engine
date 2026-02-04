@@ -208,6 +208,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private List<MenuTreeVO> handleMenuPermission(List<MenuTreeVO> menuTreeVOList, List<String> menuPermission) {
         List<MenuTreeVO> permissionMenuList = new ArrayList<>();
         for (MenuTreeVO menuTreeVO : menuTreeVOList) {
+            // 首页跳过权限判断
+            if ("/home".equals(menuTreeVO.getPath())) {
+                permissionMenuList.add(menuTreeVO);
+                continue;
+            }
             // 权限判断
             List<String> signList = new ArrayList<>();
             this.getAllSignByMenu(menuTreeVO, signList);
