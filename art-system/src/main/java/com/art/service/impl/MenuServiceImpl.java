@@ -1,12 +1,15 @@
 package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.art.cache.MenuButtonCache;
 import com.art.cache.MenuCache;
 import com.art.common.TreeSelectVO;
 import com.art.domain.Menu;
+import com.art.domain.vo.MenuOperationPermissionVO;
 import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
 import com.art.exception.ArtException;
+import com.art.service.MenuPermissionService;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
 import com.art.utils.StringUtil;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,12 +42,26 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private final MenuCache menuCache;
 
     /**
+     * 菜单按钮缓存
+     */
+    private final MenuButtonCache menuButtonCache;
+
+    /**
+     * 菜单权限服务
+     */
+    private final MenuPermissionService menuPermissionService;
+
+    /**
      * 构造函数
      *
-     * @param menuCache 菜单缓存
+     * @param menuCache             菜单缓存
+     * @param menuButtonCache       菜单按钮缓存
+     * @param menuPermissionService 菜单权限服务
      */
-    public MenuServiceImpl(MenuCache menuCache) {
+    public MenuServiceImpl(MenuCache menuCache, MenuButtonCache menuButtonCache, MenuPermissionService menuPermissionService) {
         this.menuCache = menuCache;
+        this.menuButtonCache = menuButtonCache;
+        this.menuPermissionService = menuPermissionService;
     }
 
     /**
@@ -174,7 +192,57 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     public List<MenuTreeVO> menuTree() {
-        return menuCache.get();
+        List<MenuTreeVO> menuTreeVOList = menuCache.get();
+        // 权限过滤
+        List<String> menuPermission = this.menuPermissionService.getMenuPermission(null, null);
+        return this.handleMenuPermission(menuTreeVOList, menuPermission);
+    }
+
+    /**
+     * 处理菜单权限
+     *
+     * @param menuTreeVOList 菜单树
+     * @param menuPermission 权限标识
+     * @return 过滤权限后的菜单树
+     */
+    private List<MenuTreeVO> handleMenuPermission(List<MenuTreeVO> menuTreeVOList, List<String> menuPermission) {
+        List<MenuTreeVO> permissionMenuList = new ArrayList<>();
+        for (MenuTreeVO menuTreeVO : menuTreeVOList) {
+            // 权限判断
+            List<String> signList = new ArrayList<>();
+            this.getAllSignByMenu(menuTreeVO, signList);
+            if (!Collections.disjoint(signList, menuPermission)) {
+                // 按钮
+                List<MenuVO> menuButtonList = this.menuButtonCache.getByMenuIdAndPermission(Long.valueOf(menuTreeVO.getName()), menuPermission);
+                if (!menuButtonList.isEmpty()) {
+                    List<MenuOperationPermissionVO> menuAuth = menuButtonList.stream()
+                            .map(menuVO -> new MenuOperationPermissionVO(menuVO.getMenuName(), menuVO.getPermissionSign()))
+                            .toList();
+                    menuTreeVO.getMeta().setAuthList(menuAuth);
+                }
+                // 递归 子菜单
+                if (!CollectionUtil.isEmpty(menuTreeVO.getChildren())) {
+                    List<MenuTreeVO> childMenuTree = handleMenuPermission(menuTreeVO.getChildren(), menuPermission);
+                    menuTreeVO.setChildren(childMenuTree);
+                }
+                permissionMenuList.add(menuTreeVO);
+            }
+        }
+        return permissionMenuList;
+    }
+
+    /**
+     * 获取指定菜单下所有权限标识
+     *
+     * @param menuTree 菜单树节点对象
+     */
+    private void getAllSignByMenu(MenuTreeVO menuTree, List<String> signList) {
+        signList.add(menuTree.getMeta().getPermissionSign());
+        if (!CollectionUtil.isEmpty(menuTree.getChildren())) {
+            for (MenuTreeVO menuTreeVO : menuTree.getChildren()) {
+                getAllSignByMenu(menuTreeVO, signList);
+            }
+        }
     }
 
     /**

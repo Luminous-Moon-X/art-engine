@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 菜单元数据VO对象
  */
@@ -50,7 +52,7 @@ public class MenuMetaVO {
     /**
      * 操作权限
      */
-    private MenuOperationPermissionVO authList;
+    private List<MenuOperationPermissionVO> authList;
     /**
      * 是否全屏
      */

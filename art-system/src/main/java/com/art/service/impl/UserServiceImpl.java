@@ -2,6 +2,7 @@ package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.MD5;
+import com.art.cache.UserRoleCache;
 import com.art.common.TreeSelectVO;
 import com.art.domain.Dept;
 import com.art.domain.User;
@@ -42,16 +43,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 部门Mapper
      */
     private final DeptService deptService;
+    /**
+     * 用户角色缓存
+     */
+    private final UserRoleCache userRoleCache;
 
     /**
      * 构造函数
      *
      * @param userRoleMapper 用户角色Mapper
      * @param deptService    部门服务
+     * @param userRoleCache  用户角色缓存
      */
-    public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService) {
+    public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService, UserRoleCache userRoleCache) {
         this.userRoleMapper = userRoleMapper;
         this.deptService = deptService;
+        this.userRoleCache = userRoleCache;
     }
 
     /**
@@ -143,7 +150,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         boolean result = this.save(entity);
         // 保存角色关系
         Long[] roleIds = vo.getRoleIds();
-        return userRoleRelation(entity, result, roleIds);
+        Boolean saveRelation = userRoleRelation(entity, result, roleIds);
+        Thread.ofVirtual().start(userRoleCache::init);
+        return saveRelation;
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.art.domain.vo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 菜单操作权限VO类
@@ -9,6 +11,8 @@ import lombok.Data;
  * @since 1.0.0
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MenuOperationPermissionVO {
     /**
      * 权限名称
