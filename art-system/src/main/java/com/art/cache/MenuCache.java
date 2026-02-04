@@ -76,6 +76,7 @@ public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
             // 判断是否有子菜单
             QueryWrapper wrapper = QueryWrapper.create()
                     .eq(Menu::getParentId, menuVO.getId())
+                    .eq(Menu::getMenuType, "menu")
                     .orderBy(Menu::getOrderNum, true);
             List<MenuVO> childMenuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
             if (!childMenuList.isEmpty()) {
