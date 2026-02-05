@@ -99,6 +99,7 @@ configure(subprojects) { project ->
         implementation "${lib.'mybatis'}"
         implementation "org.springframework.boot:spring-boot-starter-data-redis"
         testImplementation "org.springframework.boot:spring-boot-starter-test"
+        implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     }
 
     test {
