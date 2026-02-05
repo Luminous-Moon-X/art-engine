@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.Dept;
@@ -116,6 +117,7 @@ public class DeptController {
      */
     @PutMapping("/edit")
     @Operation(summary = "编辑部门", description = "编辑部门")
+    @SaCheckPermission("system:dept:edit")
     public HttpResult<Boolean> edit(@RequestBody DeptVO vo) {
         return HttpResult.success(DeptService.edit(vo));
     }

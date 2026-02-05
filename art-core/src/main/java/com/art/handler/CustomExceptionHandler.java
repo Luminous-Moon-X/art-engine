@@ -1,5 +1,6 @@
 package com.art.handler;
 
+import cn.dev33.satoken.exception.NotPermissionException;
 import com.art.exception.ArtException;
 import com.art.common.HttpResult;
 import org.slf4j.Logger;
@@ -30,6 +31,18 @@ public class CustomExceptionHandler {
     public HttpResult<String> handleArtException(ArtException exception) {
         log.error("Throws an Art Exception ---> ", exception);
         return HttpResult.failure(exception.getErrorCode(), exception.getErrorMessage());
+    }
+
+    /**
+     * 接口无权限异常拦截
+     *
+     * @param exception 异常类
+     * @return 拦截处理返回值
+     */
+    @ExceptionHandler({NotPermissionException.class})
+    public HttpResult<String> handleNotPermissionException(NotPermissionException exception) {
+        log.error("Throws an NotPermissionException ---> ", exception);
+        return HttpResult.failure(403, "当前用户无该接口权限！");
     }
 
 }

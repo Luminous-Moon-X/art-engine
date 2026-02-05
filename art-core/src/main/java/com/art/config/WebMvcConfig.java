@@ -1,11 +1,14 @@
 package com.art.config;
 
+import cn.dev33.satoken.interceptor.SaInterceptor;
 import com.art.interceptor.RequestHeaderInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 /**
  * 注册拦截器
@@ -34,10 +37,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        List<String> whiteList = authConfiguration.getWhiteList();
         // 注册拦截器，应用到所有路径
         registry.addInterceptor(requestHeaderInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns(authConfiguration.getWhiteList());
+                .excludePathPatterns(whiteList);
+        registry.addInterceptor(new SaInterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns(whiteList);
         log.info("初始化拦截器和请求白名单成功");
     }
 }

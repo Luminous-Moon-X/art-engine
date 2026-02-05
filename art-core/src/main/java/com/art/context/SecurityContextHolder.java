@@ -90,6 +90,30 @@ public class SecurityContextHolder {
     }
 
     /**
+     * 设置角色编码
+     *
+     * @param roleCodes 角色编码
+     */
+    public static void setRoleCodes(List<String> roleCodes) {
+        String roleCodesStr = roleCodes.stream()
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        set(SecurityConstants.ROLE_CODES, roleCodesStr);
+    }
+
+    /**
+     * 获取角色编码
+     *
+     * @return 角色编码
+     */
+    public static List<String> getRoleCodes() {
+        String roleCodesStr = get(SecurityConstants.ROLE_CODES);
+        String[] roleCodeStrArr = roleCodesStr.split(",");
+        return new ArrayList<>(Arrays.asList(roleCodeStrArr));
+    }
+
+    /**
      * 设置部门ID
      *
      * @param deptId 部门id

@@ -1,5 +1,6 @@
 package com.art.interceptor;
 
+import com.art.cache.RoleCache;
 import com.art.cache.UserRoleCache;
 import com.art.common.LoginUser;
 import com.art.config.AuthConfiguration;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.time.Duration;
+import java.util.List;
 
 /**
  * 请求统一拦截器
@@ -35,8 +37,14 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
      * Token有效期配置
      */
     private final AuthConfiguration authConfiguration;
-
+    /**
+     * 用户角色缓存
+     */
     private final UserRoleCache userRoleCache;
+    /**
+     * 角色缓存
+     */
+    private final RoleCache roleCache;
 
     /**
      * 构造器注入
@@ -44,11 +52,13 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
      * @param redisTemplate     Redis客户端
      * @param authConfiguration Token有效期配置
      * @param userRoleCache     用户角色缓存
+     * @param roleCache         角色缓存
      */
-    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate, AuthConfiguration authConfiguration, UserRoleCache userRoleCache) {
+    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate, AuthConfiguration authConfiguration, UserRoleCache userRoleCache, RoleCache roleCache) {
         this.redisTemplate = redisTemplate;
         this.authConfiguration = authConfiguration;
         this.userRoleCache = userRoleCache;
+        this.roleCache = roleCache;
     }
 
     /**
@@ -93,7 +103,9 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         SecurityContextHolder.setUserAllName(loginUser.getNickName());
         SecurityContextHolder.setDeptId(loginUser.getDeptId());
         SecurityContextHolder.setUserType(loginUser.getUserType());
-        SecurityContextHolder.setRoleIds(userRoleCache.getRoleByUserId(loginUser.getId()));
+        List<Long> roleIds = userRoleCache.getRoleByUserId(loginUser.getId());
+        SecurityContextHolder.setRoleIds(roleIds);
+        SecurityContextHolder.setRoleCodes(this.roleCache.getRoleCodeByIds(roleIds));
         SecurityContextHolder.setToken(token);
         return true;
     }

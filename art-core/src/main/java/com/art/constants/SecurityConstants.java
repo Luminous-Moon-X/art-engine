@@ -28,6 +28,10 @@ public class SecurityConstants {
      */
     public static final String ROLE_IDS = "roleIds";
     /**
+     * 角色编码
+     */
+    public static final String ROLE_CODES = "roleCodes";
+    /**
      * 部门id
      */
     public static final String DEPT_ID = "deptId";

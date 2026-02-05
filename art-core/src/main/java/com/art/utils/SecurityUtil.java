@@ -40,6 +40,15 @@ public class SecurityUtil {
     }
 
     /**
+     * 获取当前登录用户角色编码
+     *
+     * @return 当前登录用户角色编码
+     */
+    public static List<String> getRoleCodes() {
+        return SecurityContextHolder.getRoleCodes();
+    }
+
+    /**
      * 获取当前登录用户名
      *
      * @return 当前登录用户名
