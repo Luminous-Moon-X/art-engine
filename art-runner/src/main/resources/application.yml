@@ -34,6 +34,7 @@ art:
       - /swagger-ui.html
       - /api-docs/**
       - /swagger-ui/**
+    secret-key: c7ee264fd80c4e169f473df493bf67fd
 # mybatis-flex指定mapper.xml文件位置
 mybatis-flex:
   mapper-locations:

@@ -23,6 +23,10 @@ public class AuthConfiguration {
      */
     private Integer tokenExpireTime;
     /**
+     * 密钥
+     */
+    private String secretKey;
+    /**
      * 请求白名单
      */
     private List<String> whiteList;

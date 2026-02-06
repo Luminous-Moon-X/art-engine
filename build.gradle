@@ -55,6 +55,7 @@ ext {
             "hikari-cp"                          : "com.zaxxer:HikariCP:${hikariCP}",
             "sa-token"                           : "cn.dev33:sa-token-spring-boot3-starter:${saToken}",
             "sa-token-jwt"                       : "cn.dev33:sa-token-jwt:${saToken}",
+            "sa-token-redis"                     : "cn.dev33:sa-token-redis-template:${saToken}",
             "open-api"                           : "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApi}",
             "redisson"                           : "org.redisson:redisson-spring-boot-starter:${redisson}",
             "caffeine"                           : "com.github.ben-manes.caffeine:caffeine:${caffeineCache}"
@@ -100,6 +101,7 @@ configure(subprojects) { project ->
         implementation "org.springframework.boot:spring-boot-starter-data-redis"
         testImplementation "org.springframework.boot:spring-boot-starter-test"
         implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+        implementation 'org.apache.commons:commons-pool2'
     }
 
     test {

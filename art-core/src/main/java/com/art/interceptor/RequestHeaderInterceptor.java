@@ -1,5 +1,6 @@
 package com.art.interceptor;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.art.cache.RoleCache;
 import com.art.cache.UserRoleCache;
 import com.art.common.LoginUser;
@@ -92,6 +93,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
 
         // Token续期
         redisTemplate.expire(tokenKey, Duration.ofMinutes(authConfiguration.getTokenExpireTime()));
+        StpUtil.renewTimeout(authConfiguration.getTokenExpireTime() * 60);
 
         LoginUser loginUser = JSON.parseObject(userInfoJson, LoginUser.class);
         if (loginUser == null) {
