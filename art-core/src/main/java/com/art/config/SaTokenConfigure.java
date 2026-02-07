@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import cn.dev33.satoken.jwt.StpLogicJwtForSimple;
 import cn.dev33.satoken.stp.StpLogic;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Primary;
 
 /**
  * SaToken注入JWT实现
@@ -48,6 +49,7 @@ public class SaTokenConfigure {
      * @return SaTokenConfig sa-token配置
      */
     @Bean
+    @Primary
     public SaTokenConfig saTokenConfig() {
         SaTokenConfig config = new SaTokenConfig();
         config.setJwtSecretKey(authConfiguration.getSecretKey());
