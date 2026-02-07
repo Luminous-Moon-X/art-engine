@@ -85,7 +85,7 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
     @Override
     public List<String> getMenuPermission(String type, Long id) {
         List<String> permissionSignList;
-        if ("admin".equals(SecurityUtil.getUserType())) {
+        if ("admin".equals(SecurityUtil.getUserType()) && StringUtil.isBlank(type)) {
             return this.menuAuthCache.get();
         }
         if (StringUtil.isNotBlank(type)) {

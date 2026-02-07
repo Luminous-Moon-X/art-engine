@@ -103,6 +103,7 @@ public class AuthController {
         if (StringUtils.isBlank(token)) {
             return HttpResult.success(true);
         }
+        StpUtil.logout();
         redisTemplate.delete("access_token:" + token);
         return HttpResult.success(true);
     }
