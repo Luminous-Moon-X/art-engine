@@ -64,6 +64,10 @@ public class UserVO {
      */
     private String userDescription;
     /**
+     * 用户类型
+     */
+    private String userType;
+    /**
      * 用户标签
      */
     private String userTag;

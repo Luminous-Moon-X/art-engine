@@ -1,5 +1,6 @@
 package com.art.service.impl;
 
+import com.art.domain.vo.UserVO;
 import com.art.exception.ArtException;
 import com.art.utils.SecurityUtil;
 import com.art.domain.SysUser;
@@ -7,7 +8,6 @@ import com.art.domain.vo.UserInfoVO;
 import com.art.mapper.SysUserMapper;
 import com.art.service.SysUserService;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,14 +37,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         UserInfoVO userInfoVO = new UserInfoVO();
         String token = SecurityUtil.getToken();
         String userInfoJsonStr = redisTemplate.opsForValue().get("access_token:" + token);
-        JSONObject userInfo = JSON.parseObject(userInfoJsonStr);
+        UserVO userInfo = JSON.parseObject(userInfoJsonStr, UserVO.class);
         if (userInfo == null) {
             throw new ArtException("获取用户信息失败，请联系管理员！");
         }
-        userInfoVO.setUserId(userInfo.getLong("id"));
-        userInfoVO.setUserName(userInfo.getString("nickName"));
-        userInfoVO.setEmail(userInfo.getString("userEmail"));
-        userInfoVO.setRoles(new String[]{"R_SUPER"});
+        userInfoVO.setUserId(userInfo.getId());
+        userInfoVO.setUserName(userInfo.getNickName());
+        userInfoVO.setEmail(userInfo.getUserEmail());
+        userInfoVO.setUserType(userInfo.getUserType());
         return userInfoVO;
     }
 }

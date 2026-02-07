@@ -2,12 +2,14 @@ package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.MD5;
+import com.art.cache.RuleCache;
 import com.art.cache.UserRoleCache;
 import com.art.common.TreeSelectVO;
 import com.art.domain.Dept;
 import com.art.domain.User;
 import com.art.common.UserRole;
 import com.art.domain.vo.DeptTreeSelectVO;
+import com.art.domain.vo.RuleItemVO;
 import com.art.domain.vo.UserVO;
 import com.art.exception.ArtException;
 import com.art.mapper.UserMapper;
@@ -48,17 +50,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     private final UserRoleCache userRoleCache;
 
+    private final RuleCache ruleCache;
+
     /**
      * 构造函数
      *
      * @param userRoleMapper 用户角色Mapper
      * @param deptService    部门服务
      * @param userRoleCache  用户角色缓存
+     * @param ruleCache      规则缓存
      */
-    public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService, UserRoleCache userRoleCache) {
+    public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService, UserRoleCache userRoleCache, RuleCache ruleCache) {
         this.userRoleMapper = userRoleMapper;
         this.deptService = deptService;
         this.userRoleCache = userRoleCache;
+        this.ruleCache = ruleCache;
     }
 
     /**
@@ -143,7 +149,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User entity = ConvertUtil.convert(vo, User.class);
         // 默认密码
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String password = "123456";
+        // 从规则中获取默认密码
+        RuleItemVO systemDefaultPwd = this.ruleCache.getByRuleCode("system_default_pwd");
+        String password = systemDefaultPwd.getRuleValue();
         String md5Pwd = MD5.create().digestHex(password);
         String encodePwd = encoder.encode(md5Pwd);
         entity.setPassword(encodePwd);

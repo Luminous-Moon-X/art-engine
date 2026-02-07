@@ -25,4 +25,6 @@ public class UserInfoVO {
 
     @JsonProperty("userName")
     private String userName;
+
+    private String userType;
 }

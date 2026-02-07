@@ -1,8 +1,6 @@
 package com.art.service.impl;
 
-import com.art.cache.DeptPermissionCache;
-import com.art.cache.RolePermissionCache;
-import com.art.cache.UserPermissionCache;
+import com.art.cache.*;
 import com.art.domain.DeptPermission;
 import com.art.domain.RolePermission;
 import com.art.domain.UserPermission;
@@ -12,6 +10,7 @@ import com.art.mapper.DeptPermissionMapper;
 import com.art.mapper.RolePermissionMapper;
 import com.art.mapper.UserPermissionMapper;
 import com.art.service.MenuPermissionService;
+import com.art.utils.SecurityUtil;
 import com.art.utils.StringUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Service;
@@ -38,7 +37,6 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
      * 部门功能权限缓存
      */
     private final DeptPermissionCache deptPermissionCache;
-
     /**
      * 角色功能权限Mapper
      */
@@ -51,6 +49,10 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
      * 部门功能权限Mapper
      */
     private final DeptPermissionMapper deptPermissionMapper;
+    /**
+     * 菜单权限标识缓存
+     */
+    private final MenuAuthCache menuAuthCache;
 
     /**
      * 构造函数
@@ -61,16 +63,18 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
      * @param rolePermissionMapper 角色功能权限Mapper
      * @param deptPermissionMapper 部门功能权限Mapper
      * @param userPermissionMapper 用户功能权限Mapper
+     * @param menuAuthCache        菜单权限标识缓存
      */
     public MenuPermissionServiceImpl(UserPermissionCache userPermissionCache, RolePermissionCache rolePermissionCache,
                                      DeptPermissionCache deptPermissionCache, RolePermissionMapper rolePermissionMapper,
-                                     UserPermissionMapper userPermissionMapper, DeptPermissionMapper deptPermissionMapper) {
+                                     UserPermissionMapper userPermissionMapper, DeptPermissionMapper deptPermissionMapper, MenuAuthCache menuAuthCache) {
         this.userPermissionCache = userPermissionCache;
         this.rolePermissionCache = rolePermissionCache;
         this.deptPermissionCache = deptPermissionCache;
         this.rolePermissionMapper = rolePermissionMapper;
         this.userPermissionMapper = userPermissionMapper;
         this.deptPermissionMapper = deptPermissionMapper;
+        this.menuAuthCache = menuAuthCache;
     }
 
     /**
@@ -81,6 +85,9 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
     @Override
     public List<String> getMenuPermission(String type, Long id) {
         List<String> permissionSignList;
+        if ("admin".equals(SecurityUtil.getUserType())) {
+            return this.menuAuthCache.get();
+        }
         if (StringUtil.isNotBlank(type)) {
             // 获取指定用户、角色或部门的功能权限
             permissionSignList = switch (type) {
