@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -90,14 +91,73 @@ public class AuthServiceImpl implements AuthService {
         if (!encoder.matches(password, realPassword)) {
             throw new ArtException("用户名或密码错误！");
         }
-        StpUtil.login(user.getId(),
-                new SaLoginParameter().setExtra("name", user.getUserName()));
-        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-        String token = tokenInfo.getTokenValue();
-        // 将token存储到Redis
-        redisTemplate.opsForValue().set("access_token:" + token, JSON.toJSONString(user),
-                authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
-        return new LoginResultVO(token);
+        
+        // 检查是否首次登录
+        boolean isFirstLogin = user.getFirstLoginFlag() != null && user.getFirstLoginFlag();
+        
+        LoginResultVO loginResultVO = new LoginResultVO();
+        
+        if (isFirstLogin) {
+            // 生成临时token用于强制修改密码
+            String tempToken = "temp_" + UUID.randomUUID().toString().replace("-", "");
+            
+            // 将临时token存储到Redis，设置较短的过期时间，并标记为一次性使用
+            String tempTokenKey = "temp_token:" + tempToken;
+            redisTemplate.opsForValue().set(tempTokenKey, JSON.toJSONString(user), 10, TimeUnit.MINUTES);
+            
+            // 设置强制修改密码标志
+            loginResultVO.setForceChangePassword(true);
+            loginResultVO.setToken(tempToken);
+        } else {
+            // 正常登录流程
+            StpUtil.login(user.getId(),
+                    new SaLoginParameter().setExtra("name", user.getUserName()));
+            SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+            String token = tokenInfo.getTokenValue();
+            // 将token存储到Redis
+            redisTemplate.opsForValue().set("access_token:" + token, JSON.toJSONString(user),
+                    authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
+            loginResultVO.setToken(token);
+        }
+        
+        return loginResultVO;
+    }
+
+    /**
+     * 使用临时token验证并修改密码
+     *
+     * @param tempToken 临时token
+     * @param newPassword 新密码
+     * @return 修改密码结果
+     */
+    @Override
+    public Boolean changePasswordWithTempToken(String tempToken, String newPassword) {
+        String tempTokenKey = "temp_token:" + tempToken;
+        String userJson = redisTemplate.opsForValue().get(tempTokenKey);
+        
+        if (userJson == null) {
+            throw new ArtException("临时令牌无效或已过期！");
+        }
+        
+        // 从Redis中删除临时token（一次性使用）
+        redisTemplate.delete(tempTokenKey);
+        
+        // 解析用户信息
+        User user = JSON.parseObject(userJson, User.class);
+        
+        // 验证新密码是否为空
+        if (StringUtils.isBlank(newPassword)) {
+            throw new ArtException("新密码不能为空！");
+        }
+        
+        // 更新用户密码和首次登录标志
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String encodedPassword = encoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        user.setFirstLoginFlag(false); // 设置为非首次登录
+        
+        // 更新用户信息
+        return userService.updateById(user);
     }
 
     /**

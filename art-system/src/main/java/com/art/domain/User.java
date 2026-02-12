@@ -81,4 +81,9 @@ public class User extends BaseEntity {
      */
     @Column("user_tag")
     private String userTag;
+    /**
+     * 是否首次登录
+     */
+    @Column("first_login_flag")
+    private Boolean firstLoginFlag;
 }

@@ -33,4 +33,13 @@ public interface AuthService {
      * @return 重置密码结果
      */
     Boolean userResetPassword(UserResetPasswordVO userResetPasswordVO);
+
+    /**
+     * 使用临时token修改密码（用于首次登录强制修改密码）
+     *
+     * @param tempToken 临时token
+     * @param newPassword 新密码
+     * @return 修改密码结果
+     */
+    Boolean changePasswordWithTempToken(String tempToken, String newPassword);
 }
