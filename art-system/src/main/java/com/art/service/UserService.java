@@ -76,4 +76,12 @@ public interface UserService extends IService<User> {
      * @return 用户树
      */
     List<TreeSelectVO> userTree();
+
+    /**
+     * 重置用户密码
+     *
+     * @param userId 用户ID
+     * @return 重置结果
+     */
+    Boolean resetDefaultPassword(Long userId);
 }

@@ -257,6 +257,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userTreeList;
     }
 
+    /**
+     * 重置用户密码
+     *
+     * @param userId 用户ID
+     * @return 重置结果
+     */
+    @Override
+    public Boolean resetDefaultPassword(Long userId) {
+        User user = this.selectById(userId);
+        RuleItemVO systemDefaultPwd = this.ruleCache.getByRuleCode("system_default_pwd");
+        String password = systemDefaultPwd.getRuleValue();
+        String md5Pwd = MD5.create().digestHex(password);
+        String encodePwd = new BCryptPasswordEncoder().encode(md5Pwd);
+        user.setPassword(encodePwd);
+        user.setFirstLoginFlag(true);
+        return this.updateById(user);
+    }
+
+    /**
+     * 处理部门用户树
+     *
+     * @param deptUserTreeList 部门用户树列表
+     * @param deptTreeList     部门树列表
+     */
     private void handleDeptUserTree(List<TreeSelectVO> deptUserTreeList, List<DeptTreeSelectVO> deptTreeList) {
         for (DeptTreeSelectVO deptTreeSelectVO : deptTreeList) {
             TreeSelectVO treeSelectVO = new TreeSelectVO();

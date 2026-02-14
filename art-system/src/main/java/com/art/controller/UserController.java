@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.common.TreeSelectVO;
@@ -137,6 +138,19 @@ public class UserController {
     @Operation(summary = "删除用户", description = "根据ID删除用户")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.UserService.delete(tableRowVO.getIdList()));
+    }
+
+    /**
+     * 重置用户密码
+     *
+     * @param userId 用户ID
+     * @return 重置结果
+     */
+    @PutMapping("/resetDefaultPassword")
+    @Operation(summary = "重置用户密码", description = "重置用户密码")
+    @SaCheckPermission("system:userManage:resetDefaultPassword")
+    public HttpResult<Boolean> resetDefaultPassword(@RequestParam("userId") Long userId) {
+        return HttpResult.success(this.UserService.resetDefaultPassword(userId));
     }
 
 }

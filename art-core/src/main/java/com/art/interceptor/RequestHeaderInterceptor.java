@@ -72,6 +72,9 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
+        if ("/api/error".equals(request.getRequestURI())) {
+            return true;
+        }
         // 请求头中获取token
         String token = request.getHeader(HeaderKeyConstants.TOKEN_HEADER);
         // 判断token是否合法
