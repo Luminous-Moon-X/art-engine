@@ -181,8 +181,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         boolean result = this.updateById(entity);
         // 刷新角色关系
         Long[] roleIds = vo.getRoleIds();
-        this.userRoleMapper.deleteByQuery(QueryWrapper.create().eq(UserRole::getUserId, entity.getId()));
-        return userRoleRelation(entity, result, roleIds);
+        if (roleIds != null && roleIds.length > 0) {
+            this.userRoleMapper.deleteByQuery(QueryWrapper.create().eq(UserRole::getUserId, entity.getId()));
+            return userRoleRelation(entity, result, roleIds);
+        }
+        return result;
     }
 
     /**
