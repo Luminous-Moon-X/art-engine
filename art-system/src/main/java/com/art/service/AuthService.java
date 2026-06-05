@@ -3,6 +3,7 @@ package com.art.service;
 import com.art.domain.vo.LoginResultVO;
 import com.art.domain.vo.LoginVO;
 import com.art.domain.vo.UserResetPasswordVO;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 认证服务接口
@@ -15,9 +16,10 @@ public interface AuthService {
      * 登录接口
      *
      * @param loginVO 登录参数
+     * @param request HTTP请求对象
      * @return 登录结果
      */
-    LoginResultVO login(LoginVO loginVO);
+    LoginResultVO login(LoginVO loginVO, HttpServletRequest request);
 
     /**
      * 注销登出用户

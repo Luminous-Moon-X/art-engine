@@ -7,6 +7,7 @@ import com.art.domain.vo.LoginVO;
 import com.art.domain.vo.UserResetPasswordVO;
 import com.art.exception.ArtException;
 import com.art.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +33,8 @@ public class AuthController {
      * @return 登录结果
      */
     @PostMapping("/login")
-    public HttpResult<LoginResultVO> login(@RequestBody LoginVO loginVO) {
-        return HttpResult.success(this.authService.login(loginVO));
+    public HttpResult<LoginResultVO> login(@RequestBody LoginVO loginVO, HttpServletRequest request) {
+        return HttpResult.success(this.authService.login(loginVO, request));
     }
 
     /**

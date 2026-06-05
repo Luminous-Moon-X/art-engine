@@ -10,13 +10,16 @@ import com.art.domain.vo.LoginResultVO;
 import com.art.domain.vo.LoginVO;
 import com.art.domain.vo.UserResetPasswordVO;
 import com.art.exception.ArtException;
+import com.art.log.event.LoginLogEvent;
 import com.art.service.AuthService;
 import com.art.service.UserService;
 import com.art.utils.SecurityUtil;
 import com.art.utils.StringUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.CollectionUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,10 @@ public class AuthServiceImpl implements AuthService {
      * 权限配置
      */
     private final AuthConfiguration authConfiguration;
+    /**
+     * 事件发布器
+     */
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 构造器注入
@@ -52,22 +59,25 @@ public class AuthServiceImpl implements AuthService {
      * @param userService       用户表Service层逻辑
      * @param redisTemplate     Redis操作对象
      * @param authConfiguration 权限配置
+     * @param eventPublisher    事件发布器
      */
     public AuthServiceImpl(UserService userService, RedisTemplate<String, String> redisTemplate,
-                           AuthConfiguration authConfiguration) {
+                           AuthConfiguration authConfiguration, ApplicationEventPublisher eventPublisher) {
         this.userService = userService;
         this.redisTemplate = redisTemplate;
         this.authConfiguration = authConfiguration;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
      * 登录接口
      *
      * @param loginVO 登录参数
+     * @param request HTTP请求对象
      * @return 登录结果
      */
     @Override
-    public LoginResultVO login(LoginVO loginVO) {
+    public LoginResultVO login(LoginVO loginVO, HttpServletRequest request) {
         // 获取用户登录的账号和密码
         String username = loginVO.getUsername();
         String password = loginVO.getPassword();
@@ -119,7 +129,10 @@ public class AuthServiceImpl implements AuthService {
                     authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
             loginResultVO.setToken(token);
         }
-        
+
+        // 发布登录日志事件
+        eventPublisher.publishEvent(new LoginLogEvent(user.getUserName(), user.getNickName(), request));
+
         return loginResultVO;
     }
 
