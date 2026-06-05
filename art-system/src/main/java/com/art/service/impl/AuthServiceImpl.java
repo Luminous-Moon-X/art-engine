@@ -10,7 +10,7 @@ import com.art.domain.vo.LoginResultVO;
 import com.art.domain.vo.LoginVO;
 import com.art.domain.vo.UserResetPasswordVO;
 import com.art.exception.ArtException;
-import com.art.log.event.LoginLogEvent;
+import com.art.event.LoginLogEvent;
 import com.art.service.AuthService;
 import com.art.service.UserService;
 import com.art.utils.SecurityUtil;
