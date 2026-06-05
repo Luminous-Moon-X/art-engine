@@ -2,7 +2,6 @@ package com.art.log.aspect;
 
 import com.art.common.HttpResult;
 import com.art.log.annotation.ApiLog;
-import com.art.log.domain.ApiLog;
 import com.art.log.service.ApiLogService;
 import com.art.log.util.IpUtil;
 import com.art.utils.SecurityUtil;
@@ -48,8 +47,8 @@ public class ApiLogAspect {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes != null ? attributes.getRequest() : null;
 
-        // 构建日志实体
-        ApiLog apiLogEntity = new ApiLog();
+        // 构建日志实体（使用全限定名避免与注解类名冲突）
+        com.art.log.domain.ApiLog apiLogEntity = new com.art.log.domain.ApiLog();
 
         try {
             // 设置当前用户信息
