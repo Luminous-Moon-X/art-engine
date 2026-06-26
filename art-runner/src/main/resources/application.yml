@@ -39,7 +39,7 @@ art:
 # mybatis-flex指定mapper.xml文件位置
 mybatis-flex:
   mapper-locations:
-    - classpath*:/mapper/*.xml
+    - classpath:/mapper/*.xml
   global-config:
     # 主键生成策略
     key-config:
