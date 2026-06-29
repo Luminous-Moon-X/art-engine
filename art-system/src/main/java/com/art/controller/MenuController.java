@@ -1,11 +1,13 @@
 package com.art.controller;
 
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.common.TreeSelectVO;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.MenuService;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +40,7 @@ public class MenuController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取菜单信息", description = "根据ID获取菜单信息")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "根据ID获取菜单信息")
     public HttpResult<MenuVO> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.menuService.selectById(id));
     }
@@ -51,6 +54,7 @@ public class MenuController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询菜单信息", description = "分页查询菜单信息")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "分页查询菜单信息")
     public HttpResult<Page<MenuVO>> page(Page<MenuVO> page, MenuVO vo) {
         return HttpResult.success(this.menuService.queryPage(page, vo));
     }
@@ -62,6 +66,7 @@ public class MenuController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有菜单信息", description = "查询所有菜单信息")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "查询所有菜单信息")
     public HttpResult<List<Menu>> list() {
         return HttpResult.success(this.menuService.selectList());
     }
@@ -74,6 +79,7 @@ public class MenuController {
      */
     @PostMapping("/add")
     @Operation(summary = "新增菜单", description = "新增菜单")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.INSERT, description = "新增菜单")
     public HttpResult<Boolean> add(@RequestBody MenuVO vo) {
         return HttpResult.success(menuService.add(vo));
     }
@@ -86,6 +92,7 @@ public class MenuController {
      */
     @PutMapping("/edit")
     @Operation(summary = "编辑菜单", description = "编辑菜单")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.UPDATE, description = "编辑菜单")
     public HttpResult<Boolean> edit(@RequestBody MenuVO vo) {
         return HttpResult.success(menuService.edit(vo));
     }
@@ -98,6 +105,7 @@ public class MenuController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除菜单", description = "根据ID删除菜单")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.DELETE, description = "删除菜单")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.menuService.delete(tableRowVO.getIdList()));
     }
@@ -109,6 +117,7 @@ public class MenuController {
      */
     @GetMapping("/allMenuTree")
     @Operation(summary = "获取所有菜单树", description = "获取所有菜单树")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "获取所有菜单树")
     public HttpResult<List<TreeSelectVO>> allMenuTree() {
         return HttpResult.success(this.menuService.allMenuTree());
     }
@@ -120,6 +129,7 @@ public class MenuController {
      */
     @GetMapping("/menuTree")
     @Operation(summary = "获取菜单树", description = "获取菜单树，用于渲染前端菜单栏")
+    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "获取菜单树")
     public HttpResult<List<MenuTreeVO>> menuTree() {
         return HttpResult.success(this.menuService.menuTree());
     }

@@ -1,8 +1,10 @@
 package com.art.controller;
 
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.domain.vo.CodeGenVO;
 import com.art.domain.vo.DBTableVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.GeneratorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,6 +43,7 @@ public class GeneratorController {
      */
     @GetMapping("tables")
     @Operation(summary = "获取数据表信息", description = "获取数据表，用于生成对应表的代码")
+    @ApiLog(module = "代码生成器", operationType = ApiOperationType.QUERY, description = "获取数据表信息")
     public HttpResult<List<DBTableVO>> tables() {
         return HttpResult.success(this.generatorService.tables());
     }
@@ -53,6 +56,7 @@ public class GeneratorController {
      */
     @PostMapping("generate")
     @Operation(summary = "生成代码", description = "生成对应数据表的代码")
+    @ApiLog(module = "代码生成器", operationType = ApiOperationType.INSERT, description = "生成代码")
     public HttpResult<Boolean> generateCode(@RequestBody CodeGenVO codeGenVO) {
         return HttpResult.success(this.generatorService.generateCode(codeGenVO));
     }

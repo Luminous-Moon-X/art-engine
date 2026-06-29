@@ -1,9 +1,11 @@
 package com.art.controller;
 
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.Tenant;
 import com.art.domain.vo.TenantVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.TenantService;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,6 +46,7 @@ public class TenantController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取租户信息", description = "根据ID获取租户信息")
+    @ApiLog(module = "租户管理", operationType = ApiOperationType.QUERY, description = "根据ID获取租户信息")
     public HttpResult<Tenant> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.tenantService.selectById(id));
     }
@@ -57,6 +60,7 @@ public class TenantController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询租户信息", description = "分页查询租户信息")
+    @ApiLog(module = "租户管理", operationType = ApiOperationType.QUERY, description = "分页查询租户信息")
     public HttpResult<Page<Tenant>> page(Page<Tenant> page, TenantVO vo) {
         return HttpResult.success(this.tenantService.queryPage(page, vo));
     }
@@ -68,6 +72,7 @@ public class TenantController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有租户信息", description = "查询所有租户信息")
+    @ApiLog(module = "租户管理", operationType = ApiOperationType.QUERY, description = "查询所有租户信息")
     public HttpResult<List<Tenant>> list() {
         return HttpResult.success(this.tenantService.selectList());
     }
@@ -80,6 +85,7 @@ public class TenantController {
      */
     @PostMapping("/add")
     @Operation(summary = "新增租户", description = "新增租户")
+    @ApiLog(module = "租户管理", operationType = ApiOperationType.INSERT, description = "新增租户")
     public HttpResult<Boolean> add(@RequestBody TenantVO vo) {
         return HttpResult.success(tenantService.add(vo));
     }
@@ -92,6 +98,7 @@ public class TenantController {
      */
     @PostMapping("/edit")
     @Operation(summary = "编辑租户", description = "编辑租户")
+    @ApiLog(module = "租户管理", operationType = ApiOperationType.UPDATE, description = "编辑租户")
     public HttpResult<Boolean> edit(@RequestBody TenantVO vo) {
         return HttpResult.success(tenantService.edit(vo));
     }
@@ -104,6 +111,7 @@ public class TenantController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除租户", description = "根据ID删除租户")
+    @ApiLog(module = "租户管理", operationType = ApiOperationType.DELETE, description = "删除租户")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.tenantService.delete(tableRowVO.getIdList()));
     }
@@ -116,6 +124,7 @@ public class TenantController {
      */
     @PutMapping("/toggle/{id}")
     @Operation(summary = "启用/禁用租户", description = "切换租户启用状态")
+    @ApiLog(module = "租户管理", operationType = ApiOperationType.UPDATE, description = "启用/禁用租户")
     public HttpResult<Boolean> toggleEnable(@PathVariable("id") Long id) {
         return HttpResult.success(this.tenantService.toggleEnable(id));
     }

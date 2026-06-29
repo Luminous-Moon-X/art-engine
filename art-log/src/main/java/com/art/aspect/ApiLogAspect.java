@@ -1,6 +1,5 @@
 package com.art.aspect;
 
-import com.art.common.HttpResult;
 import com.art.annotation.ApiLog;
 import com.art.service.ApiLogService;
 import com.art.util.IpUtil;
@@ -18,7 +17,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 /**
  * 接口日志切面
@@ -26,12 +24,13 @@ import java.util.Arrays;
  * 拦截标注了 @ApiLog 注解的Controller方法，自动记录接口请求行为
  *
  * @author Luminous.X
- * @since 1.0.0
+ * @since 1.2.0
  */
 @Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class ApiLogAspect {
 
     private final ApiLogService apiLogService;
@@ -67,7 +66,9 @@ public class ApiLogAspect {
         }
 
         apiLogEntity.setRequestTime(LocalDateTime.now());
-        apiLogEntity.setDescription(apiLog.value());
+        apiLogEntity.setDescription(apiLog.description());
+        apiLogEntity.setModule(apiLog.module());
+        apiLogEntity.setOperationType(apiLog.operationType().getDescription());
 
         // 记录请求参数
         try {

@@ -1,9 +1,11 @@
 package com.art.controller;
 
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.Dict;
 import com.art.domain.vo.DictVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.DictService;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,6 +46,7 @@ public class DictController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取字典信息", description = "根据ID获取字典信息")
+    @ApiLog(module = "字典管理", operationType = ApiOperationType.QUERY, description = "根据ID获取字典信息")
     public HttpResult<Dict> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.DictService.selectById(id));
     }
@@ -57,6 +60,7 @@ public class DictController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询字典信息", description = "分页查询字典信息")
+    @ApiLog(module = "字典管理", operationType = ApiOperationType.QUERY, description = "分页查询字典信息")
     public HttpResult<Page<DictVO>> page(Page<DictVO> page, DictVO vo) {
         return HttpResult.success(this.DictService.queryPage(page, vo));
     }
@@ -68,6 +72,7 @@ public class DictController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有字典信息", description = "查询所有字典信息")
+    @ApiLog(module = "字典管理", operationType = ApiOperationType.QUERY, description = "查询所有字典信息")
     public HttpResult<List<Dict>> list() {
         return HttpResult.success(this.DictService.selectList());
     }
@@ -80,6 +85,7 @@ public class DictController {
      */
     @PostMapping("/add")
     @Operation(summary = "新增字典", description = "新增字典")
+    @ApiLog(module = "字典管理", operationType = ApiOperationType.INSERT, description = "新增字典")
     public HttpResult<Boolean> add(@RequestBody DictVO vo) {
         return HttpResult.success(DictService.add(vo));
     }
@@ -92,6 +98,7 @@ public class DictController {
      */
     @PutMapping("/edit")
     @Operation(summary = "编辑字典", description = "编辑字典")
+    @ApiLog(module = "字典管理", operationType = ApiOperationType.UPDATE, description = "编辑字典")
     public HttpResult<Boolean> edit(@RequestBody DictVO vo) {
         return HttpResult.success(DictService.edit(vo));
     }
@@ -104,6 +111,7 @@ public class DictController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除字典", description = "根据ID删除字典")
+    @ApiLog(module = "字典管理", operationType = ApiOperationType.DELETE, description = "删除字典")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.DictService.delete(tableRowVO.getIdList()));
     }

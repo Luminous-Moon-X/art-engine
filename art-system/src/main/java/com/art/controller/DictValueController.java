@@ -1,10 +1,12 @@
 package com.art.controller;
 
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.DictValue;
 import com.art.domain.vo.DictItemVO;
 import com.art.domain.vo.DictValueVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.DictValueService;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +47,7 @@ public class DictValueController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取字典值信息", description = "根据ID获取字典值信息")
+    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "根据ID获取字典值信息")
     public HttpResult<DictValue> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.DictValueService.selectById(id));
     }
@@ -58,6 +61,7 @@ public class DictValueController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询字典值信息", description = "分页查询字典值信息")
+    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "分页查询字典值信息")
     public HttpResult<Page<DictValueVO>> page(Page<DictValueVO> page, DictValueVO vo) {
         return HttpResult.success(this.DictValueService.queryPage(page, vo));
     }
@@ -69,6 +73,7 @@ public class DictValueController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有字典值信息", description = "查询所有字典值信息")
+    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "查询所有字典值信息")
     public HttpResult<List<DictValue>> list() {
         return HttpResult.success(this.DictValueService.selectList());
     }
@@ -81,6 +86,7 @@ public class DictValueController {
      */
     @PostMapping("/add")
     @Operation(summary = "新增字典值", description = "新增字典值")
+    @ApiLog(module = "字典值管理", operationType = ApiOperationType.INSERT, description = "新增字典值")
     public HttpResult<Boolean> add(@RequestBody DictValueVO vo) {
         return HttpResult.success(DictValueService.add(vo));
     }
@@ -93,6 +99,7 @@ public class DictValueController {
      */
     @PutMapping("/edit")
     @Operation(summary = "编辑字典值", description = "编辑字典值")
+    @ApiLog(module = "字典值管理", operationType = ApiOperationType.UPDATE, description = "编辑字典值")
     public HttpResult<Boolean> edit(@RequestBody DictValueVO vo) {
         return HttpResult.success(DictValueService.edit(vo));
     }
@@ -105,6 +112,7 @@ public class DictValueController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除字典值", description = "根据ID删除字典值")
+    @ApiLog(module = "字典值管理", operationType = ApiOperationType.DELETE, description = "删除字典值")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.DictValueService.delete(tableRowVO.getIdList()));
     }
@@ -117,6 +125,7 @@ public class DictValueController {
      */
     @GetMapping("/dictByCode/{dictCode}")
     @Operation(summary = "根据字典编码查询字典值", description = "根据字典编码查询字典值")
+    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "根据字典编码查询字典值")
     public HttpResult<List<DictItemVO>> dictByCode(@PathVariable("dictCode") String dictCode) {
         return HttpResult.success(this.DictValueService.dictByCode(dictCode));
     }

@@ -78,4 +78,14 @@ public class ApiLog extends BaseEntity {
      */
     @Column("description")
     private String description;
+    /**
+     * 操作类型
+     */
+    @Column("operation_type")
+    private String operationType;
+    /**
+     * 功能模块
+     */
+    @Column("module")
+    private String module;
 }

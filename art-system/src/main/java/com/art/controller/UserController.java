@@ -1,12 +1,14 @@
 package com.art.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.common.TreeSelectVO;
 import com.art.domain.User;
 import com.art.domain.vo.UserInfoVO;
 import com.art.domain.vo.UserVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.SysUserService;
 import com.art.service.UserService;
 import com.mybatisflex.core.paginate.Page;
@@ -42,6 +44,7 @@ public class UserController {
      */
     @GetMapping("/info")
     @Operation(summary = "登录获取用户基本信息", description = "登录获取用户基本信息")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "登录获取用户基本信息")
     public HttpResult<UserInfoVO> info() {
         return HttpResult.success(sysUserService.info());
     }
@@ -54,6 +57,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取用户信息", description = "根据ID获取用户信息")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "根据ID获取用户信息")
     public HttpResult<User> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.UserService.selectById(id));
     }
@@ -67,6 +71,7 @@ public class UserController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询用户信息", description = "分页查询用户信息")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "分页查询用户信息")
     public HttpResult<Page<UserVO>> page(Page<UserVO> page, UserVO vo) {
         return HttpResult.success(this.UserService.queryPage(page, vo));
     }
@@ -78,6 +83,7 @@ public class UserController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有用户信息", description = "查询所有用户信息")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "查询所有用户信息")
     public HttpResult<List<User>> list() {
         return HttpResult.success(this.UserService.selectList());
     }
@@ -89,6 +95,7 @@ public class UserController {
      */
     @GetMapping("/deptUserTree")
     @Operation(summary = "查询部门用户树", description = "查询部门用户树")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "查询部门用户树")
     public HttpResult<List<TreeSelectVO>> deptUserTree() {
         return HttpResult.success(this.UserService.deptUserTree());
     }
@@ -100,6 +107,7 @@ public class UserController {
      */
     @GetMapping("/userTree")
     @Operation(summary = "查询用户树", description = "查询用户树")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "查询用户树")
     public HttpResult<List<TreeSelectVO>> userTree() {
         return HttpResult.success(this.UserService.userTree());
     }
@@ -112,6 +120,7 @@ public class UserController {
      */
     @PostMapping("/add")
     @Operation(summary = "新增用户", description = "新增用户")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.INSERT, description = "新增用户")
     public HttpResult<Boolean> add(@RequestBody UserVO vo) {
         return HttpResult.success(UserService.add(vo));
     }
@@ -124,6 +133,7 @@ public class UserController {
      */
     @PutMapping("/edit")
     @Operation(summary = "编辑用户", description = "编辑用户")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.UPDATE, description = "编辑用户")
     public HttpResult<Boolean> edit(@RequestBody UserVO vo) {
         return HttpResult.success(UserService.edit(vo));
     }
@@ -136,6 +146,7 @@ public class UserController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除用户", description = "根据ID删除用户")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.DELETE, description = "删除用户")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.UserService.delete(tableRowVO.getIdList()));
     }
@@ -149,6 +160,7 @@ public class UserController {
     @PutMapping("/resetDefaultPassword")
     @Operation(summary = "重置用户密码", description = "重置用户密码")
     @SaCheckPermission("system:userManage:resetDefaultPassword")
+    @ApiLog(module = "用户管理", operationType = ApiOperationType.UPDATE, description = "重置用户密码")
     public HttpResult<Boolean> resetDefaultPassword(@RequestParam("userId") Long userId) {
         return HttpResult.success(this.UserService.resetDefaultPassword(userId));
     }

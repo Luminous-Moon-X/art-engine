@@ -1,10 +1,12 @@
 package com.art.controller;
 
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.Rule;
 import com.art.domain.vo.RuleItemVO;
 import com.art.domain.vo.RuleVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.RuleService;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +47,7 @@ public class RuleController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取规则信息", description = "根据ID获取规则信息")
+    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "根据ID获取规则信息")
     public HttpResult<Rule> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.RuleService.selectById(id));
     }
@@ -57,6 +60,7 @@ public class RuleController {
      */
     @GetMapping("/code/{code}")
     @Operation(summary = "根据编码获取规则信息", description = "根据编码获取规则信息")
+    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "根据编码获取规则信息")
     public HttpResult<RuleItemVO> getByCode(@PathVariable("code") String code) {
         return HttpResult.success(this.RuleService.getByRuleCode(code));
     }
@@ -70,6 +74,7 @@ public class RuleController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询规则信息", description = "分页查询规则信息")
+    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "分页查询规则信息")
     public HttpResult<Page<RuleVO>> page(Page<RuleVO> page, RuleVO vo) {
         return HttpResult.success(this.RuleService.queryPage(page, vo));
     }
@@ -81,6 +86,7 @@ public class RuleController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有规则信息", description = "查询所有规则信息")
+    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "查询所有规则信息")
     public HttpResult<List<RuleVO>> list() {
         return HttpResult.success(this.RuleService.selectList());
     }
@@ -93,6 +99,7 @@ public class RuleController {
      */
     @PostMapping("/add")
     @Operation(summary = "新增规则", description = "新增规则")
+    @ApiLog(module = "规则管理", operationType = ApiOperationType.INSERT, description = "新增规则")
     public HttpResult<Boolean> add(@RequestBody RuleVO vo) {
         return HttpResult.success(RuleService.add(vo));
     }
@@ -105,6 +112,7 @@ public class RuleController {
      */
     @PutMapping("/edit")
     @Operation(summary = "编辑规则", description = "编辑规则")
+    @ApiLog(module = "规则管理", operationType = ApiOperationType.UPDATE, description = "编辑规则")
     public HttpResult<Boolean> edit(@RequestBody RuleVO vo) {
         return HttpResult.success(RuleService.edit(vo));
     }
@@ -117,6 +125,7 @@ public class RuleController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除规则", description = "根据ID删除规则")
+    @ApiLog(module = "规则管理", operationType = ApiOperationType.DELETE, description = "删除规则")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.RuleService.delete(tableRowVO.getIdList()));
     }

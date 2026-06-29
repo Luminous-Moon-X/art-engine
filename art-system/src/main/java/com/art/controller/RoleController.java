@@ -1,10 +1,12 @@
 package com.art.controller;
 
+import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.SelectVO;
 import com.art.common.TableRowVO;
 import com.art.domain.Role;
 import com.art.domain.vo.RoleVO;
+import com.art.enums.ApiOperationType;
 import com.art.service.RoleService;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +47,7 @@ public class RoleController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取角色信息", description = "根据ID获取角色信息")
+    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "根据ID获取角色信息")
     public HttpResult<Role> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.roleService.selectById(id));
     }
@@ -58,6 +61,7 @@ public class RoleController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询角色信息", description = "分页查询角色信息")
+    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "分页查询角色信息")
     public HttpResult<Page<RoleVO>> page(Page<RoleVO> page, RoleVO vo) {
         return HttpResult.success(this.roleService.queryPage(page, vo));
     }
@@ -69,6 +73,7 @@ public class RoleController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有角色信息", description = "查询所有角色信息")
+    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "查询所有角色信息")
     public HttpResult<List<Role>> list() {
         return HttpResult.success(this.roleService.selectList());
     }
@@ -80,6 +85,7 @@ public class RoleController {
      */
     @GetMapping("/select")
     @Operation(summary = "角色下拉列表", description = "角色下拉列表")
+    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "角色下拉列表")
     public HttpResult<List<SelectVO>> select() {
         return HttpResult.success(this.roleService.select());
     }
@@ -92,6 +98,7 @@ public class RoleController {
      */
     @PostMapping("/add")
     @Operation(summary = "新增角色", description = "新增角色")
+    @ApiLog(module = "角色管理", operationType = ApiOperationType.INSERT, description = "新增角色")
     public HttpResult<Boolean> add(@RequestBody RoleVO vo) {
         return HttpResult.success(roleService.add(vo));
     }
@@ -104,6 +111,7 @@ public class RoleController {
      */
     @PutMapping("/edit")
     @Operation(summary = "编辑角色", description = "编辑角色")
+    @ApiLog(module = "角色管理", operationType = ApiOperationType.UPDATE, description = "编辑角色")
     public HttpResult<Boolean> edit(@RequestBody RoleVO vo) {
         return HttpResult.success(roleService.edit(vo));
     }
@@ -116,6 +124,7 @@ public class RoleController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除角色", description = "根据ID删除角色")
+    @ApiLog(module = "角色管理", operationType = ApiOperationType.DELETE, description = "删除角色")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.roleService.delete(tableRowVO.getIdList()));
     }
