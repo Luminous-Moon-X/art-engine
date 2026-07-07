@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.95.206.93:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: xuaihao1234A!
+    password: root
     hikari:
       # 连接最大生命周期
       max-lifetime: 1800000      # 30分钟
@@ -19,7 +19,7 @@ spring:
     redis:
       host: 47.95.206.93
       port: 6379
-      password: xuaihao1234
+      password: 123456
       database: 0
       timeout: 10s
       lettuce:
