@@ -26,7 +26,7 @@ public class AIChatAutoClientAutoConfig {
     @Bean
     public ChatModel artChatClient() {
         OpenAIChatConfig config = new OpenAIChatConfig();
-        config.setApiKey("sk-xQap5kp3ubSFu9FdfTgpAPm5yVQDEeIM3oYTNKN0yqB6vYfctaGcmTS4atTJ4FVU");
+        config.setApiKey("");
         config.setModel("deepseek-v4-pro");
         config.setEndpoint("https://opencode.ai/zen/go");
         config.setRequestPath("/v1/chat/completions");
