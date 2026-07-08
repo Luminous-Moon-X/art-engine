@@ -33,7 +33,8 @@ ext {
             saToken = "1.44.0",
             openApi = "2.8.5",
             redisson = "3.24.3",
-            caffeineCache = "3.1.8"
+            caffeineCache = "3.1.8",
+            agentsFlex = "2.1.9"
     ]
     lib = [
             "spring-boot-dependencies"           : "org.springframework.boot:spring-boot-dependencies:${SPRING_BOOT_VERSION}",
@@ -58,7 +59,8 @@ ext {
             "sa-token-redis"                     : "cn.dev33:sa-token-redis-template:${saToken}",
             "open-api"                           : "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApi}",
             "redisson"                           : "org.redisson:redisson-spring-boot-starter:${redisson}",
-            "caffeine"                           : "com.github.ben-manes.caffeine:caffeine:${caffeineCache}"
+            "caffeine"                           : "com.github.ben-manes.caffeine:caffeine:${caffeineCache}",
+            "agents-flex"                        : "com.agentsflex:agents-flex-core:${agentsFlex}"
     ]
 }
 

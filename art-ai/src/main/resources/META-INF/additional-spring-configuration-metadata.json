@@ -1,0 +1,77 @@
+{
+  "groups": [
+    {
+      "name": "art.ai-model",
+      "type": "com.art.config.BigModelConfig",
+      "sourceType": "com.art.config.BigModelConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "art.ai-model.api-key",
+      "type": "java.lang.String",
+      "description": "API 密钥，用于鉴权",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.end-point",
+      "type": "java.lang.String",
+      "description": "服务端点地址，例如 https://api.openai.com",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.request-path",
+      "type": "java.lang.String",
+      "description": "请求路径，例如 /v1/chat/completions",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.model-name",
+      "type": "java.lang.String",
+      "description": "模型名称，例如 gpt-4、deepseek-v4-pro",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.provider",
+      "type": "java.lang.String",
+      "description": "服务提供商标识，例如 openai、ollama",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.support-image",
+      "type": "java.lang.Boolean",
+      "description": "是否支持图片输入",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.only-base64-image",
+      "type": "java.lang.Boolean",
+      "description": "是否仅支持 base64 格式图片",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.support-audio",
+      "type": "java.lang.Boolean",
+      "description": "是否支持音频输入",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.support-video",
+      "type": "java.lang.Boolean",
+      "description": "是否支持视频输入",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.support-thinking",
+      "type": "java.lang.Boolean",
+      "description": "是否支持思考过程输出",
+      "sourceType": "com.art.config.BigModelConfig"
+    },
+    {
+      "name": "art.ai-model.enabled-thinking",
+      "type": "java.lang.Boolean",
+      "description": "是否启用思考过程输出",
+      "sourceType": "com.art.config.BigModelConfig"
+    }
+  ]
+}

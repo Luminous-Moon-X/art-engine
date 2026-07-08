@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version "${SPRING_BOOT_VERSION}"
 }
 dependencies {
+    implementation project(":art-ai")
     implementation project(":art-core")
     implementation project(":art-business")
     implementation project(":art-system")
