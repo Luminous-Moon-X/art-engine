@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.95.206.93:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: xuaihao1234A!
+    password: root
     hikari:
       # 连接最大生命周期
       max-lifetime: 1800000      # 30分钟
@@ -17,9 +17,9 @@ spring:
       keepalive-time: 30000
   data:
     redis:
-      host: 47.95.206.93
+      host: localhost
       port: 6379
-      password: xuaihao1234
+      password: 123456
       database: 0
       timeout: 10s
       lettuce:
@@ -31,6 +31,14 @@ spring:
           max-wait: 3000ms
           time-between-eviction-runs: 10s
         shutdown-timeout: 200ms
+    elasticsearch:
+      repositories:
+        enabled: false
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
 # Art平台配置
 art:
   auth:
@@ -43,16 +51,5 @@ art:
       - /swagger-ui.html
       - /api-docs/**
       - /swagger-ui/**
+      - /ai/chat
     secret-key: c7ee264fd80c4e169f473df493bf67fd
-  ai-model:
-    api-key: 1234567890
-    end-point: https://api.openai.com
-    request-path: /v1/chat/completions
-    model-name: gpt-4
-    provider: openai
-    support-image: false
-    only-base64-image: false
-    support-audio: false
-    support-video: false
-    support-thinking: false
-    enabled-thinking: false

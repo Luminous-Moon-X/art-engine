@@ -84,6 +84,9 @@
     <!-- Spring日志级别控制  -->
     <logger name="org.springframework" level="warn"/>
 
+    <!-- 抑制 OpenTelemetry LoggingSpanExporter 的 INFO span 刷屏 -->
+    <logger name="io.opentelemetry.exporter.logging" level="warn"/>
+
     <root level="info">
         <appender-ref ref="console"/>
     </root>
