@@ -44,9 +44,9 @@ public class SystemPromptProvider {
     public void init() {
         try (InputStream in = new ClassPathResource(SYSTEM_PROMPT_LOCATION).getInputStream()) {
             this.systemPrompt = StreamUtils.copyToString(in, StandardCharsets.UTF_8).trim();
-            log.info("系统提示词加载完成: {}", SYSTEM_PROMPT_LOCATION);
+            log.info("AI big model system prompt loaded successfully!");
         } catch (IOException e) {
-            log.error("系统提示词加载失败: {}", SYSTEM_PROMPT_LOCATION, e);
+            log.error("AI big model system prompt loaded failed:", e);
             this.systemPrompt = "";
         }
     }
