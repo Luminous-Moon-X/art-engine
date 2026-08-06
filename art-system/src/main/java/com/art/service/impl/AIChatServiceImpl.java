@@ -1,7 +1,6 @@
 package com.art.service.impl;
 
 import com.agentsflex.core.message.Message;
-import com.agentsflex.core.message.SystemMessage;
 import com.agentsflex.core.model.chat.ChatModel;
 import com.agentsflex.core.model.chat.StreamResponseListener;
 import com.agentsflex.core.model.chat.response.AiMessageResponse;
@@ -74,7 +73,7 @@ public class AIChatServiceImpl implements AIChatService {
         RedisChatMemory memory = new RedisChatMemory(conversationId, redisTemplate);
         // 构建提示词：塞入系统提示词 + 用户输入
         MemoryPrompt prompt = new MemoryPrompt(memory);
-        prompt.setSystemMessage(new SystemMessage(systemPromptProvider.getSystemPrompt()));
+        prompt.setSystemMessage(systemPromptProvider.getSystemPrompt());
         prompt.addUserMessage(question);
         // 发送流式请求
         artChatClient.chatStream(prompt, new StreamResponseListener() {
