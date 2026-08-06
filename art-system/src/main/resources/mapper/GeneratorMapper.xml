@@ -10,13 +10,14 @@
     </resultMap>
 
     <select id="getDBTables" resultMap="DBTableVOMap">
-        SELECT TABLE_NAME    as id,
-               TABLE_NAME    as table_name,
-               TABLE_COMMENT as table_comment,
-               CREATE_TIME   as create_time
-        FROM INFORMATION_SCHEMA.TABLES
-        WHERE TABLE_SCHEMA = DATABASE()
-        ORDER BY CREATE_TIME DESC
+        SELECT t.table_name                          AS id,
+               t.table_name                          AS table_name,
+               COALESCE(obj_description((quote_ident(t.table_schema) || '.' || quote_ident(t.table_name))::regclass, 'pg_class'), '') AS table_comment,
+               NULL                                  AS create_time
+        FROM information_schema.tables t
+        WHERE t.table_schema = current_schema()
+          AND t.table_type = 'BASE TABLE'
+        ORDER BY t.table_name DESC
     </select>
 
 </mapper>

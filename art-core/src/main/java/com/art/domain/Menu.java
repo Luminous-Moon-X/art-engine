@@ -20,7 +20,7 @@ public class Menu extends BaseEntity {
      * 启用标识
      */
     @Column("enable_flag")
-    private Boolean enableFlag;
+    private Integer enableFlag;
     /**
      * 菜单类型
      */

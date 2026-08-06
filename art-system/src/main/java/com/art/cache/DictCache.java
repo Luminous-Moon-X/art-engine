@@ -58,7 +58,7 @@ public class DictCache extends ArtCache<String, Map<String, List<DictItemVO>>> {
     @Override
     protected Map<String, List<DictItemVO>> getCacheData() {
         Map<String, List<DictItemVO>> dictMap = new ConcurrentHashMap<>();
-        List<Dict> allDictList = dictMapper.selectListByQuery(QueryWrapper.create().eq(Dict::getEnableFlag, true));
+        List<Dict> allDictList = dictMapper.selectListByQuery(QueryWrapper.create().eq(Dict::getEnableFlag, 1));
         List<Thread> threads = new ArrayList<>();
         for (Dict dict : allDictList) {
             Thread thread = Thread.ofVirtual().start(() -> {

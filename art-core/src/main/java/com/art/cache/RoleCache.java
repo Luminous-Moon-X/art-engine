@@ -55,7 +55,7 @@ public class RoleCache extends ArtCache<String, List<Role>> {
      */
     @Override
     protected List<Role> getCacheData() {
-        return this.roleMapper.selectListByQuery(QueryWrapper.create().eq(Role::getEnableFlag, true));
+        return this.roleMapper.selectListByQuery(QueryWrapper.create().eq(Role::getEnableFlag, 1));
     }
 
     /**

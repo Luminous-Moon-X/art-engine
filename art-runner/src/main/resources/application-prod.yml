@@ -1,7 +1,7 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/aether?serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/art-engine?currentSchema=public
     username: root
     password: root
     hikari:

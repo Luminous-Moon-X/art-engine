@@ -32,5 +32,5 @@ public class Tenant extends BaseEntity {
      * 启用标志
      */
     @Column("enable_flag")
-    private Boolean enableFlag;
+    private Integer enableFlag;
 }

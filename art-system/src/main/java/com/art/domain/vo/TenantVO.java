@@ -31,5 +31,5 @@ public class TenantVO {
      * 启用标志
      */
     @Query(type = Query.Type.EQ)
-    private Boolean enableFlag;
+    private Integer enableFlag;
 }

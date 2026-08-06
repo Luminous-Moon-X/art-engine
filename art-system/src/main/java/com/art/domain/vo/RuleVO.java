@@ -35,7 +35,7 @@ public class RuleVO {
     /**
      * 删除标识
      */
-    private Boolean enableFlag;
+    private Integer enableFlag;
     /**
      * 规则编码
      */

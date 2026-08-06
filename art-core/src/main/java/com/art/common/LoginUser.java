@@ -19,7 +19,7 @@ public class LoginUser {
     /**
      * 启用标识
      */
-    private Boolean enableFlag;
+    private Integer enableFlag;
     /**
      * 用户名
      */

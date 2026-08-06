@@ -6,7 +6,7 @@ dependencies {
     api "${lib.'commons-lang3'}"
     api "${lib.'lombok'}"
     api "${lib.'transmittable-thread-local'}"
-    api "${lib.'mysql-connect-java'}"
+    api "${lib.'postgresql-connect-java'}"
     api "${lib.'reflections'}"
     api "${lib.'sa-token'}"
     api "${lib.'sa-token-jwt'}"

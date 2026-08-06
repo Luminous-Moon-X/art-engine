@@ -91,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = userList.getFirst();
-        if (!user.getEnableFlag()) {
+        if (user.getEnableFlag() == 0) {
             throw new ArtException("该用户已被禁用，请联系管理员！");
         }
         // 对比密码

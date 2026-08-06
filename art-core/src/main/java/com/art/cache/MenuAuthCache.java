@@ -62,7 +62,7 @@ public class MenuAuthCache extends ArtCache<String, List<String>> {
      */
     @Override
     protected List<String> getCacheData() {
-        return this.menuMapper.selectListByQueryAs(QueryWrapper.create().eq(Menu::getEnableFlag, true), MenuVO.class)
+        return this.menuMapper.selectListByQueryAs(QueryWrapper.create().eq(Menu::getEnableFlag, 1), MenuVO.class)
                 .stream()
                 .map(MenuVO::getPermissionSign)
                 .toList();

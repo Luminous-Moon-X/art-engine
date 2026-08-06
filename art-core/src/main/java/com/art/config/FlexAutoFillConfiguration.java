@@ -42,7 +42,7 @@ public class FlexAutoFillConfiguration {
             if (entity instanceof BaseEntity baseEntity) {
                 baseEntity.setCreateId(SecurityUtil.getUserId());
                 baseEntity.setCreateTime(LocalDateTime.now());
-                baseEntity.setDeleteFlag(false);
+                baseEntity.setDeleteFlag(0);
             }
         }
     }

@@ -34,7 +34,7 @@ public class DictVO {
     /**
      * 启用标识
      */
-    private Boolean enableFlag;
+    private Integer enableFlag;
     /**
      * 创建时间
      */

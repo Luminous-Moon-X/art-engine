@@ -109,7 +109,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         if (tenant == null) {
             throw new ArtException("该租户不存在，请检查！");
         }
-        tenant.setEnableFlag(!tenant.getEnableFlag()); // 切换启用状态
+        tenant.setEnableFlag(tenant.getEnableFlag() == 0 ? 1 : 0); // 切换启用状态
         return this.updateById(tenant);
     }
 }

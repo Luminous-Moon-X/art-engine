@@ -44,7 +44,7 @@ public class BaseEntity {
      * 删除标识
      */
     @Column("delete_flag")
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
     /**
      * 租户ID
      */

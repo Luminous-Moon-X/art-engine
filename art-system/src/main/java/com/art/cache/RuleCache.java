@@ -62,7 +62,7 @@ public class RuleCache extends ArtCache<String, List<RuleItemVO>> {
     @Override
     protected List<RuleItemVO> getCacheData() {
         return this.ruleMapper
-                .selectListByQueryAs(QueryWrapper.create().eq(Rule::getEnableFlag, true), RuleItemVO.class);
+                .selectListByQueryAs(QueryWrapper.create().eq(Rule::getEnableFlag, 1), RuleItemVO.class);
     }
 
     /**

@@ -35,5 +35,5 @@ public class Role extends BaseEntity {
      * 是否启用
      */
     @Column("enable_flag")
-    private Boolean enableFlag;
+    private Integer enableFlag;
 }
