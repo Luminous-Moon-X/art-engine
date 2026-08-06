@@ -25,3 +25,6 @@ hs_err_pid*
 .vscode/*
 */build/*
 build/*
+
+# AI init file
+CLAUDE.md
