@@ -104,7 +104,10 @@ public class AIChatServiceImpl implements AIChatService {
 
         // 客户端超时或断开连接时回收资源
         emitter.onTimeout(emitter::complete);
-        emitter.onError(throwable -> log.warn("SSE 连接异常: {}", throwable.toString()));
+        emitter.onError(throwable -> {
+            log.warn("SSE 连接异常: {}", throwable.toString());
+            emitter.complete();
+        });
         return emitter;
     }
 }
