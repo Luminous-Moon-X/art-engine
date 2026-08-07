@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/art-engine?currentSchema=public
-    username: root
-    password: root
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/art-engine?currentSchema=public
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
     hikari:
       # 连接最大生命周期
       max-lifetime: 1800000      # 30分钟
@@ -17,10 +17,10 @@ spring:
       keepalive-time: 30000
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST:localhost}
       port: 6379
-      password: root
-      database: 0
+      password: ${REDIS_PASSWORD:root}
+      database: ${REDIS_DATABASE:0}
       timeout: 10s
       lettuce:
         pool:
@@ -54,10 +54,10 @@ art:
       - /ai/chat
     secret-key: c7ee264fd80c4e169f473df493bf67fd
   ai-model:
-    model: deepseek-v4-flash
-    endpoint: https://opencode.ai/zen/go
-    request-path: /v1/chat/completions
-    api-key: 123456
+    model: ${AI_MODEL:deepseek-v4-flash}
+    endpoint: ${AI_ENDPOINT:https://opencode.ai/zen/go}
+    request-path: ${AI_REQUEST_PATH:/v1/chat/completions}
+    api-key: ${AI_API_KEY:123456}
     provider: openAI
     support-image: false
     only-base64-image: false
