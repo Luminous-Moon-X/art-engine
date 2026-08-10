@@ -44,16 +44,21 @@ public class AIChatServiceImpl implements AIChatService {
     private final RedisTemplate<String, Message> redisTemplate;
 
     /**
+     * 对话记忆key
+     */
+    private static final String AI_CHAT_MEMORY_KEY = "ai_chat_memory";
+
+    /**
      * 构造器
      *
      * @param artChatClient        AI模型对象
      * @param systemPromptProvider 系统提示词提供者
-     * @param redisTemplate        Redis客户端
+     * @param messageRedisTemplate Redis客户端
      */
-    public AIChatServiceImpl(ChatModel artChatClient, SystemPromptProvider systemPromptProvider, RedisTemplate<String, Message> redisTemplate) {
+    public AIChatServiceImpl(ChatModel artChatClient, SystemPromptProvider systemPromptProvider, RedisTemplate<String, Message> messageRedisTemplate) {
         this.artChatClient = artChatClient;
         this.systemPromptProvider = systemPromptProvider;
-        this.redisTemplate = redisTemplate;
+        this.redisTemplate = messageRedisTemplate;
     }
 
     /**
@@ -69,7 +74,7 @@ public class AIChatServiceImpl implements AIChatService {
         // 超时时间5分钟
         SseEmitter emitter = new SseEmitter(5 * 60 * 1000L);
         // 创建对话记忆
-        String conversationId = SecurityUtil.getUserId() + ":" + chatId;
+        String conversationId = AI_CHAT_MEMORY_KEY + ":" + SecurityUtil.getUserId() + ":" + chatId;
         RedisChatMemory memory = new RedisChatMemory(conversationId, redisTemplate);
         // 构建提示词：塞入系统提示词 + 用户输入
         MemoryPrompt prompt = new MemoryPrompt(memory);
@@ -93,6 +98,7 @@ public class AIChatServiceImpl implements AIChatService {
                     emitter.completeWithError(e);
                 }
             }
+
             // 流式结束
             @Override
             public void onStop(StreamContext context) {

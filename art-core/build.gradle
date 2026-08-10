@@ -13,6 +13,7 @@ dependencies {
     api "${lib.'sa-token-redis'}"
     api "${lib.'open-api'}"
     api "${lib.'redisson'}"
+    api "${lib.'agents-flex'}"
 
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework.boot:spring-boot-starter-web'

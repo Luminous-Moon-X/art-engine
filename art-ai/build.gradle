@@ -1,5 +1,4 @@
 dependencies {
-    api "${lib.'agents-flex'}"
     implementation project(':art-core')
     // 显式指定 okio 3.x 版本，解决 okhttp 5.x (Spring Boot BOM 升级) 与 okio 2.x 的兼容问题
     implementation 'com.squareup.okio:okio:3.16.4'
