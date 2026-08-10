@@ -1,11 +1,15 @@
 package com.art.controller;
 
+import com.art.DocumentUtil;
 import com.art.domain.vo.UserChatVO;
 import com.art.service.AIChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
 
 /**
  * AI 对话控制器
@@ -34,4 +38,15 @@ public class AIChatController {
     public SseEmitter chat(@RequestBody UserChatVO userChatVO) {
         return this.aiChatService.chat(userChatVO);
     }
+
+    /**
+     * 上传解析文档
+     *
+     * @param file 文档
+     */
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String upload(@RequestPart("file") MultipartFile file) throws IOException {
+        return DocumentUtil.extract(file);
+    }
+
 }

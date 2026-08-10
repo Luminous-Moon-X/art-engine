@@ -14,6 +14,7 @@ dependencies {
     api "${lib.'open-api'}"
     api "${lib.'redisson'}"
     api "${lib.'agents-flex'}"
+    api "${lib.'agents-flex-doc-extractor'}"
 
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework.boot:spring-boot-starter-web'

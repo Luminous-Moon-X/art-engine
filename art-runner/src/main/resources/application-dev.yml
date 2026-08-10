@@ -52,6 +52,7 @@ art:
       - /api-docs/**
       - /swagger-ui/**
       - /ai/chat
+      - /ai/upload
     secret-key: c7ee264fd80c4e169f473df493bf67fd
   ai-model:
     model: ${AI_MODEL:deepseek-v4-flash}
