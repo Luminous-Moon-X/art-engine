@@ -101,7 +101,7 @@ public class AIChatServiceImpl implements AIChatService {
 
             // 流式结束
             @Override
-            public void onStop(StreamContext context) {
+            public void onClose(StreamContext context) {
                 prompt.addMessage(context.getFullMessage());
                 // 将AI回答添加到对话记忆
                 emitter.complete();
