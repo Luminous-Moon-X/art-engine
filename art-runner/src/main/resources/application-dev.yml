@@ -54,6 +54,7 @@ art:
       - /ai/chat
       - /ai/upload
     secret-key: c7ee264fd80c4e169f473df493bf67fd
+  # AI大模型配置
   ai-model:
     model: ${AI_MODEL:deepseek-v4-flash}
     endpoint: ${AI_ENDPOINT:https://opencode.ai/zen/go}
@@ -66,3 +67,21 @@ art:
     support-video: false
     support-thinking: true
     thinking-enabled: true
+  # 嵌入模型配置
+  embedding-model:
+    provider: ${EMBEDDING_MODEL_TYPE:ollama}
+    endpoint: ${EMBEDDING_MODEL_ENDPOINT:http://localhost:11434}
+    request-path: ${EMBEDDING_MODEL_REQUEST_PATH:/api/embed}
+    model: ${EMBEDDING_MODEL_NAME:qwen3-embedding:0.6b}
+    api-key: ${EMBEDDING_MODEL_API_KEY:123456}
+  # 向量数据库配置
+  vector-db:
+    host: ${VECTOR_DB_HOST:localhost}
+    port: ${VECTOR_DB_PORT:5432}
+    username: ${VECTOR_DB_USERNAME:root}
+    password: ${VECTOR_DB_PASSWORD:root}
+    database: knowledge-db
+    collection-name: document_knowledge
+    dimension: 1024
+    auto-create-collection: true
+    use-hnsw-index: true

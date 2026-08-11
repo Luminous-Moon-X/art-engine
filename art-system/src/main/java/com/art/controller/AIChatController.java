@@ -1,5 +1,8 @@
 package com.art.controller;
 
+import com.agentsflex.core.document.Document;
+import com.agentsflex.core.store.StoreResult;
+import com.agentsflex.store.pgvector.PgvectorVectorStore;
 import com.art.DocumentUtil;
 import com.art.domain.vo.UserChatVO;
 import com.art.service.AIChatService;
@@ -10,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * AI 对话控制器
@@ -24,8 +28,12 @@ public class AIChatController {
 
     private final AIChatService aiChatService;
 
-    public AIChatController(AIChatService aiChatService) {
+    private final PgvectorVectorStore vectorStore;
+
+
+    public AIChatController(AIChatService aiChatService, PgvectorVectorStore vectorStore) {
         this.aiChatService = aiChatService;
+        this.vectorStore = vectorStore;
     }
 
     /**
@@ -45,8 +53,13 @@ public class AIChatController {
      * @param file 文档
      */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String upload(@RequestPart("file") MultipartFile file) throws IOException {
-        return DocumentUtil.extract(file);
+    public void upload(@RequestPart("file") MultipartFile file) throws IOException {
+        String documentText = DocumentUtil.extract(file);
+        Document document = Document.of(documentText);
+        List<Document> documents = DocumentUtil.splitParagraph(document);
+        StoreResult store = vectorStore.store(documents);
+        System.out.println("exception:" + store.getException());
+        System.out.println("message:" + store.getMessage());
     }
 
 }
