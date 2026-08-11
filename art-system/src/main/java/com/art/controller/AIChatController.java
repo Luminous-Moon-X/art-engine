@@ -55,7 +55,9 @@ public class AIChatController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void upload(@RequestPart("file") MultipartFile file) throws IOException {
         String documentText = DocumentUtil.extract(file);
+        String title = file.getOriginalFilename();
         Document document = Document.of(documentText);
+        document.setTitle(title);
         List<Document> documents = DocumentUtil.splitParagraph(document);
         StoreResult store = vectorStore.store(documents);
         System.out.println("exception:" + store.getException());

@@ -25,7 +25,7 @@ public class VectorStoreProperties {
     /**
      * 端口
      */
-    private Integer port = 5432;
+    private Integer port;
     /**
      * 用户名
      */
@@ -45,13 +45,13 @@ public class VectorStoreProperties {
     /**
      * 向量维度
      */
-    private Integer dimension = 1024;
+    private Integer dimension;
     /**
      * 自动创建表
      */
-    private Boolean autoCreateCollection = true;
+    private Boolean autoCreateCollection;
     /**
      * 创建HNSW索引
      */
-    private Boolean useHnswIndex = false;
+    private Boolean useHnswIndex;
 }
