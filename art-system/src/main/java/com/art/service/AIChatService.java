@@ -1,6 +1,7 @@
 package com.art.service;
 
 import com.art.domain.vo.UserChatVO;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
@@ -17,4 +18,11 @@ public interface AIChatService {
      * @return SseEmitter 流式响应
      */
     SseEmitter chat(UserChatVO userChatVO);
+
+    /**
+     * 向量化处理文档
+     *
+     * @param file 文档
+     */
+    void vectorDoc(MultipartFile file);
 }

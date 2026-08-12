@@ -1,9 +1,5 @@
 package com.art.controller;
 
-import com.agentsflex.core.document.Document;
-import com.agentsflex.core.store.StoreResult;
-import com.agentsflex.store.pgvector.PgvectorVectorStore;
-import com.art.DocumentUtil;
 import com.art.domain.vo.UserChatVO;
 import com.art.service.AIChatService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +7,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * AI 对话控制器
@@ -28,12 +21,9 @@ public class AIChatController {
 
     private final AIChatService aiChatService;
 
-    private final PgvectorVectorStore vectorStore;
 
-
-    public AIChatController(AIChatService aiChatService, PgvectorVectorStore vectorStore) {
+    public AIChatController(AIChatService aiChatService) {
         this.aiChatService = aiChatService;
-        this.vectorStore = vectorStore;
     }
 
     /**
@@ -53,15 +43,8 @@ public class AIChatController {
      * @param file 文档
      */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void upload(@RequestPart("file") MultipartFile file) throws IOException {
-        String documentText = DocumentUtil.extract(file);
-        String title = file.getOriginalFilename();
-        Document document = Document.of(documentText);
-        document.setTitle(title);
-        List<Document> documents = DocumentUtil.splitParagraph(document);
-        StoreResult store = vectorStore.store(documents);
-        System.out.println("exception:" + store.getException());
-        System.out.println("message:" + store.getMessage());
+    public void upload(@RequestPart("file") MultipartFile file) {
+        this.aiChatService.vectorDoc(file);
     }
 
 }

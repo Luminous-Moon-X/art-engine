@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Configuration
 @DependsOn("artModelProperties")
-public class AIChatAutoClientAutoConfig {
+public class AIChatClientAutoConfig {
 
     /**
      * 自定义模型配置
@@ -32,7 +32,7 @@ public class AIChatAutoClientAutoConfig {
      *
      * @param artModelProperties 自定义模型配置
      */
-    public AIChatAutoClientAutoConfig(BigModelProperties artModelProperties) {
+    public AIChatClientAutoConfig(BigModelProperties artModelProperties) {
         this.artModelProperties = artModelProperties;
     }
 

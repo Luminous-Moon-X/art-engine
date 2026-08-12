@@ -74,6 +74,13 @@ art:
     request-path: ${EMBEDDING_MODEL_REQUEST_PATH:/api/embed}
     model: ${EMBEDDING_MODEL_NAME:qwen3-embedding:0.6b}
     api-key: ${EMBEDDING_MODEL_API_KEY:123456}
+  # 重排模型配置
+  rerank-model:
+    enabled: false
+    endpoint: ${RERANK_MODEL_ENDPOINT:http://localhost:11434}
+    request-path: ${RERANK_MODEL_REQUEST_PATH:/api/chat}
+    model: ${RERANK_MODEL_NAME:dengcao/Qwen3-Reranker-0.6B:Q8_0}
+    api-key: ${RERANK_MODEL_API_KEY:123456}
   # 向量数据库配置
   vector-db:
     host: ${VECTOR_DB_HOST:localhost}

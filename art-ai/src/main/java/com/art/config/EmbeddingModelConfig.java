@@ -5,6 +5,8 @@ import com.agentsflex.embedding.ollama.OllamaEmbeddingConfig;
 import com.agentsflex.embedding.ollama.OllamaEmbeddingModel;
 import com.agentsflex.embedding.openai.OpenAIEmbeddingConfig;
 import com.agentsflex.embedding.openai.OpenAIEmbeddingModel;
+import com.agentsflex.embedding.qwen.QwenEmbeddingConfig;
+import com.agentsflex.embedding.qwen.QwenEmbeddingModel;
 import com.art.properties.EmbeddingModelProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -61,6 +63,14 @@ public class EmbeddingModelConfig {
                 OpenAiConfig.setRequestPath(embeddingModelProperties.getRequestPath());
                 OpenAiConfig.setApiKey(embeddingModelProperties.getApiKey());
                 model = new OpenAIEmbeddingModel(OpenAiConfig);
+                break;
+            case "qwen":
+                QwenEmbeddingConfig qwenConfig = new QwenEmbeddingConfig();
+                qwenConfig.setModel(embeddingModelProperties.getModel());
+                qwenConfig.setEndpoint(embeddingModelProperties.getEndpoint());
+                qwenConfig.setRequestPath(embeddingModelProperties.getRequestPath());
+                qwenConfig.setApiKey(embeddingModelProperties.getApiKey());
+                model = new QwenEmbeddingModel(qwenConfig);
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported embedding model provider: " + provider + ",it should be openAi | ollama.");
