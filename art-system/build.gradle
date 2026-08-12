@@ -5,4 +5,6 @@ dependencies {
     implementation project(":art-ai")
 
     implementation 'org.springframework.security:spring-security-crypto'
+    implementation 'software.amazon.awssdk:s3:2.48.4'
+    implementation 'software.amazon.awssdk:apache5-client:2.48.4'
 }
