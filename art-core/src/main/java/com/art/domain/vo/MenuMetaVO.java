@@ -24,23 +24,23 @@ public class MenuMetaVO {
     /**
      * 是否缓存
      */
-    private Boolean keepAlive;
+    private Integer keepAlive;
     /**
      * 是否固定
      */
-    private Boolean fixedTab;
+    private Integer fixedTab;
     /**
      * 是否显示徽标
      */
-    private Boolean showBadge;
+    private Integer showBadge;
     /**
      * 是否隐藏
      */
-    private Boolean isHide;
+    private Integer isHide;
     /**
      * 是否隐藏tab
      */
-    private Boolean isHideTab;
+    private Integer isHideTab;
     /**
      * 链接
      */
@@ -48,7 +48,7 @@ public class MenuMetaVO {
     /**
      * 是否内嵌
      */
-    private Boolean isIframe;
+    private Integer isIframe;
     /**
      * 操作权限
      */
@@ -56,7 +56,7 @@ public class MenuMetaVO {
     /**
      * 是否全屏
      */
-    private Boolean isFullScreen;
+    private Integer isFullScreen;
     /**
      * 激活路径
      */

@@ -70,37 +70,37 @@ public class Menu extends BaseEntity {
      * 是否缓存
      */
     @Column("keep_alive")
-    private Boolean keepAlive;
+    private Integer keepAlive;
     /**
      * 是否隐藏
      */
     @Column("hide_flag")
-    private Boolean hideFlag;
+    private Integer hideFlag;
     /**
      * 是否内嵌
      */
     @Column("iframe_flag")
-    private Boolean iframeFlag;
+    private Integer iframeFlag;
     /**
      * 是否显示徽标
      */
     @Column("show_badge")
-    private Boolean showBadge;
+    private Integer showBadge;
     /**
      * 是否固定
      */
     @Column("fixed_tab")
-    private Boolean fixedTab;
+    private Integer fixedTab;
     /**
      * 是否隐藏标签
      */
     @Column("hide_tab")
-    private Boolean hideTab;
+    private Integer hideTab;
     /**
      * 是否全屏
      */
     @Column("full_screen")
-    private Boolean fullScreen;
+    private Integer fullScreen;
     /**
      * 父级ID
      */

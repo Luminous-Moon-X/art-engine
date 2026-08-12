@@ -62,31 +62,31 @@ public class MenuVO {
     /**
      * 是否缓存
      */
-    private Boolean keepAlive;
+    private Integer keepAlive;
     /**
      * 是否隐藏
      */
-    private Boolean hideFlag;
+    private Integer hideFlag;
     /**
      * 是否内嵌
      */
-    private Boolean iframeFlag;
+    private Integer iframeFlag;
     /**
      * 是否显示徽标
      */
-    private Boolean showBadge;
+    private Integer showBadge;
     /**
      * 是否固定
      */
-    private Boolean fixedTab;
+    private Integer fixedTab;
     /**
      * 是否隐藏标签
      */
-    private Boolean hideTab;
+    private Integer hideTab;
     /**
      * 是否全屏
      */
-    private Boolean fullScreen;
+    private Integer fullScreen;
     /**
      * 父级ID
      */
