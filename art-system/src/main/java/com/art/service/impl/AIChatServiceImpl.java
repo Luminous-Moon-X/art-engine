@@ -200,7 +200,7 @@ public class AIChatServiceImpl implements AIChatService {
         if (documentText.length() > 10000) {
             List<String> docSplit = splitFixedLength(documentText, 10000);
             docSplit.forEach(doc -> {
-                Document document = Document.of(documentText);
+                Document document = Document.of(doc);
                 document.setTitle(fileName);
                 documents.addAll(DocumentUtil.splitAi(document, artChatClient));
             });
