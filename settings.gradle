@@ -12,7 +12,6 @@ rootProject.name = 'art-engine'
 // 子项目名称
 include 'art-ai'
 include 'art-core'
-include 'art-business'
 include 'art-system'
 include 'art-runner'
 include 'art-websocket'

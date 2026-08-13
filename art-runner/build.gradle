@@ -5,7 +5,6 @@ plugins {
 dependencies {
     implementation project(":art-ai")
     implementation project(":art-core")
-    implementation project(":art-business")
     implementation project(":art-system")
     implementation project(":art-log")
     implementation project(":art-websocket")
