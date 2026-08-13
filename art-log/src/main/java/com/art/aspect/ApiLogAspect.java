@@ -72,7 +72,7 @@ public class ApiLogAspect {
         apiLogEntity.setRequestTime(LocalDateTime.now());
         apiLogEntity.setDescription(apiLog.description());
         apiLogEntity.setModule(apiLog.module());
-        apiLogEntity.setOperationType(apiLog.operationType().getDescription());
+        apiLogEntity.setOperationType(apiLog.operationType().getCode());
 
         // 记录请求参数
         try {
