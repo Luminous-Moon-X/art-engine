@@ -40,9 +40,16 @@ public class FlexAutoFillConfiguration {
         @Override
         public void onInsert(Object entity) {
             if (entity instanceof BaseEntity baseEntity) {
-                baseEntity.setCreateId(SecurityUtil.getUserId());
-                baseEntity.setCreateTime(LocalDateTime.now());
-                baseEntity.setDeleteFlag(0);
+                // 仅在未显式赋值时自动填充，避免覆盖异步线程中已手动赋值的审计字段
+                if (baseEntity.getCreateId() == null) {
+                    baseEntity.setCreateId(SecurityUtil.getUserId());
+                }
+                if (baseEntity.getCreateTime() == null) {
+                    baseEntity.setCreateTime(LocalDateTime.now());
+                }
+                if (baseEntity.getDeleteFlag() == null) {
+                    baseEntity.setDeleteFlag(0);
+                }
             }
         }
     }
@@ -55,7 +62,10 @@ public class FlexAutoFillConfiguration {
         @Override
         public void onUpdate(Object entity) {
             if (entity instanceof BaseEntity baseEntity) {
-                baseEntity.setUpdateId(SecurityUtil.getUserId());
+                // 仅在未显式赋值时自动填充，避免覆盖异步线程中已手动赋值的审计字段
+                if (baseEntity.getUpdateId() == null) {
+                    baseEntity.setUpdateId(SecurityUtil.getUserId());
+                }
                 baseEntity.setUpdateTime(LocalDateTime.now());
             }
         }

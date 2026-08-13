@@ -51,8 +51,6 @@ art:
       - /swagger-ui.html
       - /api-docs/**
       - /swagger-ui/**
-      - /ai/chat
-      - /ai/upload
     secret-key: c7ee264fd80c4e169f473df493bf67fd
   # AI大模型配置
   ai-model:
