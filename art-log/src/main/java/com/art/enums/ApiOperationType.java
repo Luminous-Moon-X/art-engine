@@ -17,7 +17,7 @@ public enum ApiOperationType {
     /**
      * 描述
      */
-    private String description;
+    private final String description;
     /**
      * 枚举构造函数
      * @param description 描述
