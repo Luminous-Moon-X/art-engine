@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -205,15 +204,17 @@ public class OssFileServiceImpl extends ServiceImpl<OssFileMapper, OssFile> impl
      */
     private String generateObjectKey(String fileName, String directory) {
         String dir = StrUtil.isBlank(directory)
-                ? "upload"
-                : directory.trim().replaceAll("^[/\\\\]+|[/\\\\]+$", "");
+                ? ""
+                : directory.trim().replaceAll("^[/\\\\]+|[/\\\\]+$", "") + "/";
         String ext = "";
         int index = fileName == null ? -1 : fileName.lastIndexOf('.');
         if (index >= 0) {
             ext = fileName.substring(index).toLowerCase(Locale.ROOT);
         }
-        String date = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
-        return dir + "/" + date + "/" + UUID.randomUUID().toString().replace("-", "") + ext;
+        int year = LocalDate.now().getYear();
+        int month = LocalDate.now().getMonthValue();
+        int day = LocalDate.now().getDayOfMonth();
+        return dir + year + "/" + month + "/" + day + "/" + UUID.randomUUID().toString().replace("-", "") + ext;
     }
 
     /**
