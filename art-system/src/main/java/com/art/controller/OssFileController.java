@@ -95,9 +95,9 @@ public class OssFileController {
         OssFile file = this.ossFileService.getFileById(id);
         ObjectStorageObject object = this.ossFileService.downloadObject(id);
         MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
-        if (object.getContentType() != null) {
+        if (object.contentType() != null) {
             try {
-                mediaType = MediaType.parseMediaType(object.getContentType());
+                mediaType = MediaType.parseMediaType(object.contentType());
             } catch (Exception ignored) {
             }
         }
@@ -105,10 +105,10 @@ public class OssFileController {
         ResponseEntity.BodyBuilder builder = ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedName)
                 .contentType(mediaType);
-        if (object.getContentLength() >= 0) {
-            builder.contentLength(object.getContentLength());
+        if (object.contentLength() >= 0) {
+            builder.contentLength(object.contentLength());
         }
-        return builder.body(new InputStreamResource(object.getInputStream()));
+        return builder.body(new InputStreamResource(object.inputStream()));
     }
 
     /**
