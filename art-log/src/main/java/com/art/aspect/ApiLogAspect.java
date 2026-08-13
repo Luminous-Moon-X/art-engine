@@ -12,10 +12,14 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 
 /**
@@ -89,10 +93,21 @@ public class ApiLogAspect {
             // 记录成功响应
             apiLogEntity.setResponseCode(200);
             // 记录返回值
+            String resultStr;
             try {
-                String resultStr = JSON.toJSONString(result);
-                if (resultStr.length() > 5000) {
-                    resultStr = resultStr.substring(0, 5000) + "...(截断)";
+                Object body = result;
+                if (result instanceof ResponseEntity<?> response) {
+                    body = response.getBody();
+                }
+                if (body instanceof InputStream
+                        || body instanceof Resource
+                        || body instanceof StreamingResponseBody) {
+                    resultStr = "[二进制流]";
+                } else {
+                    resultStr = JSON.toJSONString(result);
+                    if (resultStr.length() > 5000) {
+                        resultStr = resultStr.substring(0, 5000) + "...(截断)";
+                    }
                 }
                 apiLogEntity.setResponseResult(resultStr);
             } catch (Exception e) {
