@@ -1,5 +1,6 @@
 package com.art.service.impl;
 
+import com.art.context.IgnoreSqlLogContextHolder;
 import com.art.domain.MenuLog;
 import com.art.domain.vo.MenuLogVO;
 import com.art.mapper.MenuLogMapper;
@@ -50,13 +51,19 @@ public class MenuLogServiceImpl extends ServiceImpl<MenuLogMapper, MenuLog> impl
      */
     @Override
     public void recordMenuLog(String menuName, String menuPath) {
-        MenuLog menuLog = new MenuLog();
-        menuLog.setUserId(SecurityUtil.getUserId());
-        menuLog.setUserName(SecurityUtil.getUserName());
-        menuLog.setNickName(SecurityUtil.getUserAllName());
-        menuLog.setMenuName(menuName);
-        menuLog.setMenuPath(menuPath);
-        menuLog.setClickTime(LocalDateTime.now());
-        this.save(menuLog);
+        try {
+            IgnoreSqlLogContextHolder.enable();
+            MenuLog menuLog = new MenuLog();
+            menuLog.setUserId(SecurityUtil.getUserId());
+            menuLog.setUserName(SecurityUtil.getUserName());
+            menuLog.setNickName(SecurityUtil.getUserAllName());
+            menuLog.setMenuName(menuName);
+            menuLog.setMenuPath(menuPath);
+            menuLog.setClickTime(LocalDateTime.now());
+            this.save(menuLog);
+        } finally {
+            IgnoreSqlLogContextHolder.disable();
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 package com.art.service.impl;
 
+import com.art.context.IgnoreSqlLogContextHolder;
 import com.art.domain.ApiLog;
 import com.art.domain.vo.ApiLogVO;
 import com.art.mapper.ApiLogMapper;
@@ -48,6 +49,12 @@ public class ApiLogServiceImpl extends ServiceImpl<ApiLogMapper, ApiLog> impleme
     @Override
     @Async
     public void saveAsync(ApiLog apiLog) {
-        this.save(apiLog);
+        try {
+            IgnoreSqlLogContextHolder.enable();
+            this.save(apiLog);
+        } finally {
+            IgnoreSqlLogContextHolder.disable();
+        }
+
     }
 }
