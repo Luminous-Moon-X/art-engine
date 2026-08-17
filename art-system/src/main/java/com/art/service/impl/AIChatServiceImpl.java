@@ -448,7 +448,8 @@ public class AIChatServiceImpl implements AIChatService {
             if (StrUtil.isBlank(title)) {
                 return fallback;
             }
-            return title.length() > MAX_TITLE_LENGTH ? title.substring(0, MAX_TITLE_LENGTH) : title;
+            // AI回复可能存在误差，这里多考虑5个字
+            return title.length() > MAX_TITLE_LENGTH + 5 ? title.substring(0, MAX_TITLE_LENGTH + 5) : title;
         } catch (Exception e) {
             log.error("调用AI总结对话主题失败", e);
             return fallback;

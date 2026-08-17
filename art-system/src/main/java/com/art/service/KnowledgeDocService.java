@@ -1,6 +1,7 @@
 package com.art.service;
 
 import com.art.domain.KnowledgeDoc;
+import com.art.domain.vo.KnowledgeDocContentVO;
 import com.art.domain.vo.KnowledgeDocVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
@@ -56,6 +57,29 @@ public interface KnowledgeDocService extends IService<KnowledgeDoc> {
      * @param id 文档ID
      */
     void vectorize(Long id);
+
+    /**
+     * 查询文档内容。
+     *
+     * <p>根据知识库文档ID查询文档内容表中的对应内容记录，
+     * 若尚未解析则返回null。</p>
+     *
+     * @param docId 文档ID
+     * @return 文档内容
+     */
+    KnowledgeDocContentVO getContent(Long docId);
+
+    /**
+     * 更新文档内容。
+     *
+     * <p>仅允许对已解析完成（parseStatus为complete）的文档编辑内容，
+     * 更新文档内容表中对应记录的content字段。</p>
+     *
+     * @param docId   文档ID
+     * @param content 新的文档内容
+     * @return 更新结果
+     */
+    Boolean updateContent(Long docId, String content);
 
     /**
      * 删除文档，同时删除文档内容记录与对象存储中的文件。

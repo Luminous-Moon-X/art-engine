@@ -3,6 +3,7 @@ package com.art.controller;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
+import com.art.domain.vo.KnowledgeDocContentVO;
 import com.art.domain.vo.KnowledgeDocVO;
 import com.art.enums.ApiOperationType;
 import com.art.service.KnowledgeDocService;
@@ -11,8 +12,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -97,6 +100,32 @@ public class KnowledgeDocController {
     public HttpResult<Boolean> vector(@PathVariable("id") Long id) {
         this.knowledgeDocService.vectorize(id);
         return HttpResult.success(true);
+    }
+
+    /**
+     * 查询文档内容。
+     *
+     * @param docId 文档ID
+     * @return 文档内容
+     */
+    @GetMapping("/content/{docId}")
+    @Operation(summary = "查询文档内容", description = "根据文档ID查询文档内容表中的内容")
+    @ApiLog(module = "知识库文档", operationType = ApiOperationType.QUERY, description = "查询文档内容")
+    public HttpResult<KnowledgeDocContentVO> content(@PathVariable("docId") Long docId) {
+        return HttpResult.success(this.knowledgeDocService.getContent(docId));
+    }
+
+    /**
+     * 更新文档内容。
+     *
+     * @param vo 文档内容VO（docId与content）
+     * @return 更新结果
+     */
+    @PutMapping("/content")
+    @Operation(summary = "更新文档内容", description = "编辑保存已解析文档的内容")
+    @ApiLog(module = "知识库文档", operationType = ApiOperationType.UPDATE, description = "更新文档内容")
+    public HttpResult<Boolean> updateContent(@RequestBody KnowledgeDocContentVO vo) {
+        return HttpResult.success(this.knowledgeDocService.updateContent(vo.getDocId(), vo.getContent()));
     }
 
     /**

@@ -1,8 +1,10 @@
 package com.art.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.agentsflex.core.document.Document;
 import com.agentsflex.core.model.chat.ChatModel;
+import com.agentsflex.core.store.SearchWrapper;
 import com.agentsflex.core.store.StoreResult;
 import com.agentsflex.store.pgvector.PgvectorVectorStore;
 import com.art.DocumentUtil;
@@ -10,6 +12,7 @@ import com.art.domain.KnowledgeDoc;
 import com.art.domain.KnowledgeDocContent;
 import com.art.domain.OssFile;
 import com.art.domain.User;
+import com.art.domain.vo.KnowledgeDocContentVO;
 import com.art.domain.vo.KnowledgeDocVO;
 import com.art.domain.vo.OssFileVO;
 import com.art.exception.ArtException;
@@ -36,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -184,7 +188,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
             throw new ArtException("请先完成文档解析后再进行向量处理");
         }
         if (KnowledgeDoc.STATUS_PROCESSING.equals(doc.getVectorStatus())) {
-            throw new ArtException("文档正在向量处理中，请稍后重试");
+            throw new ArtException("文档正在进行向量处理，请耐心等待");
         }
         // 先将向量状态字段改为processing
         KnowledgeDoc update = new KnowledgeDoc();
@@ -220,12 +224,80 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
             if (!removed) {
                 throw new ArtException("知识库文档删除失败");
             }
+            // 删除向量
+            int dimension = vectorStore.getEmbeddingModel().dimensions();
+            if (dimension > 0) {
+                float[] placeholderVector = new float[dimension];
+                Arrays.fill(placeholderVector, 1.0f);
+                SearchWrapper wrapper = new SearchWrapper();
+                wrapper.setVector(placeholderVector);
+                wrapper.eq("metadata.doc_id", id);
+                wrapper.maxResults(Integer.MAX_VALUE);
+                List<Document> vectorDocs = vectorStore.search(wrapper);
+                if (CollectionUtil.isNotEmpty(vectorDocs)) {
+                    vectorStore.delete(vectorDocs.stream().map(Document::getId).collect(Collectors.toList()));
+                }
+            }
             // 删除对象存储中的文件与OSS文件记录
             if (doc.getOssFileId() != null) {
                 ossFileService.delete(List.of(doc.getOssFileId()));
             }
         }
         return true;
+    }
+
+    /**
+     * 查询文档内容。
+     *
+     * @param docId 文档ID
+     * @return 文档内容
+     */
+    @Override
+    public KnowledgeDocContentVO getContent(Long docId) {
+        // 校验文档存在
+        getDocById(docId);
+        KnowledgeDocContent contentEntity = getContentEntity(docId);
+        if (contentEntity == null) {
+            return null;
+        }
+        return ConvertUtil.convert(contentEntity, KnowledgeDocContentVO.class);
+    }
+
+    /**
+     * 更新文档内容。
+     *
+     * @param docId   文档ID
+     * @param content 新的文档内容
+     * @return 更新结果
+     */
+    @Override
+    public Boolean updateContent(Long docId, String content) {
+        KnowledgeDoc doc = getDocById(docId);
+        // 仅允许对已完成解析的文档编辑内容，避免被后续解析覆盖
+        if (!KnowledgeDoc.STATUS_COMPLETE.equals(doc.getParseStatus())) {
+            throw new ArtException("请先完成文档解析后再编辑内容");
+        }
+        KnowledgeDocContent contentEntity = getContentEntity(docId);
+        if (contentEntity == null) {
+            throw new ArtException("文档内容不存在，请先解析文档");
+        }
+        KnowledgeDocContent update = new KnowledgeDocContent();
+        update.setId(contentEntity.getId());
+        update.setContent(content);
+        return knowledgeDocContentMapper.update(update) > 0;
+    }
+
+    /**
+     * 根据文档ID查询最新的文档内容记录。
+     *
+     * @param docId 文档ID
+     * @return 文档内容记录
+     */
+    private KnowledgeDocContent getContentEntity(Long docId) {
+        return knowledgeDocContentMapper.selectOneByQuery(
+                QueryWrapper.create()
+                        .eq(KnowledgeDocContent::getDocId, docId)
+                        .orderBy(KnowledgeDocContent::getId, false));
     }
 
     /**
@@ -300,10 +372,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
         try {
             KnowledgeDoc doc = getDocById(id);
             // 1. 根据知识库文档表ID获取文档内容表中的文档内容
-            KnowledgeDocContent contentEntity = knowledgeDocContentMapper.selectOneByQuery(
-                    QueryWrapper.create()
-                            .eq(KnowledgeDocContent::getDocId, id)
-                            .orderBy(KnowledgeDocContent::getId, false));
+            KnowledgeDocContent contentEntity = getContentEntity(id);
             if (contentEntity == null || StrUtil.isBlank(contentEntity.getContent())) {
                 throw new ArtException("文档内容不存在，请先解析文档");
             }
@@ -330,6 +399,24 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
             }
             // 3. 调用向量库工具处理向量
             log.info("开始向量化文档，文档ID：{}", id);
+            // 查询该文档是否已经存在向量，如果存在，先删除旧的
+            int dimension = vectorStore.getEmbeddingModel().dimensions();
+            if (dimension > 0) {
+                float[] placeholderVector = new float[dimension];
+                Arrays.fill(placeholderVector, 1.0f);
+                SearchWrapper wrapper = new SearchWrapper();
+                wrapper.setVector(placeholderVector);
+                wrapper.eq("metadata.doc_id", id);
+                wrapper.maxResults(Integer.MAX_VALUE);
+                List<Document> vectorDocs = vectorStore.search(wrapper);
+                if (CollectionUtil.isNotEmpty(vectorDocs)) {
+                    vectorStore.delete(vectorDocs.stream().map(Document::getId).collect(Collectors.toList()));
+                }
+            }
+            // 添加元数据信息
+            for (Document document : documents) {
+                document.putMetadata("doc_id", id);
+            }
             StoreResult store = vectorStore.store(documents);
             if (store.getException() != null) {
                 throw new ArtException("文档向量化失败：", store.getException());
