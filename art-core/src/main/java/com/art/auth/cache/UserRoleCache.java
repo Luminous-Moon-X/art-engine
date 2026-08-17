@@ -1,6 +1,7 @@
-package com.art.cache;
+package com.art.auth.cache;
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.common.UserRole;
 import com.art.mapper.UserRoleMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -10,24 +11,28 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 用户角色缓存
+ * 用户角色关系二级缓存实现（认证授权基础设施缓存，归属 art-core）
  *
  * @author Luminous.X
  * @since 1.1.0
  */
 @Component
-public class UserRoleCache extends ArtCache<String, List<UserRole>> {
+public class UserRoleCache extends ArtCache<List<UserRole>> {
 
+    /**
+     * 用户角色Mapper
+     */
     private final UserRoleMapper userRoleMapper;
 
     /**
      * 构造函数
      *
      * @param redisTemplate  Redis客户端
+     * @param properties     缓存配置
      * @param userRoleMapper 用户角色Mapper
      */
-    public UserRoleCache(RedisTemplate<String, Object> redisTemplate, UserRoleMapper userRoleMapper) {
-        super(redisTemplate);
+    public UserRoleCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, UserRoleMapper userRoleMapper) {
+        super(redisTemplate, properties);
         this.userRoleMapper = userRoleMapper;
     }
 
@@ -37,7 +42,7 @@ public class UserRoleCache extends ArtCache<String, List<UserRole>> {
      * @return 缓存名称
      */
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "用户角色关系";
     }
 
@@ -47,7 +52,7 @@ public class UserRoleCache extends ArtCache<String, List<UserRole>> {
      * @return Redis Key
      */
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "userRole";
     }
 
@@ -57,7 +62,7 @@ public class UserRoleCache extends ArtCache<String, List<UserRole>> {
      * @return 缓存数据
      */
     @Override
-    protected List<UserRole> getCacheData() {
+    protected List<UserRole> loadFromDb() {
         return this.userRoleMapper.selectListByQuery(QueryWrapper.create());
     }
 

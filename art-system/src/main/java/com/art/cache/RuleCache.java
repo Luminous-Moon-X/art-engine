@@ -1,6 +1,7 @@
 package com.art.cache;
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.Rule;
 import com.art.domain.vo.RuleItemVO;
 import com.art.mapper.RuleMapper;
@@ -11,15 +12,15 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 规则数据二级缓存实现
+ * 规则数据二级缓存实现（业务缓存，归属 art-system）
  *
  * @author Luminous.X
  * @since 1.0.0
  */
 @Component
-public class RuleCache extends ArtCache<String, List<RuleItemVO>> {
+public class RuleCache extends ArtCache<List<RuleItemVO>> {
     /**
-     * 规则服务
+     * 规则Mapper
      */
     private final RuleMapper ruleMapper;
 
@@ -27,10 +28,11 @@ public class RuleCache extends ArtCache<String, List<RuleItemVO>> {
      * 构造函数
      *
      * @param redisTemplate Redis客户端
-     * @param ruleMapper    规则服务
+     * @param properties    缓存配置
+     * @param ruleMapper    规则Mapper
      */
-    public RuleCache(RedisTemplate<String, Object> redisTemplate, RuleMapper ruleMapper) {
-        super(redisTemplate);
+    public RuleCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, RuleMapper ruleMapper) {
+        super(redisTemplate, properties);
         this.ruleMapper = ruleMapper;
     }
 
@@ -40,7 +42,7 @@ public class RuleCache extends ArtCache<String, List<RuleItemVO>> {
      * @return 缓存名称
      */
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "规则数据";
     }
 
@@ -50,7 +52,7 @@ public class RuleCache extends ArtCache<String, List<RuleItemVO>> {
      * @return 缓存Key
      */
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "rule";
     }
 
@@ -60,7 +62,7 @@ public class RuleCache extends ArtCache<String, List<RuleItemVO>> {
      * @return 缓存数据
      */
     @Override
-    protected List<RuleItemVO> getCacheData() {
+    protected List<RuleItemVO> loadFromDb() {
         return this.ruleMapper
                 .selectListByQueryAs(QueryWrapper.create().eq(Rule::getEnableFlag, 1), RuleItemVO.class);
     }

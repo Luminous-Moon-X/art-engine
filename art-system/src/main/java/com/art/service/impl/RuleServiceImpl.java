@@ -1,6 +1,7 @@
 package com.art.service.impl;
 
 import com.art.cache.RuleCache;
+import com.art.cache.support.CacheRefreshService;
 import com.art.domain.Rule;
 import com.art.domain.vo.RuleItemVO;
 import com.art.domain.vo.RuleVO;
@@ -30,14 +31,20 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
      * 规则缓存
      */
     private final RuleCache ruleCache;
+    /**
+     * 缓存刷新服务
+     */
+    private final CacheRefreshService cacheRefreshService;
 
     /**
      * 构造函数
      *
-     * @param ruleCache 规则缓存
+     * @param ruleCache           规则缓存
+     * @param cacheRefreshService 缓存刷新服务
      */
-    public RuleServiceImpl(RuleCache ruleCache) {
+    public RuleServiceImpl(RuleCache ruleCache, CacheRefreshService cacheRefreshService) {
         this.ruleCache = ruleCache;
+        this.cacheRefreshService = cacheRefreshService;
     }
 
     /**
@@ -87,7 +94,11 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
             throw new ArtException("数据为空，请检查！");
         }
         Rule entity = ConvertUtil.convert(vo, Rule.class);
-        return this.save(entity);
+        boolean save = this.save(entity);
+        if (save) {
+            cacheRefreshService.refreshAfterCommit(ruleCache);
+        }
+        return save;
     }
 
     /**
@@ -103,7 +114,11 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
             throw new ArtException("数据为空，请检查！");
         }
         Rule entity = ConvertUtil.convert(vo, Rule.class);
-        return this.updateById(entity);
+        boolean edit = this.updateById(entity);
+        if (edit) {
+            cacheRefreshService.refreshAfterCommit(ruleCache);
+        }
+        return edit;
     }
 
     /**
@@ -115,7 +130,11 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
-        return this.removeByIds(idList);
+        boolean result = this.removeByIds(idList);
+        if (result) {
+            cacheRefreshService.refreshAfterCommit(ruleCache);
+        }
+        return result;
     }
 
     /**

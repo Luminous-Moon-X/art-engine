@@ -1,6 +1,10 @@
 package com.art.service.impl;
 
-import com.art.cache.*;
+import com.art.auth.cache.DeptPermissionCache;
+import com.art.auth.cache.MenuAuthCache;
+import com.art.auth.cache.RolePermissionCache;
+import com.art.auth.cache.UserPermissionCache;
+import com.art.cache.support.CacheRefreshService;
 import com.art.domain.DeptPermission;
 import com.art.domain.RolePermission;
 import com.art.domain.UserPermission;
@@ -53,6 +57,10 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
      * 菜单权限标识缓存
      */
     private final MenuAuthCache menuAuthCache;
+    /**
+     * 缓存刷新服务
+     */
+    private final CacheRefreshService cacheRefreshService;
 
     /**
      * 构造函数
@@ -64,10 +72,12 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
      * @param deptPermissionMapper 部门功能权限Mapper
      * @param userPermissionMapper 用户功能权限Mapper
      * @param menuAuthCache        菜单权限标识缓存
+     * @param cacheRefreshService  缓存刷新服务
      */
     public MenuPermissionServiceImpl(UserPermissionCache userPermissionCache, RolePermissionCache rolePermissionCache,
                                      DeptPermissionCache deptPermissionCache, RolePermissionMapper rolePermissionMapper,
-                                     UserPermissionMapper userPermissionMapper, DeptPermissionMapper deptPermissionMapper, MenuAuthCache menuAuthCache) {
+                                     UserPermissionMapper userPermissionMapper, DeptPermissionMapper deptPermissionMapper,
+                                     MenuAuthCache menuAuthCache, CacheRefreshService cacheRefreshService) {
         this.userPermissionCache = userPermissionCache;
         this.rolePermissionCache = rolePermissionCache;
         this.deptPermissionCache = deptPermissionCache;
@@ -75,6 +85,7 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
         this.userPermissionMapper = userPermissionMapper;
         this.deptPermissionMapper = deptPermissionMapper;
         this.menuAuthCache = menuAuthCache;
+        this.cacheRefreshService = cacheRefreshService;
     }
 
     /**
@@ -141,7 +152,7 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
                         throw new ArtException("用户功能权限保存失败，请联系管理员！");
                     }
                 }
-                Thread.ofVirtual().start(userPermissionCache::init);
+                cacheRefreshService.refreshAfterCommit(userPermissionCache);
             }
             case "role" -> {
                 this.rolePermissionMapper.deleteByQuery(QueryWrapper.create().eq(RolePermission::getRoleId, id));
@@ -153,7 +164,7 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
                         throw new ArtException("角色功能权限保存失败，请联系管理员！");
                     }
                 }
-                Thread.ofVirtual().start(rolePermissionCache::init);
+                cacheRefreshService.refreshAfterCommit(rolePermissionCache);
             }
             case "dept" -> {
                 this.deptPermissionMapper.deleteByQuery(QueryWrapper.create().eq(DeptPermission::getDeptId, id));
@@ -165,7 +176,7 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
                         throw new ArtException("部门功能权限保存失败，请联系管理员！");
                     }
                 }
-                Thread.ofVirtual().start(deptPermissionCache::init);
+                cacheRefreshService.refreshAfterCommit(deptPermissionCache);
             }
             default -> throw new ArtException("权限类型错误，请联系管理员！");
         }
@@ -182,5 +193,9 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
         this.deptPermissionMapper.deleteByQuery(QueryWrapper.create().in(DeptPermission::getPermissionSign, menuPermissionSign));
         this.rolePermissionMapper.deleteByQuery(QueryWrapper.create().in(RolePermission::getPermissionSign, menuPermissionSign));
         this.userPermissionMapper.deleteByQuery(QueryWrapper.create().in(UserPermission::getPermissionSign, menuPermissionSign));
+        // 权限数据变更后刷新相关缓存
+        cacheRefreshService.refreshAfterCommit(userPermissionCache);
+        cacheRefreshService.refreshAfterCommit(rolePermissionCache);
+        cacheRefreshService.refreshAfterCommit(deptPermissionCache);
     }
 }

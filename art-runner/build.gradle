@@ -8,6 +8,8 @@ dependencies {
     implementation project(":art-system")
     implementation project(":art-log")
     implementation project(":art-websocket")
+
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.3.0'
 }
 
 // 编译项目版本信息

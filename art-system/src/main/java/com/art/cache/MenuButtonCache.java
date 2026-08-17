@@ -1,6 +1,7 @@
 package com.art.cache;
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuVO;
 import com.art.mapper.MenuMapper;
@@ -11,13 +12,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 菜单按钮数据二级缓存实现
+ * 菜单按钮数据二级缓存实现（业务缓存，归属 art-system）
  *
  * @author Luminous.X
  * @since 1.1.0
  */
 @Component
-public class MenuButtonCache extends ArtCache<String, List<MenuVO>> {
+public class MenuButtonCache extends ArtCache<List<MenuVO>> {
     /**
      * 菜单按钮Mapper
      */
@@ -27,10 +28,11 @@ public class MenuButtonCache extends ArtCache<String, List<MenuVO>> {
      * 构造函数
      *
      * @param redisTemplate Redis客户端
+     * @param properties    缓存配置
      * @param menuMapper    菜单按钮Mapper
      */
-    public MenuButtonCache(RedisTemplate<String, Object> redisTemplate, MenuMapper menuMapper) {
-        super(redisTemplate);
+    public MenuButtonCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper) {
+        super(redisTemplate, properties);
         this.menuMapper = menuMapper;
     }
 
@@ -40,17 +42,17 @@ public class MenuButtonCache extends ArtCache<String, List<MenuVO>> {
      * @return 缓存名称
      */
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "菜单按钮";
     }
 
     /**
-     * 获取RedisKey
+     * 获取缓存Key
      *
-     * @return RedisKey
+     * @return 缓存Key
      */
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "menuButton";
     }
 
@@ -60,7 +62,7 @@ public class MenuButtonCache extends ArtCache<String, List<MenuVO>> {
      * @return 缓存数据
      */
     @Override
-    protected List<MenuVO> getCacheData() {
+    protected List<MenuVO> loadFromDb() {
         QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getMenuType, "button");
         return this.menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
     }

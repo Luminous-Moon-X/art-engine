@@ -1,6 +1,7 @@
-package com.art.cache;
+package com.art.auth.cache;
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.Role;
 import com.art.mapper.RoleMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -9,8 +10,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 角色数据二级缓存实现（认证授权基础设施缓存，归属 art-core）
+ *
+ * @author Luminous.X
+ * @since 1.1.0
+ */
 @Component
-public class RoleCache extends ArtCache<String, List<Role>> {
+public class RoleCache extends ArtCache<List<Role>> {
 
     /**
      * 角色Mapper
@@ -21,10 +28,11 @@ public class RoleCache extends ArtCache<String, List<Role>> {
      * 构造函数
      *
      * @param redisTemplate Redis客户端
+     * @param properties    缓存配置
      * @param roleMapper    角色Mapper
      */
-    public RoleCache(RedisTemplate<String, Object> redisTemplate, RoleMapper roleMapper) {
-        super(redisTemplate);
+    public RoleCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, RoleMapper roleMapper) {
+        super(redisTemplate, properties);
         this.roleMapper = roleMapper;
     }
 
@@ -34,7 +42,7 @@ public class RoleCache extends ArtCache<String, List<Role>> {
      * @return 缓存名称
      */
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "角色数据";
     }
 
@@ -44,7 +52,7 @@ public class RoleCache extends ArtCache<String, List<Role>> {
      * @return Redis Key
      */
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "role";
     }
 
@@ -54,7 +62,7 @@ public class RoleCache extends ArtCache<String, List<Role>> {
      * @return 缓存数据
      */
     @Override
-    protected List<Role> getCacheData() {
+    protected List<Role> loadFromDb() {
         return this.roleMapper.selectListByQuery(QueryWrapper.create().eq(Role::getEnableFlag, 1));
     }
 

@@ -2,8 +2,9 @@ package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.MD5;
+import com.art.auth.cache.UserRoleCache;
 import com.art.cache.RuleCache;
-import com.art.cache.UserRoleCache;
+import com.art.cache.support.CacheRefreshService;
 import com.art.common.TreeSelectVO;
 import com.art.domain.Dept;
 import com.art.domain.User;
@@ -53,18 +54,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final RuleCache ruleCache;
 
     /**
+     * 缓存刷新服务
+     */
+    private final CacheRefreshService cacheRefreshService;
+
+    /**
      * 构造函数
      *
-     * @param userRoleMapper 用户角色Mapper
-     * @param deptService    部门服务
-     * @param userRoleCache  用户角色缓存
-     * @param ruleCache      规则缓存
+     * @param userRoleMapper      用户角色Mapper
+     * @param deptService         部门服务
+     * @param userRoleCache       用户角色缓存
+     * @param ruleCache           规则缓存
+     * @param cacheRefreshService 缓存刷新服务
      */
-    public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService, UserRoleCache userRoleCache, RuleCache ruleCache) {
+    public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService, UserRoleCache userRoleCache,
+                           RuleCache ruleCache, CacheRefreshService cacheRefreshService) {
         this.userRoleMapper = userRoleMapper;
         this.deptService = deptService;
         this.userRoleCache = userRoleCache;
         this.ruleCache = ruleCache;
+        this.cacheRefreshService = cacheRefreshService;
     }
 
     /**
@@ -161,7 +170,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 保存角色关系
         Long[] roleIds = vo.getRoleIds();
         Boolean saveRelation = userRoleRelation(entity, result, roleIds);
-        Thread.ofVirtual().start(userRoleCache::init);
+        cacheRefreshService.refreshAfterCommit(userRoleCache);
         return saveRelation;
     }
 
@@ -183,7 +192,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long[] roleIds = vo.getRoleIds();
         if (roleIds != null && roleIds.length > 0) {
             this.userRoleMapper.deleteByQuery(QueryWrapper.create().eq(UserRole::getUserId, entity.getId()));
-            return userRoleRelation(entity, result, roleIds);
+            Boolean saveRelation = userRoleRelation(entity, result, roleIds);
+            cacheRefreshService.refreshAfterCommit(userRoleCache);
+            return saveRelation;
         }
         return result;
     }
@@ -218,7 +229,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
         this.userRoleMapper.deleteByQuery(QueryWrapper.create().in(UserRole::getUserId, idList));
-        return this.removeByIds(idList);
+        boolean result = this.removeByIds(idList);
+        if (result) {
+            cacheRefreshService.refreshAfterCommit(userRoleCache);
+        }
+        return result;
     }
 
     /**

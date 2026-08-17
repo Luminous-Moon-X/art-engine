@@ -1,6 +1,7 @@
-package com.art.cache;
+package com.art.auth.cache;
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.UserPermission;
 import com.art.mapper.UserPermissionMapper;
 import com.art.utils.SecurityUtil;
@@ -10,13 +11,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 用户功能权限缓存
+ * 用户功能权限二级缓存实现（认证授权基础设施缓存，归属 art-core）
  *
  * @author Luminous.X
  * @since 1.1.0
  */
 @Component
-public class UserPermissionCache extends ArtCache<String, List<UserPermission>> {
+public class UserPermissionCache extends ArtCache<List<UserPermission>> {
     /**
      * 用户权限Mapper
      */
@@ -26,10 +27,11 @@ public class UserPermissionCache extends ArtCache<String, List<UserPermission>> 
      * 构造函数
      *
      * @param redisTemplate        Redis客户端
+     * @param properties           缓存配置
      * @param userPermissionMapper 用户权限Mapper
      */
-    public UserPermissionCache(RedisTemplate<String, Object> redisTemplate, UserPermissionMapper userPermissionMapper) {
-        super(redisTemplate);
+    public UserPermissionCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, UserPermissionMapper userPermissionMapper) {
+        super(redisTemplate, properties);
         this.userPermissionMapper = userPermissionMapper;
     }
 
@@ -39,17 +41,17 @@ public class UserPermissionCache extends ArtCache<String, List<UserPermission>> 
      * @return 缓存名称
      */
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "用户功能权限";
     }
 
     /**
-     * 获取RedisKey
+     * 获取缓存Key
      *
-     * @return RedisKey
+     * @return 缓存Key
      */
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "menuPermission:user";
     }
 
@@ -59,7 +61,7 @@ public class UserPermissionCache extends ArtCache<String, List<UserPermission>> 
      * @return 缓存数据
      */
     @Override
-    protected List<UserPermission> getCacheData() {
+    protected List<UserPermission> loadFromDb() {
         return this.userPermissionMapper.selectAll();
     }
 

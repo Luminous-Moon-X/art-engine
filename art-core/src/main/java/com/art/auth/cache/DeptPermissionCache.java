@@ -1,6 +1,7 @@
-package com.art.cache;
+package com.art.auth.cache;
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.DeptPermission;
 import com.art.mapper.DeptPermissionMapper;
 import com.art.utils.SecurityUtil;
@@ -10,13 +11,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 部门功能权限缓存
+ * 部门功能权限二级缓存实现（认证授权基础设施缓存，归属 art-core）
  *
  * @author Luminous.X
  * @since 1.1.0
  */
 @Component
-public class DeptPermissionCache extends ArtCache<String, List<DeptPermission>> {
+public class DeptPermissionCache extends ArtCache<List<DeptPermission>> {
     /**
      * 部门权限Mapper
      */
@@ -26,10 +27,11 @@ public class DeptPermissionCache extends ArtCache<String, List<DeptPermission>> 
      * 构造函数
      *
      * @param redisTemplate        Redis客户端
+     * @param properties           缓存配置
      * @param deptPermissionMapper 部门权限Mapper
      */
-    public DeptPermissionCache(RedisTemplate<String, Object> redisTemplate, DeptPermissionMapper deptPermissionMapper) {
-        super(redisTemplate);
+    public DeptPermissionCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, DeptPermissionMapper deptPermissionMapper) {
+        super(redisTemplate, properties);
         this.deptPermissionMapper = deptPermissionMapper;
     }
 
@@ -39,17 +41,17 @@ public class DeptPermissionCache extends ArtCache<String, List<DeptPermission>> 
      * @return 缓存名称
      */
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "部门功能权限";
     }
 
     /**
-     * 获取RedisKey
+     * 获取缓存Key
      *
-     * @return RedisKey
+     * @return 缓存Key
      */
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "menuPermission:dept";
     }
 
@@ -59,7 +61,7 @@ public class DeptPermissionCache extends ArtCache<String, List<DeptPermission>> 
      * @return 缓存数据
      */
     @Override
-    protected List<DeptPermission> getCacheData() {
+    protected List<DeptPermission> loadFromDb() {
         return deptPermissionMapper.selectAll();
     }
 

@@ -119,3 +119,44 @@ configure(subprojects) { project ->
         }
     }
 }
+
+// 跨模块重复类校验：同 FQCN 类出现在多个模块 jar 中时，运行时类加载顺序会静默遮蔽其中一个，
+// 导致修改不生效的隐蔽问题，因此构建期直接失败
+tasks.register('checkDuplicateClasses') {
+    group = 'verification'
+    description = '校验各子模块 jar 之间是否存在同 FQCN 重复类'
+    dependsOn subprojects.collect { it.tasks.matching { t -> t.name == 'jar' } }
+    doLast {
+        def classOwners = [:].withDefault { [] as Set }
+        subprojects.each { project ->
+            def jarTask = project.tasks.findByName('jar')
+            if (jarTask == null || !jarTask.enabled) {
+                return
+            }
+            def jarFile = jarTask.archiveFile.get().asFile
+            if (!jarFile.exists()) {
+                return
+            }
+            project.zipTree(jarFile).matching { include '**/*.class' }.visit { f ->
+                if (!f.isDirectory()) {
+                    classOwners[f.relativePath.pathString] << project.name
+                }
+            }
+        }
+        def duplicates = classOwners.findAll { k, v -> v.size() > 1 }.sort { it.key }
+        if (!duplicates.isEmpty()) {
+            def msg = duplicates.collect { k, v -> "  ${k} -> ${v.join(', ')}" }.join('\n')
+            throw new GradleException("发现跨模块重复类（同 FQCN），存在运行时类遮蔽风险：\n" + msg)
+        }
+        println "checkDuplicateClasses 通过：未发现跨模块重复类"
+    }
+}
+
+// 挂到各子模块 check 上，保证 build 时强制校验
+configure(subprojects) { project ->
+    project.plugins.withId('java') {
+        project.tasks.named('check') {
+            dependsOn rootProject.tasks.named('checkDuplicateClasses')
+        }
+    }
+}

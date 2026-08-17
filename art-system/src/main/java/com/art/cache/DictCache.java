@@ -1,6 +1,7 @@
 package com.art.cache;
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.context.IgnoreSqlLogContextHolder;
 import com.art.domain.Dict;
 import com.art.domain.DictValue;
@@ -18,8 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 数据字典二级缓存实现（业务缓存，归属 art-system）
+ *
+ * @author Luminous.X
+ * @since 1.0.0
+ */
 @Component
-public class DictCache extends ArtCache<String, Map<String, List<DictItemVO>>> {
+public class DictCache extends ArtCache<Map<String, List<DictItemVO>>> {
 
     /**
      * 数据字典值Mapper
@@ -35,39 +42,44 @@ public class DictCache extends ArtCache<String, Map<String, List<DictItemVO>>> {
      * 构造函数
      *
      * @param redisTemplate   Redis客户端
+     * @param properties      缓存配置
      * @param dictValueMapper 数据字典值Mapper
      * @param dictMapper      数据字典Mapper
      */
-    public DictCache(RedisTemplate<String, Object> redisTemplate, DictValueMapper dictValueMapper, DictMapper dictMapper) {
-        super(redisTemplate);
+    public DictCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, DictValueMapper dictValueMapper, DictMapper dictMapper) {
+        super(redisTemplate, properties);
         this.dictValueMapper = dictValueMapper;
         this.dictMapper = dictMapper;
     }
 
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "数据字典";
     }
 
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "dict";
     }
 
     @SneakyThrows
     @Override
-    protected Map<String, List<DictItemVO>> getCacheData() {
+    protected Map<String, List<DictItemVO>> loadFromDb() {
         Map<String, List<DictItemVO>> dictMap = new ConcurrentHashMap<>();
         List<Dict> allDictList = dictMapper.selectListByQuery(QueryWrapper.create().eq(Dict::getEnableFlag, 1));
         List<Thread> threads = new ArrayList<>();
         for (Dict dict : allDictList) {
             Thread thread = Thread.ofVirtual().start(() -> {
                 Long dictId = dict.getId();
+                // IgnoreSqlLogContextHolder 为普通 ThreadLocal，虚拟线程内需自行开启
                 IgnoreSqlLogContextHolder.enable();
-                List<DictValue> dictValues = dictValueMapper.selectListByQuery(QueryWrapper.create().eq(DictValue::getDictId, dictId));
-                IgnoreSqlLogContextHolder.disable();
-                List<DictItemVO> dictItemList = ConvertUtil.convertList(dictValues, DictItemVO.class);
-                dictMap.put(dict.getDictCode(), dictItemList);
+                try {
+                    List<DictValue> dictValues = dictValueMapper.selectListByQuery(QueryWrapper.create().eq(DictValue::getDictId, dictId));
+                    List<DictItemVO> dictItemList = ConvertUtil.convertList(dictValues, DictItemVO.class);
+                    dictMap.put(dict.getDictCode(), dictItemList);
+                } finally {
+                    IgnoreSqlLogContextHolder.disable();
+                }
             });
             threads.add(thread);
         }

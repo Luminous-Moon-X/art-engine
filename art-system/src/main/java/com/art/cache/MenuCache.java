@@ -1,7 +1,8 @@
 package com.art.cache;
 
 
-import com.art.ArtCache;
+import com.art.cache.support.ArtCache;
+import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuMetaVO;
 import com.art.domain.vo.MenuTreeVO;
@@ -15,16 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 菜单数据二级缓存实现
+ * 菜单树数据二级缓存实现（前端路由展示业务缓存，归属 art-system）
  *
  * @author Luminous.X
  * @since 1.0.0
  */
 @Component
-public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
+public class MenuCache extends ArtCache<List<MenuTreeVO>> {
 
     /**
-     * 菜单服务
+     * 菜单Mapper
      */
     private final MenuMapper menuMapper;
 
@@ -32,30 +33,32 @@ public class MenuCache extends ArtCache<String, List<MenuTreeVO>> {
      * 构造函数
      *
      * @param redisTemplate Redis客户端
-     * @param menuMapper    菜单服务
+     * @param properties    缓存配置
+     * @param menuMapper    菜单Mapper
      */
-    public MenuCache(RedisTemplate<String, Object> redisTemplate, MenuMapper menuMapper) {
-        super(redisTemplate);
+    public MenuCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper) {
+        super(redisTemplate, properties);
         this.menuMapper = menuMapper;
     }
 
     @Override
-    protected String getCacheName() {
+    public String cacheName() {
         return "菜单树数据";
     }
 
     @Override
-    protected String getRedisKey() {
+    public String redisKey() {
         return "menuTree";
     }
 
     @Override
-    protected List<MenuTreeVO> getCacheData() {
+    protected List<MenuTreeVO> loadFromDb() {
         QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getParentId, -1);
         wrapper.orderBy(Menu::getOrderNum, true);
         List<MenuVO> menuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
         return this.handleMenuTree(menuList);
     }
+
 
     /**
      * 处理菜单树

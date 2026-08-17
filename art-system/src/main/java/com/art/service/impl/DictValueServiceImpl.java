@@ -1,6 +1,7 @@
 package com.art.service.impl;
 
 import com.art.cache.DictCache;
+import com.art.cache.support.CacheRefreshService;
 import com.art.domain.DictValue;
 import com.art.domain.vo.DictItemVO;
 import com.art.domain.vo.DictValueVO;
@@ -29,14 +30,20 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
      * 字典缓存
      */
     private final DictCache dictCache;
+    /**
+     * 缓存刷新服务
+     */
+    private final CacheRefreshService cacheRefreshService;
 
     /**
      * 构造函数
      *
-     * @param dictCache 字典缓存
+     * @param dictCache           字典缓存
+     * @param cacheRefreshService 缓存刷新服务
      */
-    public DictValueServiceImpl(DictCache dictCache) {
+    public DictValueServiceImpl(DictCache dictCache, CacheRefreshService cacheRefreshService) {
         this.dictCache = dictCache;
+        this.cacheRefreshService = cacheRefreshService;
     }
 
     /**
@@ -89,7 +96,7 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
         DictValue entity = ConvertUtil.convert(vo, DictValue.class);
         boolean save = this.save(entity);
         if (save) {
-            Thread.ofVirtual().start(dictCache::init);
+            cacheRefreshService.refreshAfterCommit(dictCache);
         }
         return save;
     }
@@ -109,7 +116,7 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
         DictValue entity = ConvertUtil.convert(vo, DictValue.class);
         boolean b = this.updateById(entity);
         if (b) {
-            Thread.ofVirtual().start(dictCache::init);
+            cacheRefreshService.refreshAfterCommit(dictCache);
         }
         return b;
     }
@@ -125,7 +132,7 @@ public class DictValueServiceImpl extends ServiceImpl<DictValueMapper, DictValue
     public Boolean delete(List<Long> idList) {
         boolean b = this.removeByIds(idList);
         if (b) {
-            Thread.ofVirtual().start(dictCache::init);
+            cacheRefreshService.refreshAfterCommit(dictCache);
         }
         return b;
     }

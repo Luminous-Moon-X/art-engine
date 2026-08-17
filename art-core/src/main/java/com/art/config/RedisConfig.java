@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -85,6 +88,25 @@ public class RedisConfig {
         LettuceConnectionFactory factory = new LettuceConnectionFactory(serverConfig, clientConfig);
         factory.setValidateConnection(true); // 验证连接
         return factory;
+    }
+
+    /**
+     * Redisson客户端（用于二级缓存失效广播）
+     *
+     * @return Redisson客户端
+     */
+    @Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClient() {
+        Config config = new Config();
+        org.redisson.config.SingleServerConfig serverConfig = config.useSingleServer()
+                .setAddress("redis://" + host + ":" + port)
+                .setDatabase(database)
+                .setConnectTimeout(10000)
+                .setTimeout(10000);
+        if (password != null && !password.isBlank()) {
+            serverConfig.setPassword(password);
+        }
+        return Redisson.create(config);
     }
 
     /**

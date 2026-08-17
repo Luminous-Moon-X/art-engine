@@ -1,8 +1,10 @@
 package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.art.auth.cache.MenuAuthCache;
 import com.art.cache.MenuButtonCache;
 import com.art.cache.MenuCache;
+import com.art.cache.support.CacheRefreshService;
 import com.art.common.TreeSelectVO;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuOperationPermissionVO;
@@ -53,16 +55,31 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private final MenuPermissionService menuPermissionService;
 
     /**
+     * 菜单权限标识缓存
+     */
+    private final MenuAuthCache menuAuthCache;
+
+    /**
+     * 缓存刷新服务
+     */
+    private final CacheRefreshService cacheRefreshService;
+
+    /**
      * 构造函数
      *
      * @param menuCache             菜单缓存
      * @param menuButtonCache       菜单按钮缓存
      * @param menuPermissionService 菜单权限服务
+     * @param menuAuthCache         菜单权限标识缓存
+     * @param cacheRefreshService   缓存刷新服务
      */
-    public MenuServiceImpl(MenuCache menuCache, MenuButtonCache menuButtonCache, MenuPermissionService menuPermissionService) {
+    public MenuServiceImpl(MenuCache menuCache, MenuButtonCache menuButtonCache, MenuPermissionService menuPermissionService,
+                           MenuAuthCache menuAuthCache, CacheRefreshService cacheRefreshService) {
         this.menuCache = menuCache;
         this.menuButtonCache = menuButtonCache;
         this.menuPermissionService = menuPermissionService;
+        this.menuAuthCache = menuAuthCache;
+        this.cacheRefreshService = cacheRefreshService;
     }
 
     /**
@@ -141,7 +158,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         Menu entity = ConvertUtil.convert(vo, Menu.class);
         boolean save = this.save(entity);
         if (save) {
-            Thread.ofVirtual().start(menuCache::init);
+            cacheRefreshService.refreshAfterCommit(menuCache);
+            cacheRefreshService.refreshAfterCommit(menuButtonCache);
+            cacheRefreshService.refreshAfterCommit(menuAuthCache);
         }
         return save;
     }
@@ -161,7 +180,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         Menu entity = ConvertUtil.convert(vo, Menu.class);
         boolean edit = this.updateById(entity);
         if (edit) {
-            Thread.ofVirtual().start(menuCache::init);
+            cacheRefreshService.refreshAfterCommit(menuCache);
+            cacheRefreshService.refreshAfterCommit(menuButtonCache);
+            cacheRefreshService.refreshAfterCommit(menuAuthCache);
         }
         return edit;
     }
@@ -185,11 +206,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         }
         boolean result = this.removeByIds(idList);
         if (result) {
-            Thread.ofVirtual().start(() -> {
-                menuCache.init();
-                List<String> deletePermissionSigns = this.listByIds(idList).stream().map(Menu::getPermissionSign).toList();
-                menuPermissionService.deletePermissionByMenu(deletePermissionSigns);
-            });
+            List<String> deletePermissionSigns = this.listByIds(idList).stream().map(Menu::getPermissionSign).toList();
+            menuPermissionService.deletePermissionByMenu(deletePermissionSigns);
+            cacheRefreshService.refreshAfterCommit(menuCache);
+            cacheRefreshService.refreshAfterCommit(menuButtonCache);
+            cacheRefreshService.refreshAfterCommit(menuAuthCache);
         }
         return result;
     }
