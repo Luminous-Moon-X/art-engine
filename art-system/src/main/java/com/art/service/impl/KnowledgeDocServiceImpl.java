@@ -122,15 +122,20 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
      * 插入成功后修改文档表内容解析状态字段（改为processing）并异步执行文档解析，随后返回。</p>
      *
      * @param file 文档
+     * @param kbId 所属知识库ID
      * @return 文档信息
      */
     @Override
-    public KnowledgeDocVO upload(MultipartFile file) {
+    public KnowledgeDocVO upload(MultipartFile file, Long kbId) {
+        if (kbId == null) {
+            throw new ArtException("知识库ID不能为空");
+        }
         // 1. 上传文档到对象存储并记录OSS文件信息
         OssFileVO ossFile = ossFileService.upload(file, DIRECTORY);
         // 2. 文档信息存入知识库文档表，两个状态字段默认pending
         Long userId = SecurityUtil.getUserId();
         KnowledgeDoc doc = new KnowledgeDoc();
+        doc.setKbId(kbId);
         doc.setDocName(getFileName(file.getOriginalFilename()));
         doc.setDocType(resolveDocType(file.getOriginalFilename(), file.getContentType()));
         doc.setOssFileId(ossFile.getId());

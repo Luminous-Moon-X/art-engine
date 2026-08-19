@@ -61,6 +61,12 @@ public class KnowledgeDoc extends BaseEntity {
     private Long ossFileId;
 
     /**
+     * 所属知识库ID（关联 p_ai_knowledge_base.id）
+     */
+    @Column("kb_id")
+    private Long kbId;
+
+    /**
      * 内容解析状态：pending-待处理 processing-处理中 complete-完成 error-失败
      */
     @Column("parse_status")

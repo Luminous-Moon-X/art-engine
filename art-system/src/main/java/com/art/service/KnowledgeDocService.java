@@ -24,9 +24,10 @@ public interface KnowledgeDocService extends IService<KnowledgeDoc> {
      * 两个状态字段默认为待处理，插入成功后修改内容解析状态并异步执行文档解析。</p>
      *
      * @param file 文档
+     * @param kbId 所属知识库ID
      * @return 文档信息
      */
-    KnowledgeDocVO upload(MultipartFile file);
+    KnowledgeDocVO upload(MultipartFile file, Long kbId);
 
     /**
      * 分页查询知识库文档信息。

@@ -51,13 +51,15 @@ public class KnowledgeDocController {
      * 上传知识库文档。
      *
      * @param file 文档
+     * @param kbId 所属知识库ID
      * @return 文档信息
      */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "上传知识库文档", description = "上传文档到对象存储并写入知识库文档表")
+    @Operation(summary = "上传知识库文档", description = "上传文档到对象存储并写入知识库文档表，关联指定知识库")
     @ApiLog(module = "知识库文档", operationType = ApiOperationType.INSERT, description = "上传知识库文档")
-    public HttpResult<KnowledgeDocVO> upload(@RequestParam("file") MultipartFile file) {
-        return HttpResult.success(this.knowledgeDocService.upload(file));
+    public HttpResult<KnowledgeDocVO> upload(@RequestParam("file") MultipartFile file,
+                                             @RequestParam("kbId") Long kbId) {
+        return HttpResult.success(this.knowledgeDocService.upload(file, kbId));
     }
 
     /**

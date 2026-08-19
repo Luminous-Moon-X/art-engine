@@ -36,6 +36,12 @@ public class KnowledgeDocVO {
     private Long ossFileId;
 
     /**
+     * 所属知识库ID（关联知识库主键）
+     */
+    @Query(type = Query.Type.EQ)
+    private Long kbId;
+
+    /**
      * 内容解析状态：pending-待处理 processing-处理中 complete-完成 error-失败
      */
     private String parseStatus;
