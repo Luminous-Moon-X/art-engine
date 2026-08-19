@@ -6,6 +6,7 @@ import com.agentsflex.core.document.splitter.AIDocumentSplitter;
 import com.agentsflex.core.document.splitter.RegexDocumentSplitter;
 import com.agentsflex.core.model.chat.ChatModel;
 import com.agentsflex.doc.DocumentExtractors;
+import com.art.handler.NullExtractedImageHandler;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -20,6 +21,12 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class DocumentUtil {
+
+    static {
+        // 全局设置 文档解析时忽略图片
+        DocumentExtractors.setExtractedImageHandler(new NullExtractedImageHandler());
+    }
+
     /**
      * 文档内容提取
      *
