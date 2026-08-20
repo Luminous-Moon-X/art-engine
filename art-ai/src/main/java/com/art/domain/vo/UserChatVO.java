@@ -18,4 +18,8 @@ public class UserChatVO {
      * 用户问题
      */
     private String question;
+    /**
+     * 知识库ID
+     */
+    private Long kbId;
 }

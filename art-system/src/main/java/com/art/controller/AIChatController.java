@@ -64,6 +64,32 @@ public class AIChatController {
     }
 
     /**
+     * 重命名对话
+     *
+     * @param body 请求体，包含 conversationId 与 newName
+     * @return 成功提示
+     */
+    @PutMapping("/conversations/rename")
+    public HttpResult<Boolean> renameConversation(@RequestBody java.util.Map<String, String> body) {
+        String conversationId = body.get("conversationId");
+        String newName = body.get("newName");
+        this.aiChatService.renameConversation(conversationId, newName);
+        return HttpResult.success(true);
+    }
+
+    /**
+     * 删除对话及其全部消息
+     *
+     * @param conversationId 对话ID
+     * @return 成功提示
+     */
+    @DeleteMapping("/conversations/{conversationId}")
+    public HttpResult<Boolean> deleteConversation(@PathVariable("conversationId") String conversationId) {
+        this.aiChatService.deleteConversation(conversationId);
+        return HttpResult.success(true);
+    }
+
+    /**
      * 上传解析文档
      *
      * @param file 文档

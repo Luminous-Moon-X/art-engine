@@ -421,6 +421,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
             // 添加元数据信息
             for (Document document : documents) {
                 document.putMetadata("doc_id", id);
+                document.putMetadata("kb_id", doc.getKbId());
             }
             StoreResult store = vectorStore.store(documents);
             if (store.getException() != null) {

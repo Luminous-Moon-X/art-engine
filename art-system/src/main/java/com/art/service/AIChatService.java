@@ -39,9 +39,25 @@ public interface AIChatService {
     List<ChatMessageVO> listMessages(String conversationId);
 
     /**
+     * 重命名对话
+     *
+     * @param conversationId 对话ID
+     * @param newName        新对话名称
+     */
+    void renameConversation(String conversationId, String newName);
+
+    /**
+     * 删除对话（连同其下全部消息）
+     *
+     * @param conversationId 对话ID
+     */
+    void deleteConversation(String conversationId);
+
+    /**
      * 向量化处理文档
      *
      * @param file 文档
      */
     void vectorDoc(MultipartFile file);
 }
+

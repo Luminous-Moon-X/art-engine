@@ -2,6 +2,7 @@ package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import org.springframework.transaction.annotation.Transactional;
 import com.agentsflex.core.document.Document;
 import com.agentsflex.core.message.AiMessage;
 import com.agentsflex.core.message.Message;
@@ -115,13 +116,13 @@ public class AIChatServiceImpl implements AIChatService {
     /**
      * 构造器
      *
-     * @param artChatClient         AI模型对象
-     * @param systemPromptProvider  系统提示词提供者
-     * @param messageRedisTemplate  Redis客户端
-     * @param vectorStore           向量数据库
-     * @param rerankModel           重排模型
-     * @param aiConversationMapper  对话表映射层
-     * @param aiChatMessageMapper   对话内容表映射层
+     * @param artChatClient        AI模型对象
+     * @param systemPromptProvider 系统提示词提供者
+     * @param messageRedisTemplate Redis客户端
+     * @param vectorStore          向量数据库
+     * @param rerankModel          重排模型
+     * @param aiConversationMapper 对话表映射层
+     * @param aiChatMessageMapper  对话内容表映射层
      */
     public AIChatServiceImpl(ChatModel artChatClient, SystemPromptProvider systemPromptProvider,
                              RedisTemplate<String, Message> messageRedisTemplate, PgvectorVectorStore vectorStore,
@@ -153,6 +154,7 @@ public class AIChatServiceImpl implements AIChatService {
     public SseEmitter chat(UserChatVO userChatVO) {
         String chatId = userChatVO.getChatId();
         String question = userChatVO.getQuestion();
+        Long kbId = userChatVO.getKbId();
         if (StrUtil.isBlank(chatId)) {
             throw new ArtException("对话ID不能为空");
         }
@@ -170,7 +172,7 @@ public class AIChatServiceImpl implements AIChatService {
         // 创建对话记忆
         String memoryKey = AI_CHAT_MEMORY_KEY + ":" + userId + ":" + chatId;
         // 构建prompt提示词
-        MemoryPrompt prompt = buildPrompt(memoryKey, chatId, question);
+        MemoryPrompt prompt = buildPrompt(memoryKey, chatId, question, kbId);
         // 发送流式请求
         artChatClient.chatStream(prompt, new StreamResponseListener() {
             @Override
@@ -214,12 +216,12 @@ public class AIChatServiceImpl implements AIChatService {
     /**
      * 处理流式对话结束后的业务逻辑：落库消息、创建/更新对话、总结主题、推送完成事件
      *
-     * @param emitter   SSE连接
-     * @param prompt    对话提示词
-     * @param context   流式上下文
-     * @param chatId    对话ID
-     * @param question  用户问题
-     * @param userId    用户ID
+     * @param emitter  SSE连接
+     * @param prompt   对话提示词
+     * @param context  流式上下文
+     * @param chatId   对话ID
+     * @param question 用户问题
+     * @param userId   用户ID
      */
     private void handleStreamClose(SseEmitter emitter, MemoryPrompt prompt, StreamContext context,
                                    String chatId, String question, Long userId) {
@@ -338,14 +340,88 @@ public class AIChatServiceImpl implements AIChatService {
     }
 
     /**
+     * 重命名对话（校验归属）
+     *
+     * @param conversationId 对话ID
+     * @param newName        新对话名称
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void renameConversation(String conversationId, String newName) {
+        Long userId = getRequiredUserId();
+        if (StrUtil.isBlank(conversationId)) {
+            throw new ArtException("对话ID不能为空");
+        }
+        // 去除首尾空格，空名称不允许保存
+        String name = newName == null ? "" : newName.trim();
+        if (StrUtil.isBlank(name)) {
+            throw new ArtException("对话名称不能为空");
+        }
+        AiConversation conversation = getOwnedConversation(conversationId, userId);
+        AiConversation update = new AiConversation();
+        update.setId(conversation.getId());
+        update.setConversationName(name);
+        update.setUpdateId(userId);
+        aiConversationMapper.update(update);
+    }
+
+    /**
+     * 删除对话及其全部消息（校验归属）
+     *
+     * @param conversationId 对话ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteConversation(String conversationId) {
+        Long userId = getRequiredUserId();
+        if (StrUtil.isBlank(conversationId)) {
+            throw new ArtException("对话ID不能为空");
+        }
+        // 校验归属并确认对话存在
+        AiConversation conversation = getOwnedConversation(conversationId, userId);
+        // 删除对话下的全部消息
+        aiChatMessageMapper.deleteByQuery(QueryWrapper.create()
+                .eq(AiChatMessage::getConversationId, conversationId));
+        // 删除对话
+        aiConversationMapper.deleteById(conversation.getId());
+        // 清除Redis中的该对话记忆
+        String memoryKey = AI_CHAT_MEMORY_KEY + ":" + userId + ":" + conversationId;
+        try {
+            redisTemplate.delete(memoryKey);
+        } catch (Exception e) {
+            log.warn("清除对话记忆失败: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 查询当前用户拥有的对话，不存在或不属于当前用户时抛异常
+     *
+     * @param conversationId 对话ID
+     * @param userId         当前用户ID
+     * @return 对话实体
+     */
+    private AiConversation getOwnedConversation(String conversationId, Long userId) {
+        AiConversation conversation = aiConversationMapper.selectOneByQuery(
+                QueryWrapper.create().eq(AiConversation::getConversationId, conversationId));
+        if (conversation == null) {
+            throw new ArtException("对话不存在或已被删除");
+        }
+        if (!Objects.equals(userId, conversation.getUserId())) {
+            throw new ArtException(403, "无权访问该对话");
+        }
+        return conversation;
+    }
+
+    /**
      * 构建prompt
      *
-     * @param memoryKey  对话记忆key
-     * @param chatId     对话id
-     * @param question   输入问题
+     * @param memoryKey 对话记忆key
+     * @param chatId    对话id
+     * @param question  输入问题
+     * @param kbId      知识库id
      * @return prompt
      */
-    private MemoryPrompt buildPrompt(String memoryKey, String chatId, String question) {
+    private MemoryPrompt buildPrompt(String memoryKey, String chatId, String question, Long kbId) {
         RedisChatMemory memory = new RedisChatMemory(memoryKey, redisTemplate);
         // Redis记忆为空时（如服务重启、缓存过期），从数据库回填历史消息，保证多轮对话上下文不丢失
         if (CollectionUtil.isEmpty(memory.getMessages(Integer.MAX_VALUE))) {
@@ -369,7 +445,7 @@ public class AIChatServiceImpl implements AIChatService {
         prompt.addUserMessage(question);
         // RAG知识库查询（知识库服务不可用时降级为普通对话，不影响主流程）
         try {
-            attachRagContext(prompt, question);
+            attachRagContext(prompt, question, kbId);
         } catch (Exception e) {
             log.warn("RAG知识库查询失败，已降级为普通对话: {}", e.getMessage());
         }
@@ -381,10 +457,14 @@ public class AIChatServiceImpl implements AIChatService {
      *
      * @param prompt   对话提示词
      * @param question 用户问题
+     * @param kbId     知识库id
      */
-    private void attachRagContext(MemoryPrompt prompt, String question) {
+    private void attachRagContext(MemoryPrompt prompt, String question, Long kbId) {
         SearchWrapper wrapper = new SearchWrapper()
                 .text(question).maxResults(20).minScore(0.2).outputVector(true);
+        if (kbId != null) {
+            wrapper.eq("metadata.kb_id", kbId);
+        }
         List<Document> ragDocuments = vectorStore.search(wrapper);
         // 重排模型优化精确度
         if (CollectionUtil.isNotEmpty(ragDocuments)) {
