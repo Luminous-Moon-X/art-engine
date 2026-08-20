@@ -1,19 +1,23 @@
 package com.art.controller;
 
-import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.domain.vo.ForceChangePasswordVO;
 import com.art.domain.vo.LoginResultVO;
 import com.art.domain.vo.LoginVO;
 import com.art.domain.vo.UserResetPasswordVO;
 import com.art.exception.ArtException;
-import com.art.enums.ApiOperationType;
 import com.art.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.*;
 
 
+/**
+ * 认证相关接口
+ *
+ * @author Luminous.X
+ * @since 1.0.0
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -35,7 +39,6 @@ public class AuthController {
      * @return 登录结果
      */
     @PostMapping("/login")
-    @ApiLog(module = "认证管理", operationType = ApiOperationType.QUERY, description = "用户登录")
     public HttpResult<LoginResultVO> login(@RequestBody LoginVO loginVO, HttpServletRequest request) {
         return HttpResult.success(this.authService.login(loginVO, request));
     }
@@ -46,7 +49,6 @@ public class AuthController {
      * @return 注销登出结果
      */
     @PostMapping("/logout")
-    @ApiLog(module = "认证管理", operationType = ApiOperationType.QUERY, description = "用户注销登出")
     public HttpResult<Boolean> logout() {
         return HttpResult.success(this.authService.logout());
     }
@@ -58,7 +60,6 @@ public class AuthController {
      * @return 重置密码结果
      */
     @PutMapping("/userResetPassword")
-    @ApiLog(module = "认证管理", operationType = ApiOperationType.UPDATE, description = "用户重置密码")
     public HttpResult<Boolean> userResetPassword(@RequestBody UserResetPasswordVO userResetPasswordVO) {
         return HttpResult.success(this.authService.userResetPassword(userResetPasswordVO));
     }
@@ -70,15 +71,14 @@ public class AuthController {
      * @return 修改密码结果
      */
     @PutMapping("/changePasswordWithTempToken")
-    @ApiLog(module = "认证管理", operationType = ApiOperationType.UPDATE, description = "使用临时token修改密码")
     public HttpResult<Boolean> changePasswordWithTempToken(@RequestBody ForceChangePasswordVO forceChangePasswordVO) {
         // 验证新密码和确认密码是否一致
         if (!forceChangePasswordVO.getNewPassword().equals(forceChangePasswordVO.getConfirmPassword())) {
             throw new ArtException("新密码与确认密码不一致！");
         }
-        
+
         return HttpResult.success(this.authService.changePasswordWithTempToken(
-                forceChangePasswordVO.getTempToken(), 
+                forceChangePasswordVO.getTempToken(),
                 forceChangePasswordVO.getNewPassword()));
     }
 }
