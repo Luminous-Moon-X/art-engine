@@ -5,13 +5,14 @@ import com.art.service.ApiLogService;
 import com.art.util.IpUtil;
 import com.art.utils.SecurityUtil;
 import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -33,11 +34,29 @@ import java.time.LocalDateTime;
 @Slf4j
 @Aspect
 @Component
-@RequiredArgsConstructor
 @SuppressWarnings("unused")
 public class ApiLogAspect {
 
+    /**
+     * 接口日志服务
+     */
     private final ApiLogService apiLogService;
+
+    /**
+     * API日志的ObjectMapper
+     */
+    private final ObjectMapper apiLogObjectMapper;
+
+    /**
+     * 构造函数
+     *
+     * @param apiLogService      接口日志服务
+     * @param apiLogObjectMapper API日志的ObjectMapper
+     */
+    public ApiLogAspect(ApiLogService apiLogService, @Qualifier("apiLogObjectMapper") ObjectMapper apiLogObjectMapper) {
+        this.apiLogService = apiLogService;
+        this.apiLogObjectMapper = apiLogObjectMapper;
+    }
 
     /**
      * 环绕通知：拦截 @ApiLog 注解的方法
