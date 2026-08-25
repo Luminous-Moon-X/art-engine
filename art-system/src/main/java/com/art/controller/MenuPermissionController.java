@@ -39,7 +39,7 @@ public class MenuPermissionController {
      * @return 菜单权限
      */
     @GetMapping
-    @ApiLog(module = "菜单权限管理", operationType = ApiOperationType.QUERY, description = "获取菜单权限")
+    
     public HttpResult<List<String>> getMenuPermission(@RequestParam("type") String type, @RequestParam("id") Long id) {
         return HttpResult.success(this.menuPermissionService.getMenuPermission(type, id));
     }

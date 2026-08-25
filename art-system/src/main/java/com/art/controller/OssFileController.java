@@ -77,7 +77,6 @@ public class OssFileController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询上传文件信息", description = "分页查询上传文件信息")
-    @ApiLog(module = "对象存储文件", operationType = ApiOperationType.QUERY, description = "分页查询上传文件信息")
     public HttpResult<Page<OssFileVO>> page(Page<OssFileVO> page, OssFileVO vo) {
         return HttpResult.success(this.ossFileService.queryPage(page, vo));
     }
@@ -90,7 +89,6 @@ public class OssFileController {
      */
     @GetMapping("/download/{id}")
     @Operation(summary = "下载文件", description = "根据文件ID下载文件")
-    @ApiLog(module = "对象存储文件", operationType = ApiOperationType.QUERY, description = "下载文件")
     public ResponseEntity<InputStreamResource> download(@PathVariable("id") Long id) {
         OssFile file = this.ossFileService.getFileById(id);
         ObjectStorageObject object = this.ossFileService.downloadObject(id);

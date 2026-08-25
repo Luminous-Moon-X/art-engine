@@ -44,7 +44,6 @@ public class UserController {
      */
     @GetMapping("/info")
     @Operation(summary = "登录获取用户基本信息", description = "登录获取用户基本信息")
-    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "登录获取用户基本信息")
     public HttpResult<UserInfoVO> info() {
         return HttpResult.success(sysUserService.info());
     }
@@ -57,7 +56,6 @@ public class UserController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取用户信息", description = "根据ID获取用户信息")
-    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "根据ID获取用户信息")
     public HttpResult<User> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.UserService.selectById(id));
     }
@@ -71,7 +69,6 @@ public class UserController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询用户信息", description = "分页查询用户信息")
-    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "分页查询用户信息")
     public HttpResult<Page<UserVO>> page(Page<UserVO> page, UserVO vo) {
         return HttpResult.success(this.UserService.queryPage(page, vo));
     }
@@ -83,7 +80,6 @@ public class UserController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有用户信息", description = "查询所有用户信息")
-    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "查询所有用户信息")
     public HttpResult<List<User>> list() {
         return HttpResult.success(this.UserService.selectList());
     }
@@ -95,7 +91,6 @@ public class UserController {
      */
     @GetMapping("/deptUserTree")
     @Operation(summary = "查询部门用户树", description = "查询部门用户树")
-    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "查询部门用户树")
     public HttpResult<List<TreeSelectVO>> deptUserTree() {
         return HttpResult.success(this.UserService.deptUserTree());
     }
@@ -107,7 +102,6 @@ public class UserController {
      */
     @GetMapping("/userTree")
     @Operation(summary = "查询用户树", description = "查询用户树")
-    @ApiLog(module = "用户管理", operationType = ApiOperationType.QUERY, description = "查询用户树")
     public HttpResult<List<TreeSelectVO>> userTree() {
         return HttpResult.success(this.UserService.userTree());
     }

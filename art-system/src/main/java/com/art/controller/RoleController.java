@@ -47,7 +47,6 @@ public class RoleController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取角色信息", description = "根据ID获取角色信息")
-    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "根据ID获取角色信息")
     public HttpResult<Role> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.roleService.selectById(id));
     }
@@ -61,7 +60,6 @@ public class RoleController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询角色信息", description = "分页查询角色信息")
-    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "分页查询角色信息")
     public HttpResult<Page<RoleVO>> page(Page<RoleVO> page, RoleVO vo) {
         return HttpResult.success(this.roleService.queryPage(page, vo));
     }
@@ -73,7 +71,6 @@ public class RoleController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有角色信息", description = "查询所有角色信息")
-    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "查询所有角色信息")
     public HttpResult<List<Role>> list() {
         return HttpResult.success(this.roleService.selectList());
     }
@@ -85,7 +82,6 @@ public class RoleController {
      */
     @GetMapping("/select")
     @Operation(summary = "角色下拉列表", description = "角色下拉列表")
-    @ApiLog(module = "角色管理", operationType = ApiOperationType.QUERY, description = "角色下拉列表")
     public HttpResult<List<SelectVO>> select() {
         return HttpResult.success(this.roleService.select());
     }

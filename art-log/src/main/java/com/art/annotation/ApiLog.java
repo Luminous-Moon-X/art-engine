@@ -36,14 +36,4 @@ public @interface ApiLog {
      * @return 操作描述
      */
     String description() default "";
-
-    /**
-     * 需要排除的请求参数字段，支持点路径，如 user.password
-     */
-    String[] excludeParams() default {};
-
-    /**
-     * 需要排除的响应字段，支持点路径，如 data.token
-     */
-    String[] excludeResponse() default {};
 }

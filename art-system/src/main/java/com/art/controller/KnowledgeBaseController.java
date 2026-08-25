@@ -50,7 +50,6 @@ public class KnowledgeBaseController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询知识库信息", description = "分页查询知识库信息")
-    @ApiLog(module = "知识库", operationType = ApiOperationType.QUERY, description = "分页查询知识库信息")
     public HttpResult<Page<KnowledgeBaseVO>> page(Page<KnowledgeBaseVO> page, KnowledgeBaseVO vo) {
         return HttpResult.success(this.knowledgeBaseService.queryPage(page, vo));
     }

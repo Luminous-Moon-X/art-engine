@@ -1,6 +1,9 @@
 package com.art.utils;
 
+import com.art.config.ApiLogConfig;
 import com.art.enums.SensitiveStrategy;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 字段脱敏工具类
@@ -9,6 +12,37 @@ import com.art.enums.SensitiveStrategy;
  * @since 1.3.3
  */
 public class SensitiveUtil {
+
+    /**
+     * Jackson 数据脱敏处理
+     */
+    private static final ObjectMapper objectMapper = ApiLogConfig.apiLogObjectMapper();
+
+    /**
+     * 对指定实体类中的敏感字段进行脱敏处理<br/>
+     * 需要配合 {@link com.art.annotation.Sensitive} 注解使用<br/>
+     * 将注解添加到实体类敏感字段上，并指定脱敏策略
+     *
+     * @param obj   实体类
+     * @param clazz 实体类类型
+     * @return 脱敏后的实体类
+     */
+    public static <T> T maskClass(Object obj, Class<T> clazz) throws JsonProcessingException {
+        String afterStr = objectMapper.writeValueAsString(obj);
+        return objectMapper.readValue(afterStr, clazz);
+    }
+
+    /**
+     * 对指定实体类进行脱敏处理，并返回脱敏后的 JSON 字符串<br/>
+     * 需要配合 {@link com.art.annotation.Sensitive} 注解使用<br/>
+     * 将注解添加到实体类敏感字段上，并指定脱敏策略
+     *
+     * @param obj 实体类
+     * @return 脱敏后的 JSON 字符串
+     */
+    public static String markClassAsString(Object obj) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(obj);
+    }
 
     /**
      * 脱敏处理

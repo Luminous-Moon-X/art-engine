@@ -40,7 +40,6 @@ public class MenuController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取菜单信息", description = "根据ID获取菜单信息")
-    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "根据ID获取菜单信息")
     public HttpResult<MenuVO> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.menuService.selectById(id));
     }
@@ -54,7 +53,6 @@ public class MenuController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询菜单信息", description = "分页查询菜单信息")
-    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "分页查询菜单信息")
     public HttpResult<Page<MenuVO>> page(Page<MenuVO> page, MenuVO vo) {
         return HttpResult.success(this.menuService.queryPage(page, vo));
     }
@@ -66,7 +64,6 @@ public class MenuController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有菜单信息", description = "查询所有菜单信息")
-    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "查询所有菜单信息")
     public HttpResult<List<Menu>> list() {
         return HttpResult.success(this.menuService.selectList());
     }
@@ -117,7 +114,6 @@ public class MenuController {
      */
     @GetMapping("/allMenuTree")
     @Operation(summary = "获取所有菜单树", description = "获取所有菜单树")
-    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "获取所有菜单树")
     public HttpResult<List<TreeSelectVO>> allMenuTree() {
         return HttpResult.success(this.menuService.allMenuTree());
     }
@@ -129,7 +125,6 @@ public class MenuController {
      */
     @GetMapping("/menuTree")
     @Operation(summary = "获取菜单树", description = "获取菜单树，用于渲染前端菜单栏")
-    @ApiLog(module = "菜单管理", operationType = ApiOperationType.QUERY, description = "获取菜单树")
     public HttpResult<List<MenuTreeVO>> menuTree() {
         return HttpResult.success(this.menuService.menuTree());
     }

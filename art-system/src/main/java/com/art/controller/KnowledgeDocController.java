@@ -71,7 +71,6 @@ public class KnowledgeDocController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询知识库文档信息", description = "分页查询知识库文档信息")
-    @ApiLog(module = "知识库文档", operationType = ApiOperationType.QUERY, description = "分页查询知识库文档信息")
     public HttpResult<Page<KnowledgeDocVO>> page(Page<KnowledgeDocVO> page, KnowledgeDocVO vo) {
         return HttpResult.success(this.knowledgeDocService.queryPage(page, vo));
     }
@@ -112,7 +111,6 @@ public class KnowledgeDocController {
      */
     @GetMapping("/content/{docId}")
     @Operation(summary = "查询文档内容", description = "根据文档ID查询文档内容表中的内容")
-    @ApiLog(module = "知识库文档", operationType = ApiOperationType.QUERY, description = "查询文档内容")
     public HttpResult<KnowledgeDocContentVO> content(@PathVariable("docId") Long docId) {
         return HttpResult.success(this.knowledgeDocService.getContent(docId));
     }

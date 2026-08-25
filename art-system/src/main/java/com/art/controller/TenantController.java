@@ -46,7 +46,6 @@ public class TenantController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取租户信息", description = "根据ID获取租户信息")
-    @ApiLog(module = "租户管理", operationType = ApiOperationType.QUERY, description = "根据ID获取租户信息")
     public HttpResult<Tenant> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.tenantService.selectById(id));
     }
@@ -60,7 +59,6 @@ public class TenantController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询租户信息", description = "分页查询租户信息")
-    @ApiLog(module = "租户管理", operationType = ApiOperationType.QUERY, description = "分页查询租户信息")
     public HttpResult<Page<Tenant>> page(Page<Tenant> page, TenantVO vo) {
         return HttpResult.success(this.tenantService.queryPage(page, vo));
     }
@@ -72,7 +70,6 @@ public class TenantController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有租户信息", description = "查询所有租户信息")
-    @ApiLog(module = "租户管理", operationType = ApiOperationType.QUERY, description = "查询所有租户信息")
     public HttpResult<List<Tenant>> list() {
         return HttpResult.success(this.tenantService.selectList());
     }

@@ -46,7 +46,6 @@ public class DictController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取字典信息", description = "根据ID获取字典信息")
-    @ApiLog(module = "字典管理", operationType = ApiOperationType.QUERY, description = "根据ID获取字典信息")
     public HttpResult<Dict> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.DictService.selectById(id));
     }
@@ -60,7 +59,6 @@ public class DictController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询字典信息", description = "分页查询字典信息")
-    @ApiLog(module = "字典管理", operationType = ApiOperationType.QUERY, description = "分页查询字典信息")
     public HttpResult<Page<DictVO>> page(Page<DictVO> page, DictVO vo) {
         return HttpResult.success(this.DictService.queryPage(page, vo));
     }
@@ -72,7 +70,6 @@ public class DictController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有字典信息", description = "查询所有字典信息")
-    @ApiLog(module = "字典管理", operationType = ApiOperationType.QUERY, description = "查询所有字典信息")
     public HttpResult<List<Dict>> list() {
         return HttpResult.success(this.DictService.selectList());
     }

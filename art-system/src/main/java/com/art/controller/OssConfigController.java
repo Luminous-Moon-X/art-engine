@@ -53,7 +53,6 @@ public class OssConfigController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取对象存储配置", description = "根据ID获取对象存储配置")
-    @ApiLog(module = "对象存储配置", operationType = ApiOperationType.QUERY, description = "根据ID获取对象存储配置")
     public HttpResult<OssConfigVO> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.ossConfigService.getDetail(id));
     }
@@ -67,7 +66,6 @@ public class OssConfigController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询对象存储配置", description = "分页查询对象存储配置")
-    @ApiLog(module = "对象存储配置", operationType = ApiOperationType.QUERY, description = "分页查询对象存储配置")
     public HttpResult<Page<OssConfigVO>> page(Page<OssConfigVO> page, OssConfigVO vo) {
         return HttpResult.success(this.ossConfigService.queryPage(page, vo));
     }
@@ -79,7 +77,6 @@ public class OssConfigController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询全部对象存储配置", description = "查询全部对象存储配置")
-    @ApiLog(module = "对象存储配置", operationType = ApiOperationType.QUERY, description = "查询全部对象存储配置")
     public HttpResult<List<OssConfigVO>> list() {
         return HttpResult.success(this.ossConfigService.selectList());
     }

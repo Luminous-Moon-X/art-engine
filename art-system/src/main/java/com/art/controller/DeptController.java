@@ -49,7 +49,6 @@ public class DeptController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取部门信息", description = "根据ID获取部门信息")
-    @ApiLog(module = "部门管理", operationType = ApiOperationType.QUERY, description = "根据ID获取部门信息")
     public HttpResult<Dept> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.DeptService.selectById(id));
     }
@@ -63,7 +62,6 @@ public class DeptController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询部门信息", description = "分页查询部门信息")
-    @ApiLog(module = "部门管理", operationType = ApiOperationType.QUERY, description = "分页查询部门信息")
     public HttpResult<Page<DeptVO>> page(Page<DeptVO> page, DeptVO vo) {
         return HttpResult.success(this.DeptService.queryPage(page, vo));
     }
@@ -75,7 +73,6 @@ public class DeptController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有部门信息", description = "查询所有部门信息")
-    @ApiLog(module = "部门管理", operationType = ApiOperationType.QUERY, description = "根据ID获取部门信息")
     public HttpResult<List<DeptVO>> list() {
         return HttpResult.success(this.DeptService.selectList());
     }
@@ -87,7 +84,6 @@ public class DeptController {
      */
     @GetMapping("/treeSelect")
     @Operation(summary = "部门树形下拉列表", description = "部门树形下拉列表")
-    @ApiLog(module = "部门管理", operationType = ApiOperationType.QUERY, description = "获取部门下拉列表")
     public HttpResult<List<DeptTreeSelectVO>> treeSelect() {
         return HttpResult.success(this.DeptService.treeSelect());
     }
@@ -99,7 +95,6 @@ public class DeptController {
      */
     @GetMapping("/treeSelectNoTop")
     @Operation(summary = "部门树形下拉列表(不包含顶级节点)", description = "部门树形下拉列表(不包含顶级节点)")
-    @ApiLog(module = "部门管理", operationType = ApiOperationType.QUERY, description = "获取部门下拉列表(不包含顶级节点)")
     public HttpResult<List<DeptTreeSelectVO>> treeSelectNoTop() {
         return HttpResult.success(this.DeptService.treeSelectNoTop());
     }

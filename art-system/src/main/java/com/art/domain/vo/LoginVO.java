@@ -1,5 +1,7 @@
 package com.art.domain.vo;
 
+import com.art.annotation.Sensitive;
+import com.art.enums.SensitiveStrategy;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -20,6 +22,7 @@ public class LoginVO {
      * 密码
      */
     @JsonProperty("password")
+    @Sensitive(strategy = SensitiveStrategy.MASK_ALL)
     private String password;
     /**
      * 租户id

@@ -47,7 +47,6 @@ public class DictValueController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取字典值信息", description = "根据ID获取字典值信息")
-    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "根据ID获取字典值信息")
     public HttpResult<DictValue> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.DictValueService.selectById(id));
     }
@@ -61,7 +60,6 @@ public class DictValueController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询字典值信息", description = "分页查询字典值信息")
-    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "分页查询字典值信息")
     public HttpResult<Page<DictValueVO>> page(Page<DictValueVO> page, DictValueVO vo) {
         return HttpResult.success(this.DictValueService.queryPage(page, vo));
     }
@@ -73,7 +71,6 @@ public class DictValueController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有字典值信息", description = "查询所有字典值信息")
-    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "查询所有字典值信息")
     public HttpResult<List<DictValue>> list() {
         return HttpResult.success(this.DictValueService.selectList());
     }
@@ -125,7 +122,6 @@ public class DictValueController {
      */
     @GetMapping("/dictByCode/{dictCode}")
     @Operation(summary = "根据字典编码查询字典值", description = "根据字典编码查询字典值")
-    @ApiLog(module = "字典值管理", operationType = ApiOperationType.QUERY, description = "根据字典编码查询字典值")
     public HttpResult<List<DictItemVO>> dictByCode(@PathVariable("dictCode") String dictCode) {
         return HttpResult.success(this.DictValueService.dictByCode(dictCode));
     }

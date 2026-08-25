@@ -1,5 +1,7 @@
 package com.art.common;
 
+import com.art.annotation.Sensitive;
+import com.art.enums.SensitiveStrategy;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -31,6 +33,7 @@ public class LoginUser {
     /**
      * 密码
      */
+    @Sensitive(strategy = SensitiveStrategy.MASK_ALL)
     private String password;
     /**
      * 部门ID
@@ -43,6 +46,7 @@ public class LoginUser {
     /**
      * 用户邮箱
      */
+    @Sensitive(strategy = SensitiveStrategy.MASK_EMAIL)
     private String userEmail;
     /**
      * 用户性别
@@ -51,6 +55,7 @@ public class LoginUser {
     /**
      * 用户手机
      */
+    @Sensitive(strategy = SensitiveStrategy.MASK_PHONE)
     private String userPhone;
     /**
      * 用户地址

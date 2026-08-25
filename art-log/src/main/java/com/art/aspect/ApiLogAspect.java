@@ -4,15 +4,13 @@ import com.art.annotation.ApiLog;
 import com.art.service.ApiLogService;
 import com.art.util.IpUtil;
 import com.art.utils.SecurityUtil;
-import com.alibaba.fastjson2.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.art.utils.SensitiveUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -42,20 +40,14 @@ public class ApiLogAspect {
      */
     private final ApiLogService apiLogService;
 
-    /**
-     * API日志的ObjectMapper
-     */
-    private final ObjectMapper apiLogObjectMapper;
 
     /**
      * 构造函数
      *
      * @param apiLogService      接口日志服务
-     * @param apiLogObjectMapper API日志的ObjectMapper
      */
-    public ApiLogAspect(ApiLogService apiLogService, @Qualifier("apiLogObjectMapper") ObjectMapper apiLogObjectMapper) {
+    public ApiLogAspect(ApiLogService apiLogService) {
         this.apiLogService = apiLogService;
-        this.apiLogObjectMapper = apiLogObjectMapper;
     }
 
     /**
@@ -123,7 +115,7 @@ public class ApiLogAspect {
                         || body instanceof StreamingResponseBody) {
                     resultStr = "[二进制流]";
                 } else {
-                    resultStr = JSON.toJSONString(result);
+                    resultStr = SensitiveUtil.markClassAsString(body);
                     if (resultStr.length() > 5000) {
                         resultStr = resultStr.substring(0, 5000) + "...(截断)";
                     }
@@ -159,23 +151,26 @@ public class ApiLogAspect {
         String[] parameterNames = signature.getParameterNames();
         Object[] args = joinPoint.getArgs();
 
-        if (parameterNames == null || parameterNames.length == 0) {
+        if (args == null || args.length == 0) {
             return "";
         }
 
         StringBuilder sb = new StringBuilder("{");
-        for (int i = 0; i < parameterNames.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             if (i > 0) {
                 sb.append(", ");
             }
-            sb.append("\"").append(parameterNames[i]).append("\": ");
+            // 未开启 -parameters 编译参数时参数名为 null，退化为位置参数名，避免日志为空
+            String paramName = (parameterNames != null && i < parameterNames.length)
+                    ? parameterNames[i] : "arg" + i;
+            sb.append("\"").append(paramName).append("\": ");
             try {
                 // 过滤掉 HttpServletRequest、HttpServletResponse 等不可序列化的参数
                 Object arg = args[i];
                 if (arg instanceof HttpServletRequest) {
                     sb.append("\"[HttpServletRequest]\"");
                 } else {
-                    sb.append(JSON.toJSONString(arg));
+                    sb.append(SensitiveUtil.markClassAsString(arg));
                 }
             } catch (Exception e) {
                 sb.append("\"[序列化失败]\"");

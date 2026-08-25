@@ -47,7 +47,6 @@ public class RuleController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取规则信息", description = "根据ID获取规则信息")
-    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "根据ID获取规则信息")
     public HttpResult<Rule> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.RuleService.selectById(id));
     }
@@ -60,7 +59,6 @@ public class RuleController {
      */
     @GetMapping("/code/{code}")
     @Operation(summary = "根据编码获取规则信息", description = "根据编码获取规则信息")
-    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "根据编码获取规则信息")
     public HttpResult<RuleItemVO> getByCode(@PathVariable("code") String code) {
         return HttpResult.success(this.RuleService.getByRuleCode(code));
     }
@@ -74,7 +72,6 @@ public class RuleController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询规则信息", description = "分页查询规则信息")
-    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "分页查询规则信息")
     public HttpResult<Page<RuleVO>> page(Page<RuleVO> page, RuleVO vo) {
         return HttpResult.success(this.RuleService.queryPage(page, vo));
     }
@@ -86,7 +83,6 @@ public class RuleController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有规则信息", description = "查询所有规则信息")
-    @ApiLog(module = "规则管理", operationType = ApiOperationType.QUERY, description = "查询所有规则信息")
     public HttpResult<List<RuleVO>> list() {
         return HttpResult.success(this.RuleService.selectList());
     }

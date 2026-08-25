@@ -1,5 +1,7 @@
 package com.art.domain.vo;
 
+import com.art.annotation.Sensitive;
+import com.art.enums.SensitiveStrategy;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -15,6 +17,7 @@ public class UserInfoVO {
     private String[] buttons;
 
     @JsonProperty("email")
+    @Sensitive(strategy = SensitiveStrategy.MASK_EMAIL)
     private String email;
 
     @JsonProperty("roles")

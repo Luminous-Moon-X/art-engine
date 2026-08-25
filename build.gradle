@@ -86,6 +86,11 @@ configure(subprojects) { project ->
     sourceCompatibility = "${javaVersion}"
     targetCompatibility = "${javaVersion}"
 
+    // 编译时保留方法参数名（-parameters），供 AOP/反射读取参数名（如 API 日志记录请求参数）
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs += ['-parameters']
+    }
+
     // Maven仓库
     repositories {
         maven {
