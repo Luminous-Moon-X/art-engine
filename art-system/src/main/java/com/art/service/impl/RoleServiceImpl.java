@@ -19,13 +19,17 @@ import java.util.List;
 /**
  * 角色服务实现类。
  *
+ * <p>角色为租户级数据：多租户开启后，角色表按当前生效租户自动过滤，
+ * 各租户拥有各自独立的角色池，互不可见、互不影响。</p>
+ *
  * @author Luminous.X
  * @since 1.0.0
  */
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
+
     /**
-     * 根据ID查询角色信息
+     * 根据ID查询角色信息（自动限定当前租户）
      *
      * @param id 角色ID
      * @return 角色信息
@@ -36,7 +40,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     /**
-     * 分页查询角色信息
+     * 分页查询角色信息（自动限定当前租户）
      *
      * @param page 分页对象
      * @param vo   查询条件对象
@@ -49,7 +53,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     /**
-     * 查询所有角色信息
+     * 查询所有角色信息（自动限定当前租户）
      *
      * @return 角色信息
      */
@@ -59,7 +63,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     /**
-     * 添加角色信息
+     * 添加角色信息（自动归属当前租户）
      *
      * @param vo 角色信息
      * @return 添加结果
@@ -75,7 +79,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     /**
-     * 编辑角色信息
+     * 编辑角色信息（自动限定当前租户）
      *
      * @param vo 角色信息
      * @return 编辑结果
@@ -91,7 +95,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     /**
-     * 删除角色信息
+     * 删除角色信息（自动限定当前租户）
      *
      * @param idList 角色ID列表
      * @return 删除结果
@@ -103,7 +107,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     /**
-     * 角色树形下拉列表
+     * 角色树形下拉列表（自动限定当前租户）
      *
      * @return 角色树形下拉列表
      */

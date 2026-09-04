@@ -48,10 +48,28 @@ art:
       - /auth/login
       - /auth/logout
       - /auth/changePasswordWithTempToken
+      - /tenant/config
+      - /tenant/list
       - /swagger-ui.html
       - /api-docs/**
       - /swagger-ui/**
     secret-key: c7ee264fd80c4e169f473df493bf67fd
+  # 多租户配置
+  tenant:
+    # 是否启用多租户：开启后登录页展示租户下拉框，包含tenant_id列的表按当前租户自动过滤；
+    # 关闭后登录使用默认租户，不做租户数据过滤（租户/套餐管理页面不受影响）
+    enable: ${ART_TENANT_ENABLE:false}
+    # 默认租户ID（多租户关闭时登录使用的租户，对应租户表种子数据id=1）
+    default-tenant-id: ${ART_TENANT_DEFAULT_ID:1}
+    # 平台级管理菜单的权限标识前缀：此类菜单（菜单管理/字典管理/规则管理等）操作为系统级共享数据，
+    # 不允许分配给租户套餐——分配套餐选择树自动剔除、保存套餐时校验拦截。
+    # 需与数据库 p_sys_menu.permission_sign 实际值一致（前缀匹配：等于前缀或以"前缀:"开头），可按需增删
+    platform-menu-sign-prefixes:
+      - system:menuManage
+      - system:dictManage
+      - system:ruleManage
+      - system:tenantManage
+      - system:tenantPackageManage
   # AI大模型配置
   ai-model:
     model: ${AI_MODEL:deepseek-v4-flash}

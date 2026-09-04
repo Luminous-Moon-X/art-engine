@@ -5,6 +5,7 @@ import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.Rule;
 import com.art.domain.vo.RuleItemVO;
 import com.art.mapper.RuleMapper;
+import com.art.tenant.TenantSupport;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,10 @@ public class RuleCache extends ArtCache<List<RuleItemVO>> {
      * 规则Mapper
      */
     private final RuleMapper ruleMapper;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
@@ -30,10 +35,13 @@ public class RuleCache extends ArtCache<List<RuleItemVO>> {
      * @param redisTemplate Redis客户端
      * @param properties    缓存配置
      * @param ruleMapper    规则Mapper
+     * @param tenantSupport 多租户支持
      */
-    public RuleCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, RuleMapper ruleMapper) {
+    public RuleCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, RuleMapper ruleMapper,
+                     TenantSupport tenantSupport) {
         super(redisTemplate, properties);
         this.ruleMapper = ruleMapper;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -63,8 +71,9 @@ public class RuleCache extends ArtCache<List<RuleItemVO>> {
      */
     @Override
     protected List<RuleItemVO> loadFromDb() {
-        return this.ruleMapper
-                .selectListByQueryAs(QueryWrapper.create().eq(Rule::getEnableFlag, 1), RuleItemVO.class);
+        // 规则为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.ruleMapper
+                .selectListByQueryAs(QueryWrapper.create().eq(Rule::getEnableFlag, 1), RuleItemVO.class));
     }
 
     /**

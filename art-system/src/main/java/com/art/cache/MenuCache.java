@@ -8,6 +8,7 @@ import com.art.domain.vo.MenuMetaVO;
 import com.art.domain.vo.MenuTreeVO;
 import com.art.domain.vo.MenuVO;
 import com.art.mapper.MenuMapper;
+import com.art.tenant.TenantSupport;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,10 @@ public class MenuCache extends ArtCache<List<MenuTreeVO>> {
      * 菜单Mapper
      */
     private final MenuMapper menuMapper;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
@@ -35,10 +40,13 @@ public class MenuCache extends ArtCache<List<MenuTreeVO>> {
      * @param redisTemplate Redis客户端
      * @param properties    缓存配置
      * @param menuMapper    菜单Mapper
+     * @param tenantSupport 多租户支持
      */
-    public MenuCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper) {
+    public MenuCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper,
+                     TenantSupport tenantSupport) {
         super(redisTemplate, properties);
         this.menuMapper = menuMapper;
+        this.tenantSupport = tenantSupport;
     }
 
     @Override
@@ -53,10 +61,13 @@ public class MenuCache extends ArtCache<List<MenuTreeVO>> {
 
     @Override
     protected List<MenuTreeVO> loadFromDb() {
-        QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getParentId, -1);
-        wrapper.orderBy(Menu::getOrderNum, true);
-        List<MenuVO> menuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
-        return this.handleMenuTree(menuList);
+        // 菜单为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> {
+            QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getParentId, -1);
+            wrapper.orderBy(Menu::getOrderNum, true);
+            List<MenuVO> menuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
+            return this.handleMenuTree(menuList);
+        });
     }
 
 

@@ -5,6 +5,7 @@ import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuVO;
 import com.art.mapper.MenuMapper;
+import com.art.tenant.TenantSupport;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,10 @@ public class MenuAuthCache extends ArtCache<List<String>> {
      * 菜单Mapper
      */
     private final MenuMapper menuMapper;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
@@ -31,10 +36,13 @@ public class MenuAuthCache extends ArtCache<List<String>> {
      * @param redisTemplate Redis客户端
      * @param properties    缓存配置
      * @param menuMapper    菜单Mapper
+     * @param tenantSupport 多租户支持
      */
-    public MenuAuthCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper) {
+    public MenuAuthCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper,
+                         TenantSupport tenantSupport) {
         super(redisTemplate, properties);
         this.menuMapper = menuMapper;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -64,7 +72,9 @@ public class MenuAuthCache extends ArtCache<List<String>> {
      */
     @Override
     protected List<String> loadFromDb() {
-        return this.menuMapper.selectListByQueryAs(QueryWrapper.create().eq(Menu::getEnableFlag, 1), MenuVO.class)
+        // 菜单权限标识为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.menuMapper
+                .selectListByQueryAs(QueryWrapper.create().eq(Menu::getEnableFlag, 1), MenuVO.class))
                 .stream()
                 .map(MenuVO::getPermissionSign)
                 .toList();

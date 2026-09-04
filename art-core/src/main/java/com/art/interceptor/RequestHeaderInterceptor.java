@@ -5,6 +5,7 @@ import com.art.auth.cache.RoleCache;
 import com.art.auth.cache.UserRoleCache;
 import com.art.common.LoginUser;
 import com.art.config.AuthConfiguration;
+import com.art.constants.TenantConstants;
 import com.art.context.SecurityContextHolder;
 import com.art.exception.ArtException;
 import com.art.constants.ArtErrorMessageConstants;
@@ -108,10 +109,33 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         SecurityContextHolder.setUserAllName(loginUser.getNickName());
         SecurityContextHolder.setDeptId(loginUser.getDeptId());
         SecurityContextHolder.setUserType(loginUser.getUserType());
+        SecurityContextHolder.setTenantId(this.resolveTenantId(token, loginUser));
         List<Long> roleIds = userRoleCache.getRoleByUserId(loginUser.getId());
         SecurityContextHolder.setRoleIds(roleIds);
         SecurityContextHolder.setRoleCodes(this.roleCache.getRoleCodeByIds(roleIds));
         SecurityContextHolder.setToken(token);
         return true;
+    }
+
+    /**
+     * 解析当前请求生效的租户ID<br/>
+     * 超级管理员登录后切换租户时会写入 tenant_context:{token}，优先使用该值；
+     * 其他情况使用用户自身归属的租户ID
+     *
+     * @param token      Token
+     * @param loginUser  当前登录用户
+     * @return 生效租户ID
+     */
+    private Long resolveTenantId(String token, LoginUser loginUser) {
+        Long sessionTenantId = null;
+        try {
+            String tenantContext = redisTemplate.opsForValue().get(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token);
+            if (StringUtil.isNotBlank(tenantContext)) {
+                sessionTenantId = Long.parseLong(tenantContext.trim());
+            }
+        } catch (NumberFormatException ignored) {
+            // 租户上下文非法时回退到用户自身租户
+        }
+        return sessionTenantId != null ? sessionTenantId : loginUser.getTenantId();
     }
 }

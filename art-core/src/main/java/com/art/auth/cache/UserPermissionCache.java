@@ -4,6 +4,7 @@ import com.art.cache.support.ArtCache;
 import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.UserPermission;
 import com.art.mapper.UserPermissionMapper;
+import com.art.tenant.TenantSupport;
 import com.art.utils.SecurityUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,10 @@ public class UserPermissionCache extends ArtCache<List<UserPermission>> {
      * 用户权限Mapper
      */
     private final UserPermissionMapper userPermissionMapper;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
@@ -29,10 +34,13 @@ public class UserPermissionCache extends ArtCache<List<UserPermission>> {
      * @param redisTemplate        Redis客户端
      * @param properties           缓存配置
      * @param userPermissionMapper 用户权限Mapper
+     * @param tenantSupport        多租户支持
      */
-    public UserPermissionCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, UserPermissionMapper userPermissionMapper) {
+    public UserPermissionCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, UserPermissionMapper userPermissionMapper,
+                               TenantSupport tenantSupport) {
         super(redisTemplate, properties);
         this.userPermissionMapper = userPermissionMapper;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -62,7 +70,8 @@ public class UserPermissionCache extends ArtCache<List<UserPermission>> {
      */
     @Override
     protected List<UserPermission> loadFromDb() {
-        return this.userPermissionMapper.selectAll();
+        // 用户功能权限为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(this.userPermissionMapper::selectAll);
     }
 
     /**

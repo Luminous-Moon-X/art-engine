@@ -204,6 +204,24 @@ public class SecurityContextHolder {
     }
 
     /**
+     * 设置当前生效租户id
+     *
+     * @param tenantId 租户id
+     */
+    public static void setTenantId(Long tenantId) {
+        set(SecurityConstants.TENANT_ID, tenantId);
+    }
+
+    /**
+     * 获取当前生效租户id
+     *
+     * @return 租户id
+     */
+    public static Long getTenantId() {
+        return StringUtils.isBlank(get(SecurityConstants.TENANT_ID)) ? null : Long.parseLong(get(SecurityConstants.TENANT_ID));
+    }
+
+    /**
      * 设置时区
      *
      * @param timezone 时区

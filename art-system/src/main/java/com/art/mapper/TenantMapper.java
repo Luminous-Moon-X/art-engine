@@ -4,10 +4,10 @@ import com.art.domain.Tenant;
 import com.mybatisflex.core.BaseMapper;
 
 /**
- * 租户Mapper接口。
+ * 租户Mapper
  *
  * @author Luminous.X
- * @since 1.0.0
+ * @since 2.0.0
  */
 public interface TenantMapper extends BaseMapper<Tenant> {
 }

@@ -5,6 +5,8 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.alibaba.fastjson2.JSON;
 import com.art.config.AuthConfiguration;
+import com.art.constants.TenantConstants;
+import com.art.domain.Tenant;
 import com.art.domain.User;
 import com.art.domain.vo.LoginResultVO;
 import com.art.domain.vo.LoginVO;
@@ -12,7 +14,9 @@ import com.art.domain.vo.UserResetPasswordVO;
 import com.art.exception.ArtException;
 import com.art.event.LoginLogEvent;
 import com.art.service.AuthService;
+import com.art.service.TenantService;
 import com.art.service.UserService;
+import com.art.tenant.TenantSupport;
 import com.art.utils.SecurityUtil;
 import com.art.utils.StringUtil;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -52,6 +56,14 @@ public class AuthServiceImpl implements AuthService {
      * 事件发布器
      */
     private final ApplicationEventPublisher eventPublisher;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
+    /**
+     * 租户服务
+     */
+    private final TenantService tenantService;
 
     /**
      * 构造器注入
@@ -60,13 +72,18 @@ public class AuthServiceImpl implements AuthService {
      * @param redisTemplate     Redis操作对象
      * @param authConfiguration 权限配置
      * @param eventPublisher    事件发布器
+     * @param tenantSupport     多租户支持
+     * @param tenantService     租户服务
      */
     public AuthServiceImpl(UserService userService, RedisTemplate<String, String> redisTemplate,
-                           AuthConfiguration authConfiguration, ApplicationEventPublisher eventPublisher) {
+                           AuthConfiguration authConfiguration, ApplicationEventPublisher eventPublisher,
+                           TenantSupport tenantSupport, TenantService tenantService) {
         this.userService = userService;
         this.redisTemplate = redisTemplate;
         this.authConfiguration = authConfiguration;
         this.eventPublisher = eventPublisher;
+        this.tenantSupport = tenantSupport;
+        this.tenantService = tenantService;
     }
 
     /**
@@ -84,13 +101,30 @@ public class AuthServiceImpl implements AuthService {
         if (StringUtils.isAnyBlank(username, password)) {
             throw new ArtException("用户名或密码不能为空！");
         }
-        // 根据用户名查询用户信息
-        List<User> userList = userService.list(QueryWrapper.create().eq(User::getUserName, username));
+        // 多租户开启：校验并定位租户
+        Long loginTenantId = this.resolveLoginTenantId(loginVO);
+        // 查询用户（系统级作用域：登录线程无租户上下文，按用户名全量匹配后内存定位租户）
+        List<User> userList = tenantSupport.systemScope(() -> userService.list(
+                QueryWrapper.create().eq(User::getUserName, username)));
         if (CollectionUtil.isEmpty(userList)) {
             throw new ArtException("用户名或密码错误！");
         }
-
-        User user = userList.getFirst();
+        // 多租户开启：用户必须属于所选租户；超级管理员允许登录任意启用租户（登录即进入该租户上下文）
+        User user;
+        if (tenantSupport.isEnable()) {
+            user = userList.stream()
+                    .filter(u -> loginTenantId != null && loginTenantId.equals(u.getTenantId()))
+                    .findFirst()
+                    .orElse(null);
+            if (user == null && userList.size() == 1 && tenantSupport.isSuperAdmin(userList.getFirst().getUserType())) {
+                user = userList.getFirst();
+            }
+            if (user == null) {
+                throw new ArtException("用户名或密码错误！");
+            }
+        } else {
+            user = userList.getFirst();
+        }
         if (user.getEnableFlag() == 0) {
             throw new ArtException("该用户已被禁用，请联系管理员！");
         }
@@ -103,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
         }
         
         // 检查是否首次登录
-        boolean isFirstLogin = user.getFirstLoginFlag() != null && user.getFirstLoginFlag();
+        boolean isFirstLogin = user.getFirstLoginFlag() != null && user.getFirstLoginFlag() == 1;
         
         LoginResultVO loginResultVO = new LoginResultVO();
         
@@ -127,6 +161,8 @@ public class AuthServiceImpl implements AuthService {
             // 将token存储到Redis
             redisTemplate.opsForValue().set("access_token:" + token, JSON.toJSONString(user),
                     authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
+            // 初始化会话生效租户（超级管理员登录时写入，可随后切换）
+            this.initSessionTenant(token, user, loginTenantId);
             loginResultVO.setToken(token);
         }
 
@@ -134,6 +170,58 @@ public class AuthServiceImpl implements AuthService {
         eventPublisher.publishEvent(new LoginLogEvent(user.getUserName(), user.getNickName(), request));
 
         return loginResultVO;
+    }
+
+    /**
+     * 解析登录时选择的租户ID<br/>
+     * 多租户开启：必须携带有效的启用租户；关闭：返回null，不限定租户登录
+     *
+     * @param loginVO 登录参数
+     * @return 租户ID（多租户关闭时为null）
+     */
+    private Long resolveLoginTenantId(LoginVO loginVO) {
+        if (!tenantSupport.isEnable()) {
+            return null;
+        }
+        if (StringUtil.isBlank(loginVO.getTenantId())) {
+            throw new ArtException("请选择租户！");
+        }
+        Long tenantId;
+        try {
+            tenantId = Long.parseLong(loginVO.getTenantId().trim());
+        } catch (NumberFormatException e) {
+            throw new ArtException("租户参数错误，请重新选择租户！");
+        }
+        Tenant tenant = tenantService.selectEnabledById(tenantId);
+        if (tenant == null) {
+            throw new ArtException("租户不存在或已禁用！");
+        }
+        if (tenant.getExpireDate() != null && tenant.getExpireDate().isBefore(java.time.LocalDate.now())) {
+            throw new ArtException("租户已到期，请联系管理员！");
+        }
+        return tenantId;
+    }
+
+    /**
+     * 初始化登录会话的生效租户<br/>
+     * 仅超级管理员写入租户上下文（后续可切换租户）；租户管理员/普通用户
+     * 始终使用自身归属租户
+     *
+     * @param token         Token
+     * @param user          用户
+     * @param loginTenantId 登录选择的租户ID（多租户关闭时为null）
+     */
+    private void initSessionTenant(String token, User user, Long loginTenantId) {
+        if (!TenantConstants.USER_TYPE_SUPER_ADMIN.equals(user.getUserType())) {
+            return;
+        }
+        Long sessionTenantId = loginTenantId != null
+                ? loginTenantId
+                : (user.getTenantId() != null ? user.getTenantId() : tenantSupport.getDefaultTenantId());
+        if (sessionTenantId == null) {
+            return;
+        }
+        redisTemplate.opsForValue().set(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token, String.valueOf(sessionTenantId));
     }
 
     /**
@@ -167,10 +255,10 @@ public class AuthServiceImpl implements AuthService {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String encodedPassword = encoder.encode(newPassword);
         user.setPassword(encodedPassword);
-        user.setFirstLoginFlag(false); // 设置为非首次登录
+        user.setFirstLoginFlag(0); // 设置为非首次登录
         
         // 更新用户信息
-        return userService.updateById(user);
+        return tenantSupport.systemScope(() -> userService.updateById(user));
     }
 
     /**
@@ -186,6 +274,7 @@ public class AuthServiceImpl implements AuthService {
         }
         StpUtil.logout();
         redisTemplate.delete("access_token:" + token);
+        redisTemplate.delete(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token);
         return true;
     }
 

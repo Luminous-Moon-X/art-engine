@@ -7,6 +7,7 @@ import com.art.exception.ArtException;
 import com.art.mapper.DictMapper;
 import com.art.service.DictService;
 import com.art.service.DictValueService;
+import com.art.tenant.TenantSupport;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
 import com.mybatisflex.core.paginate.Page;
@@ -30,14 +31,20 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
      * 字典值服务
      */
     private final DictValueService dictValueService;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
      *
      * @param dictValueService 字典值服务
+     * @param tenantSupport    多租户支持
      */
-    public DictServiceImpl(DictValueService dictValueService) {
+    public DictServiceImpl(DictValueService dictValueService, TenantSupport tenantSupport) {
         this.dictValueService = dictValueService;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -48,7 +55,8 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
      */
     @Override
     public Dict selectById(Long id) {
-        return this.getById(id);
+        // 字典为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.getById(id));
     }
 
     /**
@@ -60,8 +68,11 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
      */
     @Override
     public Page<DictVO> queryPage(Page<DictVO> page, DictVO vo) {
-        QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
-        return this.getMapper().paginateAs(page, wrapper, DictVO.class);
+        // 字典为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> {
+            QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
+            return this.getMapper().paginateAs(page, wrapper, DictVO.class);
+        });
     }
 
     /**
@@ -71,7 +82,8 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
      */
     @Override
     public List<Dict> selectList() {
-        return this.list();
+        // 字典为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.list());
     }
 
     /**
@@ -87,7 +99,8 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
             throw new ArtException("数据为空，请检查！");
         }
         Dict entity = ConvertUtil.convert(vo, Dict.class);
-        return this.save(entity);
+        // 字典为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.save(entity));
     }
 
     /**
@@ -103,7 +116,8 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
             throw new ArtException("数据为空，请检查！");
         }
         Dict entity = ConvertUtil.convert(vo, Dict.class);
-        return this.updateById(entity);
+        // 字典为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.updateById(entity));
     }
 
     /**
@@ -115,10 +129,13 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
-        // 先删除字典项
-        dictValueService.remove(QueryWrapper.create().in(DictValue::getDictId, idList));
-        // 删除字典
-        return this.removeByIds(idList);
+        // 字典为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> {
+            // 先删除字典项
+            dictValueService.remove(QueryWrapper.create().in(DictValue::getDictId, idList));
+            // 删除字典
+            return this.removeByIds(idList);
+        });
     }
 
 }

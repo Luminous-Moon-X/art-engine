@@ -6,31 +6,46 @@ import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
- * 租户实体类
+ * 租户实体类（系统级数据，表无 tenant_id 列，操作时必须在系统级作用域内）
  *
  * @author Luminous.X
- * @since 1.0.0
+ * @since 2.0.0
  */
 @Data
-@Table("p_sys_tenant")
 @EqualsAndHashCode(callSuper = true)
+@Table("p_sys_tenant")
 public class Tenant extends BaseEntity {
+    /**
+     * 租户编码
+     */
+    @Column("tenant_code")
+    private String tenantCode;
     /**
      * 租户名称
      */
     @Column("tenant_name")
     private String tenantName;
     /**
-     * 过期时间
+     * 租户套餐ID
      */
-    @Column("expire_time")
-    private LocalDateTime expireTime;
+    @Column("package_id")
+    private Long packageId;
     /**
-     * 启用标志
+     * 启用标识
      */
     @Column("enable_flag")
     private Integer enableFlag;
+    /**
+     * 到期时间
+     */
+    @Column("expire_date")
+    private LocalDate expireDate;
+    /**
+     * 备注
+     */
+    @Column("remark")
+    private String remark;
 }
