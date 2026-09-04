@@ -61,15 +61,13 @@ art:
     enable: ${ART_TENANT_ENABLE:false}
     # 默认租户ID（多租户关闭时登录使用的租户，对应租户表种子数据id=1）
     default-tenant-id: ${ART_TENANT_DEFAULT_ID:1}
-    # 平台级管理菜单的权限标识前缀：此类菜单（菜单管理/字典管理/规则管理等）操作为系统级共享数据，
-    # 不允许分配给租户套餐——分配套餐选择树自动剔除、保存套餐时校验拦截。
-    # 需与数据库 p_sys_menu.permission_sign 实际值一致（前缀匹配：等于前缀或以"前缀:"开头），可按需增删
+    # 平台级管理菜单的权限标识：此类菜单无法被放入租户套餐，只能由超管操作
     platform-menu-sign-prefixes:
-      - system:menuManage
-      - system:dictManage
-      - system:ruleManage
-      - system:tenantManage
-      - system:tenantPackageManage
+      - system:menu:list
+      - system:dict:list
+      - system:rule:list
+      - system:tenant:list
+      - system:tenantPackage:list
   # AI大模型配置
   ai-model:
     model: ${AI_MODEL:deepseek-v4-flash}

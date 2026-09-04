@@ -49,6 +49,7 @@ public class DeptController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取部门信息", description = "根据ID获取部门信息")
+    @SaCheckPermission("system:dept:list")
     public HttpResult<Dept> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.DeptService.selectById(id));
     }
@@ -62,6 +63,7 @@ public class DeptController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询部门信息", description = "分页查询部门信息")
+    @SaCheckPermission("system:dept:list")
     public HttpResult<Page<DeptVO>> page(Page<DeptVO> page, DeptVO vo) {
         return HttpResult.success(this.DeptService.queryPage(page, vo));
     }
@@ -73,6 +75,7 @@ public class DeptController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有部门信息", description = "查询所有部门信息")
+    @SaCheckPermission("system:dept:list")
     public HttpResult<List<DeptVO>> list() {
         return HttpResult.success(this.DeptService.selectList());
     }
@@ -109,6 +112,7 @@ public class DeptController {
     @PostMapping("/add")
     @Operation(summary = "新增部门", description = "新增部门")
     @ApiLog(module = "部门管理", operationType = ApiOperationType.INSERT, description = "新增部门")
+    @SaCheckPermission("system:dept:add")
     public HttpResult<Boolean> add(@RequestBody DeptVO vo) {
         return HttpResult.success(DeptService.add(vo));
     }
@@ -136,6 +140,7 @@ public class DeptController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除部门", description = "根据ID删除部门")
     @ApiLog(module = "部门管理", operationType = ApiOperationType.DELETE, description = "删除部门")
+    @SaCheckPermission("system:dept:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.DeptService.delete(tableRowVO.getIdList()));
     }

@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
@@ -57,6 +58,7 @@ public class KnowledgeDocController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传知识库文档", description = "上传文档到对象存储并写入知识库文档表，关联指定知识库")
     @ApiLog(module = "知识库文档", operationType = ApiOperationType.INSERT, description = "上传知识库文档")
+    @SaCheckPermission("system:knowledge-doc:upload")
     public HttpResult<KnowledgeDocVO> upload(@RequestParam("file") MultipartFile file,
                                              @RequestParam("kbId") Long kbId) {
         return HttpResult.success(this.knowledgeDocService.upload(file, kbId));
@@ -71,6 +73,7 @@ public class KnowledgeDocController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询知识库文档信息", description = "分页查询知识库文档信息")
+    @SaCheckPermission("system:knowledge-doc:list")
     public HttpResult<Page<KnowledgeDocVO>> page(Page<KnowledgeDocVO> page, KnowledgeDocVO vo) {
         return HttpResult.success(this.knowledgeDocService.queryPage(page, vo));
     }
@@ -84,6 +87,7 @@ public class KnowledgeDocController {
     @PostMapping("/parse/{id}")
     @Operation(summary = "解析文档", description = "下载文档并解析内容存储到文档内容表")
     @ApiLog(module = "知识库文档", operationType = ApiOperationType.UPDATE, description = "解析文档")
+    @SaCheckPermission("system:knowledge-doc:parse")
     public HttpResult<Boolean> parse(@PathVariable("id") Long id) {
         this.knowledgeDocService.parse(id);
         return HttpResult.success(true);
@@ -98,6 +102,7 @@ public class KnowledgeDocController {
     @PostMapping("/vector/{id}")
     @Operation(summary = "向量处理文档", description = "分割文档内容并调用向量库处理向量")
     @ApiLog(module = "知识库文档", operationType = ApiOperationType.UPDATE, description = "向量处理文档")
+    @SaCheckPermission("system:knowledge-doc:vector")
     public HttpResult<Boolean> vector(@PathVariable("id") Long id) {
         this.knowledgeDocService.vectorize(id);
         return HttpResult.success(true);
@@ -111,6 +116,7 @@ public class KnowledgeDocController {
      */
     @GetMapping("/content/{docId}")
     @Operation(summary = "查询文档内容", description = "根据文档ID查询文档内容表中的内容")
+    @SaCheckPermission("system:knowledge-doc:content")
     public HttpResult<KnowledgeDocContentVO> content(@PathVariable("docId") Long docId) {
         return HttpResult.success(this.knowledgeDocService.getContent(docId));
     }
@@ -137,6 +143,7 @@ public class KnowledgeDocController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除文档", description = "删除文档、文档内容与对象存储中的文件")
     @ApiLog(module = "知识库文档", operationType = ApiOperationType.DELETE, description = "删除文档")
+    @SaCheckPermission("system:knowledge-doc:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.knowledgeDocService.delete(tableRowVO.getIdList()));
     }

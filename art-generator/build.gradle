@@ -1,4 +1,0 @@
-dependencies {
-    implementation project(":art-core")
-    implementation "${lib.'mybatis-flex-codegen'}"
-}

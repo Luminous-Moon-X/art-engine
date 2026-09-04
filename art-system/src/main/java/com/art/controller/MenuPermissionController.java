@@ -39,7 +39,6 @@ public class MenuPermissionController {
      * @return 菜单权限
      */
     @GetMapping
-    
     public HttpResult<List<String>> getMenuPermission(@RequestParam("type") String type, @RequestParam("id") Long id) {
         return HttpResult.success(this.menuPermissionService.getMenuPermission(type, id));
     }
