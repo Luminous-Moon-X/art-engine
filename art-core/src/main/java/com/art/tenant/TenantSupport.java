@@ -104,7 +104,12 @@ public class TenantSupport {
     /**
      * 是否为平台级管理菜单的权限标识<br/>
      * 平台级管理菜单（菜单管理/字典管理/规则管理/租户管理/租户套餐管理等）操作的是系统级共享数据，
-     * 不允许分配给租户套餐。匹配规则：标识等于配置前缀，或以"前缀:"开头。
+     * 不允许分配给租户套餐。匹配规则：
+     * <ul>
+     *     <li>标识等于配置前缀，或以"前缀:"开头；</li>
+     *     <li>配置前缀为三段式（如 system:menu:list）时，同时拦截该模块下的按钮级标识
+     *     （如 system:menu:add / system:menu:edit），避免按钮权限绕过平台菜单限制。</li>
+     * </ul>
      *
      * @param sign 权限标识
      * @return 是否平台级管理菜单权限
@@ -117,11 +122,29 @@ public class TenantSupport {
             if (StringUtil.isBlank(prefix)) {
                 continue;
             }
-            if (sign.equals(prefix) || sign.startsWith(prefix + ":")) {
+            String trimmedPrefix = prefix.trim();
+            if (sign.equals(trimmedPrefix) || sign.startsWith(trimmedPrefix + ":")) {
                 return true;
+            }
+            // 三段式前缀（system:module:action）同时拦截该模块下的全部标识
+            if (isThreeSegmentSign(trimmedPrefix)) {
+                String modulePrefix = trimmedPrefix.substring(0, trimmedPrefix.lastIndexOf(':'));
+                if (sign.equals(modulePrefix) || sign.startsWith(modulePrefix + ":")) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+
+    /**
+     * 是否为三段式权限标识（如 system:menu:list）
+     *
+     * @param sign 权限标识
+     * @return 是否三段式
+     */
+    private boolean isThreeSegmentSign(String sign) {
+        return sign.chars().filter(ch -> ch == ':').count() == 2;
     }
 
     /**

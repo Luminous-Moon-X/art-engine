@@ -2,6 +2,7 @@ package com.art.service.impl;
 
 import cn.hutool.crypto.digest.MD5;
 import com.art.cache.RuleCache;
+import com.art.config.AuthConfiguration;
 import com.art.constants.TenantConstants;
 import com.art.domain.Dept;
 import com.art.domain.Role;
@@ -17,6 +18,7 @@ import com.art.mapper.TenantMapper;
 import com.art.mapper.TenantPackageMapper;
 import com.art.mapper.UserMapper;
 import com.art.service.TenantService;
+import com.art.tenant.TenantStatusProvider;
 import com.art.tenant.TenantSubjectValidator;
 import com.art.tenant.TenantSupport;
 import com.art.utils.ConvertUtil;
@@ -31,10 +33,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +49,7 @@ import java.util.stream.Collectors;
  * @since 2.0.0
  */
 @Service
-public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> implements TenantService, TenantSubjectValidator {
+public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> implements TenantService, TenantSubjectValidator, TenantStatusProvider {
     /**
      * 多租户支持
      */
@@ -75,6 +80,30 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     private final RedisTemplate<String, String> redisTemplate;
 
     /**
+     * 权限配置（Token有效期）
+     */
+    private final AuthConfiguration authConfiguration;
+
+    /**
+     * 租户状态缓存（短TTL，避免每个请求查询数据库）
+     */
+    private static final long STATUS_CACHE_MILLIS = 30_000L;
+
+    /**
+     * 租户状态本地缓存：tenantId -> 状态快照
+     */
+    private final Map<Long, CachedTenantStatus> tenantStatusCache = new ConcurrentHashMap<>();
+
+    /**
+     * 租户状态缓存条目
+     *
+     * @param status   状态快照（租户不存在时为null）
+     * @param expireAt 缓存过期时间戳（毫秒）
+     */
+    private record CachedTenantStatus(TenantStatus status, long expireAt) {
+    }
+
+    /**
      * 构造函数
      *
      * @param tenantSupport       多租户支持
@@ -84,10 +113,12 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
      * @param deptMapper          部门Mapper
      * @param ruleCache           规则缓存
      * @param redisTemplate       Redis客户端
+     * @param authConfiguration   权限配置
      */
     public TenantServiceImpl(TenantSupport tenantSupport, TenantPackageMapper tenantPackageMapper, UserMapper userMapper,
                              RoleMapper roleMapper, DeptMapper deptMapper,
-                             RuleCache ruleCache, RedisTemplate<String, String> redisTemplate) {
+                             RuleCache ruleCache, RedisTemplate<String, String> redisTemplate,
+                             AuthConfiguration authConfiguration) {
         this.tenantSupport = tenantSupport;
         this.tenantPackageMapper = tenantPackageMapper;
         this.userMapper = userMapper;
@@ -95,6 +126,42 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         this.deptMapper = deptMapper;
         this.ruleCache = ruleCache;
         this.redisTemplate = redisTemplate;
+        this.authConfiguration = authConfiguration;
+    }
+
+    /**
+     * 查询租户状态（带30秒本地缓存，供请求拦截器每请求校验）
+     *
+     * @param tenantId 租户ID
+     * @return 租户状态（租户不存在时返回null）
+     */
+    @Override
+    public TenantStatus getStatus(Long tenantId) {
+        if (tenantId == null) {
+            return null;
+        }
+        long now = System.currentTimeMillis();
+        CachedTenantStatus cached = tenantStatusCache.get(tenantId);
+        if (cached != null && cached.expireAt() > now) {
+            return cached.status();
+        }
+        Tenant tenant = tenantSupport.systemScope(() -> this.getById(tenantId));
+        TenantStatus status = tenant == null ? null
+                : new TenantStatus(tenant.getEnableFlag(), tenant.getExpireDate());
+        tenantStatusCache.put(tenantId, new CachedTenantStatus(status, now + STATUS_CACHE_MILLIS));
+        return status;
+    }
+
+    /**
+     * 清理租户状态缓存
+     *
+     * @param tenantIds 租户ID集合
+     */
+    private void evictStatusCache(List<Long> tenantIds) {
+        if (tenantIds == null || tenantIds.isEmpty()) {
+            return;
+        }
+        tenantIds.forEach(tenantStatusCache::remove);
     }
 
     /**
@@ -290,7 +357,12 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
                 }
             }
             Tenant entity = ConvertUtil.convert(vo, Tenant.class);
-            return this.updateById(entity);
+            boolean result = this.updateById(entity);
+            if (result) {
+                // 状态变更后立即失效本地状态缓存，使禁用/到期在下一次请求生效
+                this.evictStatusCache(List.of(vo.getId()));
+            }
+            return result;
         });
     }
 
@@ -317,7 +389,11 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
                     throw new ArtException("租户下存在用户，无法删除！");
                 }
             }
-            return this.removeByIds(idList);
+            boolean result = this.removeByIds(idList);
+            if (result) {
+                this.evictStatusCache(idList);
+            }
+            return result;
         });
     }
 
@@ -356,11 +432,17 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         if (tenant == null || !Integer.valueOf(1).equals(tenant.getEnableFlag())) {
             throw new ArtException("租户不存在或已禁用！");
         }
+        // 与登录路径保持一致：已到期租户不允许切换进入
+        if (tenant.getExpireDate() != null && tenant.getExpireDate().isBefore(LocalDate.now())) {
+            throw new ArtException("租户已到期，请联系管理员！");
+        }
         String token = SecurityUtil.getToken();
         if (StringUtil.isBlank(token)) {
             throw new ArtException("登录状态已失效，请重新登录！");
         }
-        redisTemplate.opsForValue().set(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token, String.valueOf(tenantId));
+        // 会话租户上下文与登录态同寿命，避免 token 过期后 Redis 键无限累积
+        redisTemplate.opsForValue().set(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token, String.valueOf(tenantId),
+                authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
         return true;
     }
 

@@ -13,19 +13,20 @@ import com.agentsflex.core.model.chat.response.AiMessageResponse;
 import com.agentsflex.core.model.client.StreamContext;
 import com.agentsflex.core.prompt.MemoryPrompt;
 import com.agentsflex.core.store.SearchWrapper;
-import com.agentsflex.core.store.StoreResult;
 import com.agentsflex.rerank.DefaultRerankModel;
 import com.agentsflex.store.pgvector.PgvectorVectorStore;
 import com.alibaba.fastjson2.JSON;
-import com.art.DocumentUtil;
+import com.art.context.SecurityContextHolder;
 import com.art.domain.AiChatMessage;
 import com.art.domain.AiConversation;
+import com.art.domain.KnowledgeBase;
 import com.art.domain.vo.ChatMessageVO;
 import com.art.domain.vo.ConversationVO;
 import com.art.domain.vo.UserChatVO;
 import com.art.exception.ArtException;
 import com.art.mapper.AiChatMessageMapper;
 import com.art.mapper.AiConversationMapper;
+import com.art.mapper.KnowledgeBaseMapper;
 import com.art.memory.RedisChatMemory;
 import com.art.prompt.SystemPromptProvider;
 import com.art.service.AIChatService;
@@ -35,18 +36,18 @@ import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * AI对话服务实现类
@@ -94,6 +95,11 @@ public class AIChatServiceImpl implements AIChatService {
     private final AiChatMessageMapper aiChatMessageMapper;
 
     /**
+     * 知识库Mapper（校验知识库归属、限定RAG检索范围）
+     */
+    private final KnowledgeBaseMapper knowledgeBaseMapper;
+
+    /**
      * 对话记忆key前缀
      */
     private static final String AI_CHAT_MEMORY_KEY = "ai_chat_memory";
@@ -123,11 +129,12 @@ public class AIChatServiceImpl implements AIChatService {
      * @param rerankModel          重排模型
      * @param aiConversationMapper 对话表映射层
      * @param aiChatMessageMapper  对话内容表映射层
+     * @param knowledgeBaseMapper  知识库Mapper
      */
     public AIChatServiceImpl(ChatModel artChatClient, SystemPromptProvider systemPromptProvider,
                              RedisTemplate<String, Message> messageRedisTemplate, PgvectorVectorStore vectorStore,
                              @Nullable DefaultRerankModel rerankModel, AiConversationMapper aiConversationMapper,
-                             AiChatMessageMapper aiChatMessageMapper) {
+                             AiChatMessageMapper aiChatMessageMapper, KnowledgeBaseMapper knowledgeBaseMapper) {
         this.artChatClient = artChatClient;
         this.systemPromptProvider = systemPromptProvider;
         this.redisTemplate = messageRedisTemplate;
@@ -135,6 +142,7 @@ public class AIChatServiceImpl implements AIChatService {
         this.rerankModel = rerankModel;
         this.aiConversationMapper = aiConversationMapper;
         this.aiChatMessageMapper = aiChatMessageMapper;
+        this.knowledgeBaseMapper = knowledgeBaseMapper;
     }
 
     /**
@@ -165,6 +173,8 @@ public class AIChatServiceImpl implements AIChatService {
         if (userId == null) {
             throw new ArtException(401, "用户未登录或登录已过期");
         }
+        // 流式回调在OkHttp网络线程执行，需在请求线程捕获租户上下文并显式传入
+        Long tenantId = SecurityUtil.getTenantId();
         // 超时时间5分钟
         SseEmitter emitter = new SseEmitter(5 * 60 * 1000L);
         // 保存用户消息
@@ -196,7 +206,7 @@ public class AIChatServiceImpl implements AIChatService {
             @Override
             public void onClose(StreamContext context) {
                 try {
-                    handleStreamClose(emitter, prompt, context, chatId, question, userId);
+                    handleStreamClose(emitter, prompt, context, chatId, question, userId, tenantId);
                 } catch (Exception e) {
                     log.error("AI对话结束处理失败", e);
                     sendErrorAndComplete(emitter, "AI服务异常，请稍后重试");
@@ -216,6 +226,32 @@ public class AIChatServiceImpl implements AIChatService {
     /**
      * 处理流式对话结束后的业务逻辑：落库消息、创建/更新对话、总结主题、推送完成事件
      *
+     * <p>回调可能由网络线程执行，此处显式补全租户/用户上下文，
+     * 保证会话与消息落库时的 tenant_id 正确。</p>
+     *
+     * @param emitter  SSE连接
+     * @param prompt   对话提示词
+     * @param context  流式上下文
+     * @param chatId   对话ID
+     * @param question 用户问题
+     * @param userId   用户ID
+     * @param tenantId 生效租户ID
+     */
+    private void handleStreamClose(SseEmitter emitter, MemoryPrompt prompt, StreamContext context,
+                                   String chatId, String question, Long userId, Long tenantId) {
+        try {
+            SecurityContextHolder.setTenantId(tenantId);
+            SecurityContextHolder.setUserId(userId);
+            this.handleStreamCloseInternal(emitter, prompt, context, chatId, question, userId);
+        } finally {
+            // 网络线程为池化线程，必须清理上下文，避免影响后续回调
+            SecurityContextHolder.clear();
+        }
+    }
+
+    /**
+     * 处理流式对话结束后的业务逻辑（执行体）
+     *
      * @param emitter  SSE连接
      * @param prompt   对话提示词
      * @param context  流式上下文
@@ -223,8 +259,8 @@ public class AIChatServiceImpl implements AIChatService {
      * @param question 用户问题
      * @param userId   用户ID
      */
-    private void handleStreamClose(SseEmitter emitter, MemoryPrompt prompt, StreamContext context,
-                                   String chatId, String question, Long userId) {
+    private void handleStreamCloseInternal(SseEmitter emitter, MemoryPrompt prompt, StreamContext context,
+                                           String chatId, String question, Long userId) {
         AiMessage aiMessage = context.getFullMessage();
         if (aiMessage != null) {
             prompt.addMessage(aiMessage);
@@ -455,23 +491,39 @@ public class AIChatServiceImpl implements AIChatService {
     /**
      * 查询RAG知识库并将检索内容作为过程消息（不入记忆）附加到提示词
      *
+     * <p>多租户隔离：指定知识库时校验其归属当前租户；未指定时只检索
+     * 当前租户名下的知识库与直接向量化的文档，避免跨租户内容泄露。</p>
+     *
      * @param prompt   对话提示词
      * @param question 用户问题
      * @param kbId     知识库id
      */
     private void attachRagContext(MemoryPrompt prompt, String question, Long kbId) {
-        SearchWrapper wrapper = new SearchWrapper()
-                .text(question).maxResults(20).minScore(0.2).outputVector(true);
+        List<Document> ragDocuments = new ArrayList<>();
         if (kbId != null) {
-            wrapper.eq("metadata.kb_id", kbId);
+            // 指定知识库时必须属于当前生效租户
+            if (knowledgeBaseMapper.selectOneById(kbId) == null) {
+                throw new ArtException("知识库不存在或无权访问");
+            }
+            ragDocuments.addAll(this.searchRagDocuments(question, wrapper -> wrapper.eq("metadata.kb_id", kbId)));
+        } else {
+            // 未指定知识库：仅检索当前租户名下的知识库（逐个知识库过滤，避免跨租户检索）
+            for (Long tenantKbId : this.currentTenantKnowledgeBaseIds()) {
+                ragDocuments.addAll(this.searchRagDocuments(question, wrapper -> wrapper.eq("metadata.kb_id", tenantKbId)));
+            }
         }
-        List<Document> ragDocuments = vectorStore.search(wrapper);
+        // 多路检索结果按文档ID去重
+        ragDocuments = new ArrayList<>(ragDocuments.stream()
+                .filter(document -> document.getId() != null)
+                .collect(Collectors.toMap(Document::getId, document -> document, (a, b) -> a, LinkedHashMap::new))
+                .values());
         // 重排模型优化精确度
         if (CollectionUtil.isNotEmpty(ragDocuments)) {
             if (rerankModel != null) {
                 ragDocuments = rerankModel.rerank(question, ragDocuments);
             }
-            ragDocuments.subList(0, Math.min(ragDocuments.size(), 5));
+            // 仅取相似度最高的前5条作为上下文
+            ragDocuments = new ArrayList<>(ragDocuments.subList(0, Math.min(ragDocuments.size(), 5)));
             // 使用XML格式的结构化数据
             StringBuilder ragContent = new StringBuilder("<context>");
             ragDocuments.forEach(document -> {
@@ -484,6 +536,33 @@ public class AIChatServiceImpl implements AIChatService {
             AiMessage aiMessage = new AiMessage(ragContent.toString());
             prompt.addMessageTemporary(aiMessage);
         }
+    }
+
+    /**
+     * 执行一次RAG向量检索
+     *
+     * @param question 用户问题
+     * @param filter   元数据过滤条件
+     * @return 检索结果
+     */
+    private List<Document> searchRagDocuments(String question, java.util.function.Consumer<SearchWrapper> filter) {
+        SearchWrapper wrapper = new SearchWrapper()
+                .text(question).maxResults(20).minScore(0.2).outputVector(true);
+        filter.accept(wrapper);
+        return vectorStore.search(wrapper);
+    }
+
+    /**
+     * 查询当前生效租户名下的知识库ID集合
+     *
+     * @return 知识库ID集合
+     */
+    private List<Long> currentTenantKnowledgeBaseIds() {
+        return knowledgeBaseMapper.selectListByQuery(QueryWrapper.create())
+                .stream()
+                .map(KnowledgeBase::getId)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     /**
@@ -592,43 +671,6 @@ public class AIChatServiceImpl implements AIChatService {
             throw new ArtException(401, "用户未登录或登录已过期");
         }
         return userId;
-    }
-
-    /**
-     * 向量化处理文档
-     *
-     * @param file 文档
-     */
-    @Override
-    public void vectorDoc(MultipartFile file) {
-        String documentText;
-        try {
-            // 解析文档内容
-            documentText = DocumentUtil.extract(file);
-        } catch (IOException e) {
-            throw new ArtException("文档解析失败：", e);
-        }
-        String fileName = file.getOriginalFilename();
-        List<Document> documents = new ArrayList<>();
-        // 大模型语义分割对文档最大长度有限制，先根据最大长度分割后再循坏处理向量化存储
-        if (documentText.length() > 10000) {
-            List<String> docSplit = splitFixedLength(documentText, 10000);
-            docSplit.forEach(doc -> {
-                Document document = Document.of(doc);
-                document.setTitle(fileName);
-                documents.addAll(DocumentUtil.splitAi(document, artChatClient));
-            });
-        } else {
-            Document document = Document.of(documentText);
-            document.setTitle(fileName);
-            // 按照段落拆分文档
-            documents.addAll(DocumentUtil.splitAi(document, artChatClient));
-        }
-        StoreResult store = vectorStore.store(documents);
-        if (store.getException() != null) {
-            throw new ArtException("文档向量化失败：", store.getException());
-        }
-        log.info("文档向量化成功：{}", fileName);
     }
 
 

@@ -8,7 +8,6 @@ import com.art.service.AIChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
@@ -87,16 +86,6 @@ public class AIChatController {
     public HttpResult<Boolean> deleteConversation(@PathVariable("conversationId") String conversationId) {
         this.aiChatService.deleteConversation(conversationId);
         return HttpResult.success(true);
-    }
-
-    /**
-     * 上传解析文档
-     *
-     * @param file 文档
-     */
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void upload(@RequestPart("file") MultipartFile file) {
-        this.aiChatService.vectorDoc(file);
     }
 
 }

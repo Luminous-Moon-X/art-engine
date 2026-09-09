@@ -166,8 +166,9 @@ public class AuthServiceImpl implements AuthService {
             loginResultVO.setToken(token);
         }
 
-        // 发布登录日志事件
-        eventPublisher.publishEvent(new LoginLogEvent(user.getUserName(), user.getNickName(), request));
+        // 发布登录日志事件（携带生效租户，保证日志在多租户下可归属可查询）
+        Long logTenantId = loginTenantId != null ? loginTenantId : user.getTenantId();
+        eventPublisher.publishEvent(new LoginLogEvent(user.getUserName(), user.getNickName(), request, logTenantId));
 
         return loginResultVO;
     }
@@ -221,7 +222,9 @@ public class AuthServiceImpl implements AuthService {
         if (sessionTenantId == null) {
             return;
         }
-        redisTemplate.opsForValue().set(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token, String.valueOf(sessionTenantId));
+        // 会话租户上下文与登录态同寿命，避免 token 过期后 Redis 键无限累积
+        redisTemplate.opsForValue().set(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token, String.valueOf(sessionTenantId),
+                authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
     }
 
     /**
@@ -243,22 +246,35 @@ public class AuthServiceImpl implements AuthService {
         // 从Redis中删除临时token（一次性使用）
         redisTemplate.delete(tempTokenKey);
         
-        // 解析用户信息
-        User user = JSON.parseObject(userJson, User.class);
+        // 解析用户信息（仅用于定位用户，避免用登录时的旧快照回写覆盖最新状态）
+        User snapshot = JSON.parseObject(userJson, User.class);
+        if (snapshot == null || snapshot.getId() == null) {
+            throw new ArtException("临时令牌无效或已过期！");
+        }
         
         // 验证新密码是否为空
         if (StringUtils.isBlank(newPassword)) {
             throw new ArtException("新密码不能为空！");
         }
         
-        // 更新用户密码和首次登录标志
+        // 以数据库当前状态为准：用户可能已被禁用/删除，或租户归属已调整
+        User currentUser = tenantSupport.systemScope(() -> userService.getById(snapshot.getId()));
+        if (currentUser == null) {
+            throw new ArtException("用户不存在，请联系管理员！");
+        }
+        if (currentUser.getEnableFlag() != null && currentUser.getEnableFlag() == 0) {
+            throw new ArtException("该用户已被禁用，请联系管理员！");
+        }
+        
+        // 仅更新密码与首次登录标志，不覆盖其它字段
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String encodedPassword = encoder.encode(newPassword);
-        user.setPassword(encodedPassword);
-        user.setFirstLoginFlag(0); // 设置为非首次登录
+        User update = new User();
+        update.setId(currentUser.getId());
+        update.setPassword(encoder.encode(newPassword));
+        update.setFirstLoginFlag(0); // 设置为非首次登录
         
         // 更新用户信息
-        return tenantSupport.systemScope(() -> userService.updateById(user));
+        return tenantSupport.systemScope(() -> userService.updateById(update));
     }
 
     /**

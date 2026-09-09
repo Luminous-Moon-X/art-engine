@@ -21,7 +21,9 @@ import com.art.utils.SecurityUtil;
 import com.art.utils.StringUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -121,7 +123,7 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
         String userType = SecurityUtil.getUserType();
         // 超级管理员：全部菜单权限标识
         if (tenantSupport.isSuperAdmin(userType) && StringUtil.isBlank(type)) {
-            return this.menuAuthCache.get();
+            return Collections.singletonList("*");
         }
         // 租户管理员：默认拥有全部权限；多租户开启时收敛到套餐菜单范围
         // 平台级管理菜单权限标识一律剔除，不可下发给租户
@@ -136,6 +138,8 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
             return tenantSupport.filterPlatformMenuSigns(this.menuAuthCache.get());
         }
         if (StringUtil.isNotBlank(type)) {
+            // 授权主体必须属于当前生效租户，防止跨租户读取授权配置
+            this.tenantSubjectValidator.validateAssignable(type, id);
             // 获取指定用户、角色或部门的功能权限
             return switch (type) {
                 case "user" -> this.userPermissionCache.getByUserId(id)
@@ -180,10 +184,11 @@ public class MenuPermissionServiceImpl implements MenuPermissionService {
      * @return 是否成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean setPermission(MenuPermissionVO vo) {
         String type = vo.getType();
         Long id = vo.getId();
-        List<String> permissionSignList = vo.getPermissionSignList();
+        List<String> permissionSignList = vo.getPermissionSignList() == null ? List.of() : vo.getPermissionSignList();
         // 授权主体（角色/用户/部门）必须属于当前生效租户，防止跨租户授权
         this.tenantSubjectValidator.validateAssignable(type, id);
         // 多租户开启：非超级管理员只能分配套餐范围内的菜单权限

@@ -1,14 +1,11 @@
 package com.art.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.art.domain.OssConfig;
 import com.art.domain.OssFile;
 import com.art.domain.vo.OssFileVO;
 import com.art.exception.ArtException;
-import com.art.mapper.OssConfigMapper;
 import com.art.mapper.OssFileMapper;
 import com.art.service.OssFileService;
-import com.art.storage.ObjectStorageClientFactory;
 import com.art.storage.ObjectStorageObject;
 import com.art.storage.ObjectStorageService;
 import com.art.storage.ObjectStorageServiceManager;
@@ -44,28 +41,12 @@ public class OssFileServiceImpl extends ServiceImpl<OssFileMapper, OssFile> impl
     private final ObjectStorageServiceManager objectStorageServiceManager;
 
     /**
-     * 对象存储客户端工厂
-     */
-    private final ObjectStorageClientFactory objectStorageClientFactory;
-
-    /**
-     * OSS配置Mapper
-     */
-    private final OssConfigMapper ossConfigMapper;
-
-    /**
      * 构造函数。
      *
      * @param objectStorageServiceManager 对象存储服务管理器
-     * @param objectStorageClientFactory  对象存储客户端工厂
-     * @param ossConfigMapper             OSS配置Mapper
      */
-    public OssFileServiceImpl(ObjectStorageServiceManager objectStorageServiceManager,
-                              ObjectStorageClientFactory objectStorageClientFactory,
-                              OssConfigMapper ossConfigMapper) {
+    public OssFileServiceImpl(ObjectStorageServiceManager objectStorageServiceManager) {
         this.objectStorageServiceManager = objectStorageServiceManager;
-        this.objectStorageClientFactory = objectStorageClientFactory;
-        this.ossConfigMapper = ossConfigMapper;
     }
 
     /**
@@ -141,13 +122,16 @@ public class OssFileServiceImpl extends ServiceImpl<OssFileMapper, OssFile> impl
     /**
      * 根据文件ID下载对象。
      *
+     * <p>按文件自身记录的OSS配置下载：文件可能是由全局配置或历史配置上传的，
+     * 使用当前租户的配置会导致下载到错误的桶。</p>
+     *
      * @param id 文件ID
      * @return 对象内容
      */
     @Override
     public ObjectStorageObject downloadObject(Long id) {
         OssFile file = getFileById(id);
-        return objectStorageServiceManager.download(file.getObjectKey());
+        return objectStorageServiceManager.serviceForConfig(file.getOssConfigId()).download(file.getObjectKey());
     }
 
     /**
@@ -181,11 +165,8 @@ public class OssFileServiceImpl extends ServiceImpl<OssFileMapper, OssFile> impl
             if (file == null) {
                 continue;
             }
-            OssConfig config = ossConfigMapper.selectOneById(file.getOssConfigId());
-            if (config == null) {
-                throw new ArtException("文件对应的对象存储配置不存在，无法删除");
-            }
-            ObjectStorageService service = objectStorageClientFactory.create(config);
+            // 文件对应的配置可能为全局/历史配置，按文件自身配置读取
+            ObjectStorageService service = objectStorageServiceManager.serviceForConfig(file.getOssConfigId());
             service.delete(file.getObjectKey());
             boolean removed = this.removeById(id);
             if (!removed) {
