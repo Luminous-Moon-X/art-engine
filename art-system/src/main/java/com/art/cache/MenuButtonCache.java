@@ -73,7 +73,8 @@ public class MenuButtonCache extends ArtCache<List<MenuVO>> {
     protected List<MenuVO> loadFromDb() {
         // 菜单按钮为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> {
-            QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getMenuType, "button");
+            // 仅加载启用中的按钮，禁用（enableFlag=0）按钮不参与功能权限
+            QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getMenuType, "button").eq(Menu::getEnableFlag, 1);
             return this.menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
         });
     }

@@ -63,7 +63,8 @@ public class MenuCache extends ArtCache<List<MenuTreeVO>> {
     protected List<MenuTreeVO> loadFromDb() {
         // 菜单为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> {
-            QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getParentId, -1);
+            // 仅加载启用中的菜单，禁用（enableFlag=0）菜单不出现在导航树中
+            QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getParentId, -1).eq(Menu::getEnableFlag, 1);
             wrapper.orderBy(Menu::getOrderNum, true);
             List<MenuVO> menuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
             return this.handleMenuTree(menuList);
@@ -87,10 +88,11 @@ public class MenuCache extends ArtCache<List<MenuTreeVO>> {
             // 封装Meta
             MenuMetaVO meta = getMenuMetaVO(menuVO);
             menuTreeVO.setMeta(meta);
-            // 判断是否有子菜单
+            // 判断是否有子菜单（子菜单同样只加载启用中的菜单）
             QueryWrapper wrapper = QueryWrapper.create()
                     .eq(Menu::getParentId, menuVO.getId())
                     .eq(Menu::getMenuType, "menu")
+                    .eq(Menu::getEnableFlag, 1)
                     .orderBy(Menu::getOrderNum, true);
             List<MenuVO> childMenuList = menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
             if (!childMenuList.isEmpty()) {
