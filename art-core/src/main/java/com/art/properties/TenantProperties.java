@@ -1,4 +1,4 @@
-package com.art.config;
+package com.art.properties;
 
 import lombok.Getter;
 import lombok.Setter;

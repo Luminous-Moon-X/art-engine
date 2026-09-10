@@ -1,4 +1,4 @@
-package com.art.config;
+package com.art.properties;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 @Component
 @ConfigurationProperties(prefix = "art.auth")
-public class AuthConfiguration {
+public class AuthProperties {
     /**
      * token过期时间
      */

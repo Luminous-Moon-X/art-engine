@@ -4,7 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.art.auth.cache.RoleCache;
 import com.art.auth.cache.UserRoleCache;
 import com.art.common.LoginUser;
-import com.art.config.AuthConfiguration;
+import com.art.properties.AuthProperties;
 import com.art.constants.TenantConstants;
 import com.art.context.SecurityContextHolder;
 import com.art.exception.ArtException;
@@ -42,7 +42,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
     /**
      * Token有效期配置
      */
-    private final AuthConfiguration authConfiguration;
+    private final AuthProperties authProperties;
     /**
      * 用户角色缓存
      */
@@ -64,17 +64,17 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
      * 构造器注入
      *
      * @param redisTemplate        Redis客户端
-     * @param authConfiguration    Token有效期配置
+     * @param authProperties    Token有效期配置
      * @param userRoleCache        用户角色缓存
      * @param roleCache            角色缓存
      * @param tenantSupport        多租户支持
      * @param tenantStatusProvider 租户状态提供者
      */
-    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate, AuthConfiguration authConfiguration,
+    public RequestHeaderInterceptor(RedisTemplate<String, String> redisTemplate, AuthProperties authProperties,
                                     UserRoleCache userRoleCache, RoleCache roleCache, TenantSupport tenantSupport,
                                     TenantStatusProvider tenantStatusProvider) {
         this.redisTemplate = redisTemplate;
-        this.authConfiguration = authConfiguration;
+        this.authProperties = authProperties;
         this.userRoleCache = userRoleCache;
         this.roleCache = roleCache;
         this.tenantSupport = tenantSupport;
@@ -114,8 +114,8 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         }
 
         // Token续期
-        redisTemplate.expire(tokenKey, Duration.ofMinutes(authConfiguration.getTokenExpireTime()));
-        StpUtil.renewTimeout(authConfiguration.getTokenExpireTime() * 60L);
+        redisTemplate.expire(tokenKey, Duration.ofMinutes(authProperties.getTokenExpireTime()));
+        StpUtil.renewTimeout(authProperties.getTokenExpireTime() * 60L);
 
         LoginUser loginUser = JSON.parseObject(userInfoJson, LoginUser.class);
         if (loginUser == null) {
@@ -155,7 +155,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
             if (StringUtil.isNotBlank(tenantContext)) {
                 sessionTenantId = Long.parseLong(tenantContext.trim());
                 // 与登录态同步续期，避免上下文键在会话仍有效时提前过期或长期残留
-                redisTemplate.expire(tenantContextKey, Duration.ofMinutes(authConfiguration.getTokenExpireTime()));
+                redisTemplate.expire(tenantContextKey, Duration.ofMinutes(authProperties.getTokenExpireTime()));
             }
         } catch (NumberFormatException ignored) {
             // 租户上下文非法时回退到用户自身租户

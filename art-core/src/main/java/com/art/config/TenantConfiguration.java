@@ -1,6 +1,7 @@
 package com.art.config;
 
 import com.art.context.SecurityContextHolder;
+import com.art.properties.TenantProperties;
 import com.mybatisflex.core.tenant.TenantFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

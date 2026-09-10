@@ -1,6 +1,6 @@
 package com.art.storage;
 
-import com.art.config.AuthConfiguration;
+import com.art.properties.AuthProperties;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -36,15 +36,15 @@ public class OssSecretCrypto {
     /**
      * 认证配置
      */
-    private final AuthConfiguration authConfiguration;
+    private final AuthProperties authProperties;
 
     /**
      * 构造函数。
      *
-     * @param authConfiguration 认证配置
+     * @param authProperties 认证配置
      */
-    public OssSecretCrypto(AuthConfiguration authConfiguration) {
-        this.authConfiguration = authConfiguration;
+    public OssSecretCrypto(AuthProperties authProperties) {
+        this.authProperties = authProperties;
     }
 
     /**
@@ -104,7 +104,7 @@ public class OssSecretCrypto {
      */
     private SecretKeySpec buildKey() throws Exception {
         byte[] keyBytes = MessageDigest.getInstance("SHA-256")
-                .digest(authConfiguration.getSecretKey().getBytes(StandardCharsets.UTF_8));
+                .digest(authProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
         return new SecretKeySpec(keyBytes, "AES");
     }
 }

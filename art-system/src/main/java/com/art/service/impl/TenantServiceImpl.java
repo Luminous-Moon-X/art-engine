@@ -2,7 +2,7 @@ package com.art.service.impl;
 
 import cn.hutool.crypto.digest.MD5;
 import com.art.cache.RuleCache;
-import com.art.config.AuthConfiguration;
+import com.art.properties.AuthProperties;
 import com.art.constants.TenantConstants;
 import com.art.domain.Dept;
 import com.art.domain.Role;
@@ -82,7 +82,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     /**
      * 权限配置（Token有效期）
      */
-    private final AuthConfiguration authConfiguration;
+    private final AuthProperties authProperties;
 
     /**
      * 租户状态缓存（短TTL，避免每个请求查询数据库）
@@ -113,12 +113,12 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
      * @param deptMapper          部门Mapper
      * @param ruleCache           规则缓存
      * @param redisTemplate       Redis客户端
-     * @param authConfiguration   权限配置
+     * @param authProperties   权限配置
      */
     public TenantServiceImpl(TenantSupport tenantSupport, TenantPackageMapper tenantPackageMapper, UserMapper userMapper,
                              RoleMapper roleMapper, DeptMapper deptMapper,
                              RuleCache ruleCache, RedisTemplate<String, String> redisTemplate,
-                             AuthConfiguration authConfiguration) {
+                             AuthProperties authProperties) {
         this.tenantSupport = tenantSupport;
         this.tenantPackageMapper = tenantPackageMapper;
         this.userMapper = userMapper;
@@ -126,7 +126,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         this.deptMapper = deptMapper;
         this.ruleCache = ruleCache;
         this.redisTemplate = redisTemplate;
-        this.authConfiguration = authConfiguration;
+        this.authProperties = authProperties;
     }
 
     /**
@@ -442,7 +442,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         }
         // 会话租户上下文与登录态同寿命，避免 token 过期后 Redis 键无限累积
         redisTemplate.opsForValue().set(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token, String.valueOf(tenantId),
-                authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
+                authProperties.getTokenExpireTime(), TimeUnit.MINUTES);
         return true;
     }
 

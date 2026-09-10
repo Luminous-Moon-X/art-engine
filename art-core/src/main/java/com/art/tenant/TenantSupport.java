@@ -1,6 +1,6 @@
 package com.art.tenant;
 
-import com.art.config.TenantProperties;
+import com.art.properties.TenantProperties;
 import com.art.constants.TenantConstants;
 import com.art.utils.StringUtil;
 import com.mybatisflex.core.tenant.TenantManager;

@@ -4,7 +4,7 @@ import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.alibaba.fastjson2.JSON;
-import com.art.config.AuthConfiguration;
+import com.art.properties.AuthProperties;
 import com.art.constants.TenantConstants;
 import com.art.domain.Tenant;
 import com.art.domain.User;
@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * 权限配置
      */
-    private final AuthConfiguration authConfiguration;
+    private final AuthProperties authProperties;
     /**
      * 事件发布器
      */
@@ -70,17 +70,17 @@ public class AuthServiceImpl implements AuthService {
      *
      * @param userService       用户表Service层逻辑
      * @param redisTemplate     Redis操作对象
-     * @param authConfiguration 权限配置
+     * @param authProperties 权限配置
      * @param eventPublisher    事件发布器
      * @param tenantSupport     多租户支持
      * @param tenantService     租户服务
      */
     public AuthServiceImpl(UserService userService, RedisTemplate<String, String> redisTemplate,
-                           AuthConfiguration authConfiguration, ApplicationEventPublisher eventPublisher,
+                           AuthProperties authProperties, ApplicationEventPublisher eventPublisher,
                            TenantSupport tenantSupport, TenantService tenantService) {
         this.userService = userService;
         this.redisTemplate = redisTemplate;
-        this.authConfiguration = authConfiguration;
+        this.authProperties = authProperties;
         this.eventPublisher = eventPublisher;
         this.tenantSupport = tenantSupport;
         this.tenantService = tenantService;
@@ -160,7 +160,7 @@ public class AuthServiceImpl implements AuthService {
             String token = tokenInfo.getTokenValue();
             // 将token存储到Redis
             redisTemplate.opsForValue().set("access_token:" + token, JSON.toJSONString(user),
-                    authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
+                    authProperties.getTokenExpireTime(), TimeUnit.MINUTES);
             // 初始化会话生效租户（超级管理员登录时写入，可随后切换）
             this.initSessionTenant(token, user, loginTenantId);
             loginResultVO.setToken(token);
@@ -224,7 +224,7 @@ public class AuthServiceImpl implements AuthService {
         }
         // 会话租户上下文与登录态同寿命，避免 token 过期后 Redis 键无限累积
         redisTemplate.opsForValue().set(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token, String.valueOf(sessionTenantId),
-                authConfiguration.getTokenExpireTime(), TimeUnit.MINUTES);
+                authProperties.getTokenExpireTime(), TimeUnit.MINUTES);
     }
 
     /**
