@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.LoginLog;
@@ -36,6 +37,7 @@ public class LoginLogController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询登录日志", description = "分页查询登录日志")
+    @SaCheckPermission("system:login-log:list")
     public HttpResult<Page<LoginLog>> page(Page<LoginLog> page, LoginLogVO vo) {
         return HttpResult.success(this.loginLogService.queryPage(page, vo));
     }
@@ -48,6 +50,7 @@ public class LoginLogController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除登录日志", description = "根据ID删除登录日志")
+    @SaCheckPermission("system:login-log:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.loginLogService.removeByIds(tableRowVO.getIdList()));
     }

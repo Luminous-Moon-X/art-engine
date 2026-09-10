@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.domain.vo.MenuPermissionVO;
@@ -51,6 +52,7 @@ public class MenuPermissionController {
      */
     @PostMapping()
     @ApiLog(module = "菜单权限管理", operationType = ApiOperationType.UPDATE, description = "设置菜单权限")
+    @SaCheckPermission("system:menu-permission:edit")
     public HttpResult<Boolean> setPermission(@RequestBody MenuPermissionVO vo) {
         return HttpResult.success(this.menuPermissionService.setPermission(vo));
     }
