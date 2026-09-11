@@ -73,11 +73,11 @@ git clone https://github.com/Luminous-Moon-X/art-engine.git
 # 3. 修改连接配置：编辑 art-runner/src/main/resources/application-dev.yml
 #    （数据库、Redis 等信息也支持通过环境变量覆盖，如 DB_HOST、REDIS_HOST 等）
 
-# 4. 启动应用（默认端口 8080，接口前缀 /api）
+# 4. 启动应用（默认端口 8089，接口前缀 /api）
 ./gradlew :art-runner:bootRun
 
 # 5. 查看接口文档
-#    http://localhost:8080/api/swagger-ui.html
+#    http://localhost:8089/api/swagger-ui.html
 ```
 
 > Windows 环境请使用 `gradlew.bat`。
