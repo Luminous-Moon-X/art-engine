@@ -70,6 +70,10 @@ public class LoginUser {
      */
     private String userType;
     /**
+     * 租户ID
+     */
+    private Long tenantId;
+    /**
      * 用户标签
      */
     private String userTag;

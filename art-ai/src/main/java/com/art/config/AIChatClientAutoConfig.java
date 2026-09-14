@@ -3,6 +3,7 @@ package com.art.config;
 import com.agentsflex.core.model.chat.ChatModel;
 import com.agentsflex.model.chat.openai.OpenAIChatConfig;
 import com.agentsflex.model.chat.openai.OpenAIChatModel;
+import com.art.interceptor.OpencodeGoInterceptor;
 import com.art.properties.BigModelProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,7 @@ public class AIChatClientAutoConfig {
         config.setThinkingEnabled(artModelProperties.getThinkingEnabled());
         config.setLogEnabled(false);  // 关闭日志
         OpenAIChatModel openAIChatModel = new OpenAIChatModel(config);
+        openAIChatModel.addInterceptor(new OpencodeGoInterceptor());
         log.info("Init big model configuration,provider:{}，model:{}", artModelProperties.getProvider(), artModelProperties.getModel());
         return openAIChatModel;
     }

@@ -4,6 +4,7 @@ import com.art.cache.support.ArtCache;
 import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.RolePermission;
 import com.art.mapper.RolePermissionMapper;
+import com.art.tenant.TenantSupport;
 import com.art.utils.SecurityUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,10 @@ public class RolePermissionCache extends ArtCache<List<RolePermission>> {
      * 角色权限Mapper
      */
     private final RolePermissionMapper rolePermissionMapper;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
@@ -30,10 +35,13 @@ public class RolePermissionCache extends ArtCache<List<RolePermission>> {
      * @param redisTemplate        Redis客户端
      * @param properties           缓存配置
      * @param rolePermissionMapper 角色权限Mapper
+     * @param tenantSupport        多租户支持
      */
-    public RolePermissionCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, RolePermissionMapper rolePermissionMapper) {
+    public RolePermissionCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, RolePermissionMapper rolePermissionMapper,
+                               TenantSupport tenantSupport) {
         super(redisTemplate, properties);
         this.rolePermissionMapper = rolePermissionMapper;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -63,7 +71,8 @@ public class RolePermissionCache extends ArtCache<List<RolePermission>> {
      */
     @Override
     protected List<RolePermission> loadFromDb() {
-        return this.rolePermissionMapper.selectAll();
+        // 角色功能权限为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(this.rolePermissionMapper::selectAll);
     }
 
     /**

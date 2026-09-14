@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.MenuLog;
@@ -36,6 +37,7 @@ public class MenuLogController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询菜单日志", description = "分页查询菜单日志")
+    @SaCheckPermission("system:menu-log:list")
     public HttpResult<Page<MenuLog>> page(Page<MenuLog> page, MenuLogVO vo) {
         return HttpResult.success(this.menuLogService.queryPage(page, vo));
     }
@@ -63,6 +65,7 @@ public class MenuLogController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除菜单日志", description = "根据ID删除菜单日志")
+    @SaCheckPermission("system:menu-log:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.menuLogService.removeByIds(tableRowVO.getIdList()));
     }

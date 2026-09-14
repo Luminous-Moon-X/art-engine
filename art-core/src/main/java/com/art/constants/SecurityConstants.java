@@ -47,4 +47,8 @@ public class SecurityConstants {
      * Token密钥
      */
     public static final String ACCESS_TOKEN = "token";
+    /**
+     * 租户id
+     */
+    public static final String TENANT_ID = "tenantId";
 }

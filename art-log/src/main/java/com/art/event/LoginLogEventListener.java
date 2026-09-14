@@ -39,6 +39,8 @@ public class LoginLogEventListener {
             LoginLog loginLog = new LoginLog();
             loginLog.setUserName(event.getUserName());
             loginLog.setNickName(event.getNickName());
+            // 登录请求为白名单路径，异步线程无租户上下文，需显式写入日志归属租户
+            loginLog.setTenantId(event.getTenantId());
             loginLog.setLoginIp(IpUtil.getIpAddr(event.getRequest()));
             loginLog.setLoginTime(LocalDateTime.now());
             loginLog.setBrowser(UserAgentUtil.getBrowser(event.getRequest()));

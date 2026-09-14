@@ -15,7 +15,4 @@ include 'art-core'
 include 'art-system'
 include 'art-runner'
 include 'art-websocket'
-
-
-include 'art-generator'
 include 'art-log'

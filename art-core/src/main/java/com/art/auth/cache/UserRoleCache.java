@@ -4,6 +4,7 @@ import com.art.cache.support.ArtCache;
 import com.art.cache.support.ArtCacheProperties;
 import com.art.common.UserRole;
 import com.art.mapper.UserRoleMapper;
+import com.art.tenant.TenantSupport;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,10 @@ public class UserRoleCache extends ArtCache<List<UserRole>> {
      * 用户角色Mapper
      */
     private final UserRoleMapper userRoleMapper;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
@@ -30,10 +35,13 @@ public class UserRoleCache extends ArtCache<List<UserRole>> {
      * @param redisTemplate  Redis客户端
      * @param properties     缓存配置
      * @param userRoleMapper 用户角色Mapper
+     * @param tenantSupport  多租户支持
      */
-    public UserRoleCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, UserRoleMapper userRoleMapper) {
+    public UserRoleCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, UserRoleMapper userRoleMapper,
+                         TenantSupport tenantSupport) {
         super(redisTemplate, properties);
         this.userRoleMapper = userRoleMapper;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -63,7 +71,8 @@ public class UserRoleCache extends ArtCache<List<UserRole>> {
      */
     @Override
     protected List<UserRole> loadFromDb() {
-        return this.userRoleMapper.selectListByQuery(QueryWrapper.create());
+        // 用户角色关系为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.userRoleMapper.selectListByQuery(QueryWrapper.create()));
     }
 
     /**

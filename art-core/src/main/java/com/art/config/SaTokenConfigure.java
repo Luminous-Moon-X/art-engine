@@ -1,6 +1,7 @@
 package com.art.config;
 
 import cn.dev33.satoken.config.SaTokenConfig;
+import com.art.properties.AuthProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,21 +17,21 @@ import org.springframework.context.annotation.Primary;
  * @since 1.0.0
  */
 @Configuration
-@DependsOn("authConfiguration")
+@DependsOn("authProperties")
 public class SaTokenConfigure {
 
     /**
      * 自定义权限配置
      */
-    private final AuthConfiguration authConfiguration;
+    private final AuthProperties authProperties;
 
     /**
      * 构造函数
      *
-     * @param authConfiguration 自定义权限配置
+     * @param authProperties 自定义权限配置
      */
-    public SaTokenConfigure(AuthConfiguration authConfiguration) {
-        this.authConfiguration = authConfiguration;
+    public SaTokenConfigure(AuthProperties authProperties) {
+        this.authProperties = authProperties;
     }
 
     /**
@@ -52,9 +53,9 @@ public class SaTokenConfigure {
     @Primary
     public SaTokenConfig saTokenConfig() {
         SaTokenConfig config = new SaTokenConfig();
-        config.setJwtSecretKey(authConfiguration.getSecretKey());
+        config.setJwtSecretKey(authProperties.getSecretKey());
         config.setIsReadCookie(false);
-        config.setTimeout(authConfiguration.getTokenExpireTime() * 60);
+        config.setTimeout(authProperties.getTokenExpireTime() * 60L);
         return config;
     }
 }

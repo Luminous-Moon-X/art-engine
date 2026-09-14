@@ -3,7 +3,6 @@ package com.art.service;
 import com.art.domain.vo.ChatMessageVO;
 import com.art.domain.vo.ConversationVO;
 import com.art.domain.vo.UserChatVO;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
@@ -53,11 +52,5 @@ public interface AIChatService {
      */
     void deleteConversation(String conversationId);
 
-    /**
-     * 向量化处理文档
-     *
-     * @param file 文档
-     */
-    void vectorDoc(MultipartFile file);
 }
 

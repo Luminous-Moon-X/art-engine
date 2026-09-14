@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
 import com.art.domain.ApiLog;
@@ -36,6 +37,7 @@ public class ApiLogController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询接口日志", description = "分页查询接口日志")
+    @SaCheckPermission("system:api-log:list")
     public HttpResult<Page<ApiLog>> page(Page<ApiLog> page, ApiLogVO vo) {
         return HttpResult.success(this.apiLogService.queryPage(page, vo));
     }
@@ -48,6 +50,7 @@ public class ApiLogController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "删除接口日志", description = "根据ID删除接口日志")
+    @SaCheckPermission("system:api-log:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.apiLogService.removeByIds(tableRowVO.getIdList()));
     }

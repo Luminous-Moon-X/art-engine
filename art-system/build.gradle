@@ -1,7 +1,6 @@
 dependencies {
     implementation project(":art-core")
     implementation project(":art-log")
-    implementation project(":art-generator")
     implementation project(":art-ai")
 
     implementation 'org.springframework.security:spring-security-crypto'

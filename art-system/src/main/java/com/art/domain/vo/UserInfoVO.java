@@ -30,4 +30,14 @@ public class UserInfoVO {
     private String userName;
 
     private String userType;
+
+    /**
+     * 当前生效租户ID
+     */
+    private Long tenantId;
+
+    /**
+     * 当前生效租户名称
+     */
+    private String tenantName;
 }

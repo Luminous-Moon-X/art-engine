@@ -5,6 +5,7 @@ import com.art.cache.support.ArtCacheProperties;
 import com.art.domain.Menu;
 import com.art.domain.vo.MenuVO;
 import com.art.mapper.MenuMapper;
+import com.art.tenant.TenantSupport;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,10 @@ public class MenuButtonCache extends ArtCache<List<MenuVO>> {
      * 菜单按钮Mapper
      */
     private final MenuMapper menuMapper;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
@@ -30,10 +35,13 @@ public class MenuButtonCache extends ArtCache<List<MenuVO>> {
      * @param redisTemplate Redis客户端
      * @param properties    缓存配置
      * @param menuMapper    菜单按钮Mapper
+     * @param tenantSupport 多租户支持
      */
-    public MenuButtonCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper) {
+    public MenuButtonCache(RedisTemplate<String, Object> redisTemplate, ArtCacheProperties properties, MenuMapper menuMapper,
+                           TenantSupport tenantSupport) {
         super(redisTemplate, properties);
         this.menuMapper = menuMapper;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -63,8 +71,12 @@ public class MenuButtonCache extends ArtCache<List<MenuVO>> {
      */
     @Override
     protected List<MenuVO> loadFromDb() {
-        QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getMenuType, "button");
-        return this.menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
+        // 菜单按钮为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> {
+            // 仅加载启用中的按钮，禁用（enableFlag=0）按钮不参与功能权限
+            QueryWrapper wrapper = QueryWrapper.create().eq(Menu::getMenuType, "button").eq(Menu::getEnableFlag, 1);
+            return this.menuMapper.selectListByQueryAs(wrapper, MenuVO.class);
+        });
     }
 
     /**
