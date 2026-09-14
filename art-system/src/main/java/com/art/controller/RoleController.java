@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.SelectVO;
@@ -47,6 +48,7 @@ public class RoleController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取角色信息", description = "根据ID获取角色信息")
+    @SaCheckPermission("system:role:list")
     public HttpResult<Role> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.roleService.selectById(id));
     }
@@ -60,6 +62,7 @@ public class RoleController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询角色信息", description = "分页查询角色信息")
+    @SaCheckPermission("system:role:list")
     public HttpResult<Page<RoleVO>> page(Page<RoleVO> page, RoleVO vo) {
         return HttpResult.success(this.roleService.queryPage(page, vo));
     }
@@ -71,6 +74,7 @@ public class RoleController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有角色信息", description = "查询所有角色信息")
+    @SaCheckPermission("system:role:list")
     public HttpResult<List<Role>> list() {
         return HttpResult.success(this.roleService.selectList());
     }
@@ -95,6 +99,7 @@ public class RoleController {
     @PostMapping("/add")
     @Operation(summary = "新增角色", description = "新增角色")
     @ApiLog(module = "角色管理", operationType = ApiOperationType.INSERT, description = "新增角色")
+    @SaCheckPermission("system:role:add")
     public HttpResult<Boolean> add(@RequestBody RoleVO vo) {
         return HttpResult.success(roleService.add(vo));
     }
@@ -108,6 +113,7 @@ public class RoleController {
     @PutMapping("/edit")
     @Operation(summary = "编辑角色", description = "编辑角色")
     @ApiLog(module = "角色管理", operationType = ApiOperationType.UPDATE, description = "编辑角色")
+    @SaCheckPermission("system:role:edit")
     public HttpResult<Boolean> edit(@RequestBody RoleVO vo) {
         return HttpResult.success(roleService.edit(vo));
     }
@@ -121,6 +127,7 @@ public class RoleController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除角色", description = "根据ID删除角色")
     @ApiLog(module = "角色管理", operationType = ApiOperationType.DELETE, description = "删除角色")
+    @SaCheckPermission("system:role:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.roleService.delete(tableRowVO.getIdList()));
     }

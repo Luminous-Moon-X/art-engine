@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
@@ -63,6 +64,7 @@ public class OssFileController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传文件", description = "上传文件到当前启用的对象存储")
     @ApiLog(module = "对象存储文件", operationType = ApiOperationType.INSERT, description = "上传文件")
+    @SaCheckPermission("system:oss-file:upload")
     public HttpResult<OssFileVO> upload(@RequestParam("file") MultipartFile file,
                                         @RequestParam(value = "directory", required = false) String directory) {
         return HttpResult.success(this.ossFileService.upload(file, directory));
@@ -77,6 +79,7 @@ public class OssFileController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询上传文件信息", description = "分页查询上传文件信息")
+    @SaCheckPermission("system:oss-file:list")
     public HttpResult<Page<OssFileVO>> page(Page<OssFileVO> page, OssFileVO vo) {
         return HttpResult.success(this.ossFileService.queryPage(page, vo));
     }
@@ -89,6 +92,7 @@ public class OssFileController {
      */
     @GetMapping("/download/{id}")
     @Operation(summary = "下载文件", description = "根据文件ID下载文件")
+    @SaCheckPermission("system:oss-file:download")
     public ResponseEntity<InputStreamResource> download(@PathVariable("id") Long id) {
         OssFile file = this.ossFileService.getFileById(id);
         ObjectStorageObject object = this.ossFileService.downloadObject(id);
@@ -118,6 +122,7 @@ public class OssFileController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除文件", description = "删除文件信息并删除对象存储中的文件")
     @ApiLog(module = "对象存储文件", operationType = ApiOperationType.DELETE, description = "删除文件")
+    @SaCheckPermission("system:oss-file:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.ossFileService.delete(tableRowVO.getIdList()));
     }

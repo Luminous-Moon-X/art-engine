@@ -8,6 +8,7 @@ import com.agentsflex.core.store.SearchWrapper;
 import com.agentsflex.core.store.StoreResult;
 import com.agentsflex.store.pgvector.PgvectorVectorStore;
 import com.art.DocumentUtil;
+import com.art.context.SecurityContextHolder;
 import com.art.domain.KnowledgeDoc;
 import com.art.domain.KnowledgeDocContent;
 import com.art.domain.OssFile;
@@ -22,6 +23,7 @@ import com.art.mapper.UserMapper;
 import com.art.service.KnowledgeDocService;
 import com.art.service.OssFileService;
 import com.art.storage.ObjectStorageObject;
+import com.art.tenant.TenantSupport;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
 import com.art.utils.SecurityUtil;
@@ -94,6 +96,11 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
     private final PgvectorVectorStore vectorStore;
 
     /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
+
+    /**
      * 构造函数。
      *
      * @param ossFileService            OSS文件服务
@@ -101,17 +108,20 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
      * @param userMapper                用户Mapper
      * @param artChatClient             AI模型对象
      * @param vectorStore               向量数据库
+     * @param tenantSupport             多租户支持
      */
     public KnowledgeDocServiceImpl(OssFileService ossFileService,
                                    KnowledgeDocContentMapper knowledgeDocContentMapper,
                                    UserMapper userMapper,
                                    ChatModel artChatClient,
-                                   PgvectorVectorStore vectorStore) {
+                                   PgvectorVectorStore vectorStore,
+                                   TenantSupport tenantSupport) {
         this.ossFileService = ossFileService;
         this.knowledgeDocContentMapper = knowledgeDocContentMapper;
         this.userMapper = userMapper;
         this.artChatClient = artChatClient;
         this.vectorStore = vectorStore;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -177,7 +187,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
         if (KnowledgeDoc.STATUS_PROCESSING.equals(doc.getParseStatus())) {
             throw new ArtException("文档正在解析中，请稍后重试");
         }
-        this.asyncParse(id, SecurityUtil.getUserId());
+        this.asyncParse(id, SecurityUtil.getUserId(), SecurityUtil.getTenantId());
     }
 
     /**
@@ -199,9 +209,12 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
         KnowledgeDoc update = new KnowledgeDoc();
         update.setId(id);
         update.setVectorStatus(KnowledgeDoc.STATUS_PROCESSING);
-        this.updateById(update);
-        // 异步执行向量处理
-        Thread.ofVirtual().start(() -> doVectorize(id));
+        if (!this.updateById(update)) {
+            throw new ArtException("知识库文档不存在或不属于当前租户");
+        }
+        // 异步执行向量处理（显式传入租户ID，保证后台线程读写归属正确）
+        Long tenantId = SecurityUtil.getTenantId();
+        Thread.ofVirtual().start(() -> doVectorize(id, tenantId));
     }
 
     /**
@@ -221,9 +234,11 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
             if (doc == null) {
                 continue;
             }
-            // 删除文档内容记录
-            knowledgeDocContentMapper.deleteByQuery(QueryWrapper.create()
-                    .eq(KnowledgeDocContent::getDocId, id));
+            // 删除文档内容记录（内容行可能由历史异步任务写入，按文档ID全量清理）
+            tenantSupport.systemScope(() -> {
+                knowledgeDocContentMapper.deleteByQuery(QueryWrapper.create()
+                        .eq(KnowledgeDocContent::getDocId, id));
+            });
             // 删除文档记录
             boolean removed = this.removeById(id);
             if (!removed) {
@@ -308,15 +323,35 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
     /**
      * 修改解析状态为processing并异步执行文档解析。
      *
-     * @param id     文档ID
-     * @param userId 操作人ID（虚拟线程中上下文不传递，需显式传入）
+     * @param id       文档ID
+     * @param userId   操作人ID（虚拟线程中上下文不传递，需显式传入）
+     * @param tenantId 生效租户ID（虚拟线程中上下文不传递，需显式传入）
      */
-    private void asyncParse(Long id, Long userId) {
+    private void asyncParse(Long id, Long userId, Long tenantId) {
         KnowledgeDoc update = new KnowledgeDoc();
         update.setId(id);
         update.setParseStatus(KnowledgeDoc.STATUS_PROCESSING);
-        this.updateById(update);
-        Thread.ofVirtual().start(() -> doParse(id, userId));
+        if (!this.updateById(update)) {
+            throw new ArtException("知识库文档不存在或不属于当前租户");
+        }
+        Thread.ofVirtual().start(() -> doParse(id, userId, tenantId));
+    }
+
+    /**
+     * 异步执行文档解析：显式补全租户上下文后执行，结束后清理线程上下文
+     *
+     * @param id       文档ID
+     * @param userId   操作人ID
+     * @param tenantId 生效租户ID
+     */
+    private void doParse(Long id, Long userId, Long tenantId) {
+        try {
+            SecurityContextHolder.setTenantId(tenantId);
+            SecurityContextHolder.setUserId(userId);
+            this.doParseInternal(id, userId);
+        } finally {
+            SecurityContextHolder.clear();
+        }
     }
 
     /**
@@ -326,7 +361,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
      * @param id     文档ID
      * @param userId 操作人ID
      */
-    private void doParse(Long id, Long userId) {
+    private void doParseInternal(Long id, Long userId) {
         LocalDateTime parseStartTime = LocalDateTime.now();
         try {
             KnowledgeDoc doc = getDocById(id);
@@ -343,6 +378,8 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
                 KnowledgeDocContent contentEntity = new KnowledgeDocContent();
                 contentEntity.setDocId(id);
                 contentEntity.setContent(content);
+                // 显式继承文档租户归属，避免异步线程写入NULL租户内容行
+                contentEntity.setTenantId(doc.getTenantId());
                 contentEntity.setParseStartTime(parseStartTime);
                 contentEntity.setParseEndTime(LocalDateTime.now());
                 contentEntity.setCreateId(userId);
@@ -368,12 +405,27 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
     }
 
     /**
+     * 异步执行向量处理：显式补全租户上下文后执行，结束后清理线程上下文
+     *
+     * @param id       文档ID
+     * @param tenantId 生效租户ID
+     */
+    private void doVectorize(Long id, Long tenantId) {
+        try {
+            SecurityContextHolder.setTenantId(tenantId);
+            this.doVectorizeInternal(id);
+        } finally {
+            SecurityContextHolder.clear();
+        }
+    }
+
+    /**
      * 异步执行向量处理：获取文档内容、分割文档、调用向量库工具处理向量，
      * 最后将向量状态改为complete，失败改为error。
      *
      * @param id 文档ID
      */
-    private void doVectorize(Long id) {
+    private void doVectorizeInternal(Long id) {
         try {
             KnowledgeDoc doc = getDocById(id);
             // 1. 根据知识库文档表ID获取文档内容表中的文档内容

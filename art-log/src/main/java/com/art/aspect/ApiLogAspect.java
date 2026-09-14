@@ -69,6 +69,9 @@ public class ApiLogAspect {
             apiLogEntity.setUserId(SecurityUtil.getUserId());
             apiLogEntity.setUserName(SecurityUtil.getUserName());
             apiLogEntity.setNickName(SecurityUtil.getUserAllName());
+            // 异步落库线程无租户上下文，需在请求线程显式捕获租户归属与创建人
+            apiLogEntity.setTenantId(SecurityUtil.getTenantId());
+            apiLogEntity.setCreateId(SecurityUtil.getUserId());
         } catch (Exception e) {
             // 未登录时用户信息为空，不记录
         }

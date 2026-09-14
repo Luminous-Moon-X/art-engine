@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
@@ -50,6 +51,7 @@ public class KnowledgeBaseController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询知识库信息", description = "分页查询知识库信息")
+    @SaCheckPermission("system:knowledge-base:query")
     public HttpResult<Page<KnowledgeBaseVO>> page(Page<KnowledgeBaseVO> page, KnowledgeBaseVO vo) {
         return HttpResult.success(this.knowledgeBaseService.queryPage(page, vo));
     }
@@ -63,6 +65,7 @@ public class KnowledgeBaseController {
     @PostMapping("/add")
     @Operation(summary = "新增知识库", description = "新增知识库")
     @ApiLog(module = "知识库", operationType = ApiOperationType.INSERT, description = "新增知识库")
+    @SaCheckPermission("system:knowledge-base:add")
     public HttpResult<Boolean> add(@RequestBody KnowledgeBaseVO vo) {
         return HttpResult.success(this.knowledgeBaseService.add(vo));
     }
@@ -76,6 +79,7 @@ public class KnowledgeBaseController {
     @PutMapping("/edit")
     @Operation(summary = "编辑知识库", description = "编辑知识库")
     @ApiLog(module = "知识库", operationType = ApiOperationType.UPDATE, description = "编辑知识库")
+    @SaCheckPermission("system:knowledge-base:edit")
     public HttpResult<Boolean> edit(@RequestBody KnowledgeBaseVO vo) {
         return HttpResult.success(this.knowledgeBaseService.edit(vo));
     }
@@ -89,6 +93,7 @@ public class KnowledgeBaseController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除知识库", description = "删除知识库（知识库必须为空）")
     @ApiLog(module = "知识库", operationType = ApiOperationType.DELETE, description = "删除知识库")
+    @SaCheckPermission("system:knowledge-base:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.knowledgeBaseService.delete(tableRowVO.getIdList()));
     }

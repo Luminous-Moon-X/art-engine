@@ -1,12 +1,13 @@
 package com.art.service.impl;
 
-import com.art.domain.vo.UserVO;
-import com.art.exception.ArtException;
-import com.art.utils.SecurityUtil;
 import com.art.domain.SysUser;
+import com.art.domain.User;
 import com.art.domain.vo.UserInfoVO;
+import com.art.exception.ArtException;
 import com.art.mapper.SysUserMapper;
 import com.art.service.SysUserService;
+import com.art.service.TenantService;
+import com.art.utils.SecurityUtil;
 import com.alibaba.fastjson2.JSON;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
      * Redis客户端
      */
     private final RedisTemplate<String, String> redisTemplate;
+    /**
+     * 租户服务
+     */
+    private final TenantService tenantService;
 
     /**
      * 登录用户信息
@@ -37,7 +42,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         UserInfoVO userInfoVO = new UserInfoVO();
         String token = SecurityUtil.getToken();
         String userInfoJsonStr = redisTemplate.opsForValue().get("access_token:" + token);
-        UserVO userInfo = JSON.parseObject(userInfoJsonStr, UserVO.class);
+        User userInfo = JSON.parseObject(userInfoJsonStr, User.class);
         if (userInfo == null) {
             throw new ArtException("获取用户信息失败，请联系管理员！");
         }
@@ -45,6 +50,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         userInfoVO.setUserName(userInfo.getNickName());
         userInfoVO.setEmail(userInfo.getUserEmail());
         userInfoVO.setUserType(userInfo.getUserType());
+        // 当前生效租户（超级管理员切换租户后为切换后的租户）
+        Long tenantId = SecurityUtil.getTenantId();
+        userInfoVO.setTenantId(tenantId);
+        userInfoVO.setTenantName(tenantService.getTenantName(tenantId));
         return userInfoVO;
     }
 }

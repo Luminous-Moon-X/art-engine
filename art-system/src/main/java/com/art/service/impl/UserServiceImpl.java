@@ -2,26 +2,35 @@ package com.art.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.MD5;
+import cn.dev33.satoken.stp.StpUtil;
 import com.art.auth.cache.UserRoleCache;
 import com.art.cache.RuleCache;
 import com.art.cache.support.CacheRefreshService;
 import com.art.common.TreeSelectVO;
+import com.art.constants.TenantConstants;
 import com.art.domain.Dept;
+import com.art.domain.Role;
 import com.art.domain.User;
 import com.art.common.UserRole;
 import com.art.domain.vo.DeptTreeSelectVO;
 import com.art.domain.vo.RuleItemVO;
 import com.art.domain.vo.UserVO;
 import com.art.exception.ArtException;
+import com.art.mapper.RoleMapper;
 import com.art.mapper.UserMapper;
 import com.art.mapper.UserRoleMapper;
 import com.art.service.DeptService;
 import com.art.service.UserService;
+import com.art.tenant.TenantSupport;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
+import com.art.utils.SecurityUtil;
+import com.art.utils.StringUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户服务实现类
@@ -36,6 +46,7 @@ import java.util.List;
  * @author Luminous.X
  * @since 1.0.0
  */
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     /**
@@ -59,6 +70,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final CacheRefreshService cacheRefreshService;
 
     /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
+
+    /**
+     * 角色Mapper
+     */
+    private final RoleMapper roleMapper;
+
+    /**
+     * Redis客户端（踢出用户会话时清理登录态）
+     */
+    private final RedisTemplate<String, String> redisTemplate;
+
+    /**
      * 构造函数
      *
      * @param userRoleMapper      用户角色Mapper
@@ -66,14 +92,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param userRoleCache       用户角色缓存
      * @param ruleCache           规则缓存
      * @param cacheRefreshService 缓存刷新服务
+     * @param tenantSupport       多租户支持
+     * @param roleMapper          角色Mapper
+     * @param redisTemplate       Redis客户端
      */
     public UserServiceImpl(UserRoleMapper userRoleMapper, DeptService deptService, UserRoleCache userRoleCache,
-                           RuleCache ruleCache, CacheRefreshService cacheRefreshService) {
+                           RuleCache ruleCache, CacheRefreshService cacheRefreshService, TenantSupport tenantSupport,
+                           RoleMapper roleMapper, RedisTemplate<String, String> redisTemplate) {
         this.userRoleMapper = userRoleMapper;
         this.deptService = deptService;
         this.userRoleCache = userRoleCache;
         this.ruleCache = ruleCache;
         this.cacheRefreshService = cacheRefreshService;
+        this.tenantSupport = tenantSupport;
+        this.roleMapper = roleMapper;
+        this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -99,6 +132,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long deptId = vo.getDeptId();
         vo.setDeptId(null);
         QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
+        // 不查询超级管理员
+        wrapper.ne(User::getUserType, TenantConstants.USER_TYPE_SUPER_ADMIN);
         // 查询部门用户范围
         List<Long> deptIds = new ArrayList<>();
         if (deptId != null) {
@@ -111,7 +146,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<UserVO> records = pageResult.getRecords();
         for (UserVO user : records) {
             Long userId = user.getId();
-            List<UserRole> userRoles = userRoleMapper.selectListByQuery(QueryWrapper.create().eq(UserRole::getUserId, userId));
+            // 用户角色关系为系统级数据，不受租户过滤
+            List<UserRole> userRoles = tenantSupport.systemScope(() ->
+                    userRoleMapper.selectListByQuery(QueryWrapper.create().eq(UserRole::getUserId, userId)));
             Long[] roleIds = userRoles.stream().map(UserRole::getRoleId).toArray(Long[]::new);
             user.setRoleIds(roleIds);
         }
@@ -165,10 +202,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String encodePwd = encoder.encode(md5Pwd);
         entity.setPassword(encodePwd);
         entity.setUserType("normal");
-        entity.setFirstLoginFlag(true);
+        entity.setFirstLoginFlag(1);
         boolean result = this.save(entity);
         // 保存角色关系
         Long[] roleIds = vo.getRoleIds();
+        this.validateRolesInCurrentTenant(roleIds);
         Boolean saveRelation = userRoleRelation(entity, result, roleIds);
         cacheRefreshService.refreshAfterCommit(userRoleCache);
         return saveRelation;
@@ -183,20 +221,55 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean edit(UserVO vo) {
-        if (vo == null) {
-            throw new ArtException("数据为空，请检查！");
+        if (vo == null || vo.getId() == null) {
+            throw new ArtException("用户ID不能为空，请检查！");
+        }
+        // 校验目标用户属于当前生效租户，避免跨租户改写用户及其角色关系
+        User existing = this.selectById(vo.getId());
+        if (existing == null) {
+            throw new ArtException("用户不存在或不属于当前租户，请刷新后重试！");
+        }
+        // 用户类型仅超级管理员可调整，防止租户侧通过编辑接口自提权
+        if (StringUtil.isNotBlank(vo.getUserType()) && !Objects.equals(vo.getUserType(), existing.getUserType())
+                && !tenantSupport.isSuperAdmin(SecurityUtil.getUserType())) {
+            throw new ArtException("无权修改用户类型，请联系管理员！");
         }
         User entity = ConvertUtil.convert(vo, User.class);
         boolean result = this.updateById(entity);
+        // 用户被禁用时立即踢出已有会话，避免禁用后仍可继续访问
+        if (result && vo.getEnableFlag() != null && vo.getEnableFlag() == 0
+                && (existing.getEnableFlag() == null || existing.getEnableFlag() != 0)) {
+            this.kickoutUserSessions(vo.getId());
+        }
         // 刷新角色关系
         Long[] roleIds = vo.getRoleIds();
         if (roleIds != null && roleIds.length > 0) {
-            this.userRoleMapper.deleteByQuery(QueryWrapper.create().eq(UserRole::getUserId, entity.getId()));
+            // 角色为租户级数据，校验均属于当前生效租户
+            this.validateRolesInCurrentTenant(roleIds);
+            // 用户角色关系为系统级数据，删除不受租户过滤
+            tenantSupport.systemScope(() ->
+                    this.userRoleMapper.deleteByQuery(QueryWrapper.create().eq(UserRole::getUserId, entity.getId())));
             Boolean saveRelation = userRoleRelation(entity, result, roleIds);
             cacheRefreshService.refreshAfterCommit(userRoleCache);
             return saveRelation;
         }
         return result;
+    }
+
+    /**
+     * 校验角色均属于当前生效租户（角色为租户级数据，防止跨租户分配角色）
+     *
+     * @param roleIds 角色ID列表
+     */
+    private void validateRolesInCurrentTenant(Long[] roleIds) {
+        if (roleIds == null || roleIds.length == 0) {
+            return;
+        }
+        // 在租户上下文内统计（角色表自动按当前租户过滤）
+        long count = roleMapper.selectCountByQuery(QueryWrapper.create().in(Role::getId, Arrays.asList(roleIds)));
+        if (count != roleIds.length) {
+            throw new ArtException("包含非本租户的角色，请重新选择！");
+        }
     }
 
     /**
@@ -208,6 +281,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 保存结果
      */
     private Boolean userRoleRelation(User entity, boolean result, Long[] roleIds) {
+        if (roleIds == null || roleIds.length == 0) {
+            return result;
+        }
         List<UserRole> userRoleList = Arrays.stream(roleIds).map(roleId -> {
             Long userId = entity.getId();
             UserRole userRole = new UserRole();
@@ -215,7 +291,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userRole.setRoleId(roleId);
             return userRole;
         }).toList();
-        userRoleMapper.insertBatch(userRoleList);
+        // 用户角色关系为系统级数据，写入不受租户过滤
+        tenantSupport.systemScope(() -> userRoleMapper.insertBatch(userRoleList));
         return result;
     }
 
@@ -228,10 +305,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
-        this.userRoleMapper.deleteByQuery(QueryWrapper.create().in(UserRole::getUserId, idList));
+        if (idList == null || idList.isEmpty()) {
+            return false;
+        }
+        // 先校验用户归属当前生效租户，再清理关系表，避免跨租户删除关系数据
+        this.validateUsersInCurrentTenant(idList);
+        // 用户角色关系为系统级数据，删除不受租户过滤；用户本身按当前租户过滤
+        tenantSupport.systemScope(() ->
+                this.userRoleMapper.deleteByQuery(QueryWrapper.create().in(UserRole::getUserId, idList)));
         boolean result = this.removeByIds(idList);
         if (result) {
             cacheRefreshService.refreshAfterCommit(userRoleCache);
+            // 删除用户后立即踢出其已有会话，避免已删除账号继续访问
+            idList.forEach(this::kickoutUserSessions);
         }
         return result;
     }
@@ -284,13 +370,65 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Boolean resetDefaultPassword(Long userId) {
         User user = this.selectById(userId);
+        if (user == null) {
+            throw new ArtException("用户不存在或不属于当前租户！");
+        }
         RuleItemVO systemDefaultPwd = this.ruleCache.getByRuleCode("system_default_pwd");
         String password = systemDefaultPwd.getRuleValue();
         String md5Pwd = MD5.create().digestHex(password);
         String encodePwd = new BCryptPasswordEncoder().encode(md5Pwd);
         user.setPassword(encodePwd);
-        user.setFirstLoginFlag(true);
-        return this.updateById(user);
+        user.setFirstLoginFlag(1);
+        boolean result = this.updateById(user);
+        // 重置密码后踢出已有会话，强制使用新密码重新登录
+        if (result) {
+            this.kickoutUserSessions(userId);
+        }
+        return result;
+    }
+
+    /**
+     * 校验用户ID集合均属于当前生效租户
+     *
+     * <p>用户角色关系表无租户字段，清理前必须先确认主体归属，
+     * 否则传入他租户用户ID时会误删/重建其角色关系。</p>
+     *
+     * @param idList 用户ID集合
+     */
+    private void validateUsersInCurrentTenant(List<Long> idList) {
+        if (idList == null || idList.isEmpty()) {
+            return;
+        }
+        List<Long> distinctIds = idList.stream().filter(Objects::nonNull).distinct().toList();
+        if (distinctIds.isEmpty()) {
+            return;
+        }
+        // 在当前租户上下文内统计（用户表自动按当前租户过滤）
+        long count = this.count(QueryWrapper.create().in(User::getId, distinctIds));
+        if (count != distinctIds.size()) {
+            throw new ArtException("包含非本租户的用户，操作失败！");
+        }
+    }
+
+    /**
+     * 踢出指定用户的全部登录会话（清理Redis登录态与租户上下文）
+     *
+     * @param userId 用户ID
+     */
+    private void kickoutUserSessions(Long userId) {
+        if (userId == null) {
+            return;
+        }
+        try {
+            List<String> tokenValueList = StpUtil.getTokenValueListByLoginId(userId);
+            for (String tokenValue : tokenValueList) {
+                redisTemplate.delete("access_token:" + tokenValue);
+                redisTemplate.delete(TenantConstants.TENANT_CONTEXT_KEY_PREFIX + tokenValue);
+            }
+            StpUtil.kickout(userId);
+        } catch (Exception e) {
+            log.warn("踢出用户会话失败，userId={}", userId, e);
+        }
     }
 
     /**

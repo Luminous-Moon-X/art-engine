@@ -56,10 +56,26 @@ art:
       - /auth/login
       - /auth/logout
       - /auth/changePasswordWithTempToken
+      - /tenant/config
+      - /tenant/list
       - /swagger-ui.html
       - /api-docs/**
       - /swagger-ui/**
     secret-key: c7ee264fd80c4e169f473df493bf67fd
+  # 多租户配置
+  tenant:
+    # 是否启用多租户：开启后登录页展示租户下拉框，包含tenant_id列的表按当前租户自动过滤；
+    # 关闭后登录使用默认租户，不做租户数据过滤（租户/套餐管理页面不受影响）
+    enable: true
+    # 默认租户ID（多租户关闭时登录使用的租户，对应租户表种子数据id=1）
+    default-tenant-id: 1
+    # 平台级管理菜单的权限标识：此类菜单无法被放入租户套餐，只能由超管操作
+    platform-menu-sign-prefixes:
+      - system:menu:list
+      - system:dict:list
+      - system:rule:list
+      - system:tenant:list
+      - system:tenantPackage:list
   # AI大模型配置
   ai-model:
     model: ${AI_MODEL:deepseek-v4-flash}

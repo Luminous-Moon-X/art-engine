@@ -68,6 +68,7 @@ public class UserController {
      * @return 分页数据对象
      */
     @PostMapping("/page")
+    @SaCheckPermission("system:user:list")
     @Operation(summary = "分页查询用户信息", description = "分页查询用户信息")
     public HttpResult<Page<UserVO>> page(Page<UserVO> page, UserVO vo) {
         return HttpResult.success(this.UserService.queryPage(page, vo));
@@ -80,6 +81,7 @@ public class UserController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有用户信息", description = "查询所有用户信息")
+    @SaCheckPermission("system:user:list")
     public HttpResult<List<User>> list() {
         return HttpResult.success(this.UserService.selectList());
     }
@@ -115,6 +117,7 @@ public class UserController {
     @PostMapping("/add")
     @Operation(summary = "新增用户", description = "新增用户")
     @ApiLog(module = "用户管理", operationType = ApiOperationType.INSERT, description = "新增用户")
+    @SaCheckPermission("system:user:add")
     public HttpResult<Boolean> add(@RequestBody UserVO vo) {
         return HttpResult.success(UserService.add(vo));
     }
@@ -128,6 +131,7 @@ public class UserController {
     @PutMapping("/edit")
     @Operation(summary = "编辑用户", description = "编辑用户")
     @ApiLog(module = "用户管理", operationType = ApiOperationType.UPDATE, description = "编辑用户")
+    @SaCheckPermission("system:user:edit")
     public HttpResult<Boolean> edit(@RequestBody UserVO vo) {
         return HttpResult.success(UserService.edit(vo));
     }
@@ -141,6 +145,7 @@ public class UserController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除用户", description = "根据ID删除用户")
     @ApiLog(module = "用户管理", operationType = ApiOperationType.DELETE, description = "删除用户")
+    @SaCheckPermission("system:user:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.UserService.delete(tableRowVO.getIdList()));
     }
@@ -153,7 +158,7 @@ public class UserController {
      */
     @PutMapping("/resetDefaultPassword")
     @Operation(summary = "重置用户密码", description = "重置用户密码")
-    @SaCheckPermission("system:userManage:resetDefaultPassword")
+    @SaCheckPermission("system:user:resetPassword")
     @ApiLog(module = "用户管理", operationType = ApiOperationType.UPDATE, description = "重置用户密码")
     public HttpResult<Boolean> resetDefaultPassword(@RequestParam("userId") Long userId) {
         return HttpResult.success(this.UserService.resetDefaultPassword(userId));

@@ -1,5 +1,6 @@
 package com.art.utils;
 
+import com.art.constants.TenantConstants;
 import com.art.context.SecurityContextHolder;
 
 import java.util.List;
@@ -73,6 +74,33 @@ public class SecurityUtil {
      */
     public static String getUserType() {
         return SecurityContextHolder.getUserType();
+    }
+
+    /**
+     * 当前用户是否为超级管理员
+     *
+     * @return 是否为超级管理员
+     */
+    public static Boolean isSuperAdmin() {
+        return TenantConstants.USER_TYPE_SUPER_ADMIN.equals(getUserType());
+    }
+
+    /**
+     * 当前用户是否为租户管理员
+     *
+     * @return 是否为租户管理员
+     */
+    public static Boolean isTenantAdmin() {
+        return TenantConstants.USER_TYPE_ADMIN.equals(getUserType());
+    }
+
+    /**
+     * 获取当前生效租户id
+     *
+     * @return 当前生效租户id
+     */
+    public static Long getTenantId() {
+        return SecurityContextHolder.getTenantId();
     }
 
 

@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
@@ -53,6 +54,7 @@ public class OssConfigController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取对象存储配置", description = "根据ID获取对象存储配置")
+    @SaCheckPermission("system:oss-config:list")
     public HttpResult<OssConfigVO> getById(@PathVariable("id") Long id) {
         return HttpResult.success(this.ossConfigService.getDetail(id));
     }
@@ -66,6 +68,7 @@ public class OssConfigController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询对象存储配置", description = "分页查询对象存储配置")
+    @SaCheckPermission("system:oss-config:list")
     public HttpResult<Page<OssConfigVO>> page(Page<OssConfigVO> page, OssConfigVO vo) {
         return HttpResult.success(this.ossConfigService.queryPage(page, vo));
     }
@@ -77,6 +80,7 @@ public class OssConfigController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询全部对象存储配置", description = "查询全部对象存储配置")
+    @SaCheckPermission("system:oss-config:list")
     public HttpResult<List<OssConfigVO>> list() {
         return HttpResult.success(this.ossConfigService.selectList());
     }
@@ -90,6 +94,7 @@ public class OssConfigController {
     @PostMapping("/add")
     @Operation(summary = "新增对象存储配置", description = "新增对象存储配置")
     @ApiLog(module = "对象存储配置", operationType = ApiOperationType.INSERT, description = "新增对象存储配置")
+    @SaCheckPermission("system:oss-config:add")
     public HttpResult<Boolean> add(@RequestBody OssConfigVO vo) {
         return HttpResult.success(this.ossConfigService.add(vo));
     }
@@ -103,6 +108,7 @@ public class OssConfigController {
     @PutMapping("/edit")
     @Operation(summary = "编辑对象存储配置", description = "编辑对象存储配置")
     @ApiLog(module = "对象存储配置", operationType = ApiOperationType.UPDATE, description = "编辑对象存储配置")
+    @SaCheckPermission("system:oss-config:edit")
     public HttpResult<Boolean> edit(@RequestBody OssConfigVO vo) {
         return HttpResult.success(this.ossConfigService.edit(vo));
     }
@@ -116,6 +122,7 @@ public class OssConfigController {
     @PutMapping("/enable/{id}")
     @Operation(summary = "启用对象存储配置", description = "启用对象存储配置")
     @ApiLog(module = "对象存储配置", operationType = ApiOperationType.UPDATE, description = "启用对象存储配置")
+    @SaCheckPermission("system:oss-config:enable")
     public HttpResult<Boolean> enable(@PathVariable("id") Long id) {
         return HttpResult.success(this.ossConfigService.enable(id));
     }
@@ -129,6 +136,7 @@ public class OssConfigController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除对象存储配置", description = "删除对象存储配置")
     @ApiLog(module = "对象存储配置", operationType = ApiOperationType.DELETE, description = "删除对象存储配置")
+    @SaCheckPermission("system:oss-config:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.ossConfigService.delete(tableRowVO.getIdList()));
     }

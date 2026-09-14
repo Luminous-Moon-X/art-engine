@@ -85,5 +85,5 @@ public class User extends BaseEntity {
      * 是否首次登录
      */
     @Column("first_login_flag")
-    private Boolean firstLoginFlag;
+    private Integer firstLoginFlag;
 }

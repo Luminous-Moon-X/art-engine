@@ -45,4 +45,19 @@ public class CustomExceptionHandler {
         return HttpResult.failure(403, "当前用户无该接口权限！");
     }
 
+    /**
+     * 未知异常兜底拦截
+     *
+     * <p>防止 systemScope（系统级作用域）及业务调用链中抛出的非业务异常
+     * （SQL 异常、空指针、事务包装异常等）无人打印日志，导致问题静默难排查。</p>
+     *
+     * @param exception 异常类
+     * @return 拦截处理返回值
+     */
+    @ExceptionHandler(Exception.class)
+    public HttpResult<String> handleException(Exception exception) {
+        log.error("Throws an unhandled Exception ---> ", exception);
+        return HttpResult.failure(500, "系统异常，请联系管理员！");
+    }
+
 }

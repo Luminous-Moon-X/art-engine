@@ -8,6 +8,7 @@ import com.art.domain.vo.RuleVO;
 import com.art.exception.ArtException;
 import com.art.mapper.RuleMapper;
 import com.art.service.RuleService;
+import com.art.tenant.TenantSupport;
 import com.art.utils.ConvertUtil;
 import com.art.utils.QueryHelper;
 import com.mybatisflex.core.paginate.Page;
@@ -35,16 +36,22 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
      * 缓存刷新服务
      */
     private final CacheRefreshService cacheRefreshService;
+    /**
+     * 多租户支持
+     */
+    private final TenantSupport tenantSupport;
 
     /**
      * 构造函数
      *
      * @param ruleCache           规则缓存
      * @param cacheRefreshService 缓存刷新服务
+     * @param tenantSupport       多租户支持
      */
-    public RuleServiceImpl(RuleCache ruleCache, CacheRefreshService cacheRefreshService) {
+    public RuleServiceImpl(RuleCache ruleCache, CacheRefreshService cacheRefreshService, TenantSupport tenantSupport) {
         this.ruleCache = ruleCache;
         this.cacheRefreshService = cacheRefreshService;
+        this.tenantSupport = tenantSupport;
     }
 
     /**
@@ -55,7 +62,8 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
      */
     @Override
     public Rule selectById(Long id) {
-        return this.getById(id);
+        // 规则为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.getById(id));
     }
 
     /**
@@ -67,8 +75,11 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
      */
     @Override
     public Page<RuleVO> queryPage(Page<RuleVO> page, RuleVO vo) {
-        QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
-        return this.getMapper().paginateAs(page, wrapper, RuleVO.class);
+        // 规则为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> {
+            QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
+            return this.getMapper().paginateAs(page, wrapper, RuleVO.class);
+        });
     }
 
     /**
@@ -78,7 +89,8 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
      */
     @Override
     public List<RuleVO> selectList() {
-        return this.listAs(QueryWrapper.create(), RuleVO.class);
+        // 规则为系统级数据，不受租户过滤
+        return tenantSupport.systemScope(() -> this.listAs(QueryWrapper.create(), RuleVO.class));
     }
 
     /**
@@ -94,7 +106,8 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
             throw new ArtException("数据为空，请检查！");
         }
         Rule entity = ConvertUtil.convert(vo, Rule.class);
-        boolean save = this.save(entity);
+        // 规则为系统级数据，不受租户过滤
+        boolean save = tenantSupport.systemScope(() -> this.save(entity));
         if (save) {
             cacheRefreshService.refreshAfterCommit(ruleCache);
         }
@@ -114,7 +127,8 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
             throw new ArtException("数据为空，请检查！");
         }
         Rule entity = ConvertUtil.convert(vo, Rule.class);
-        boolean edit = this.updateById(entity);
+        // 规则为系统级数据，不受租户过滤
+        boolean edit = tenantSupport.systemScope(() -> this.updateById(entity));
         if (edit) {
             cacheRefreshService.refreshAfterCommit(ruleCache);
         }
@@ -130,7 +144,8 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(List<Long> idList) {
-        boolean result = this.removeByIds(idList);
+        // 规则为系统级数据，不受租户过滤
+        boolean result = tenantSupport.systemScope(() -> this.removeByIds(idList));
         if (result) {
             cacheRefreshService.refreshAfterCommit(ruleCache);
         }

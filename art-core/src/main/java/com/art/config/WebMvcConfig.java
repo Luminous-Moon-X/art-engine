@@ -2,6 +2,7 @@ package com.art.config;
 
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import com.art.interceptor.RequestHeaderInterceptor;
+import com.art.properties.AuthProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +29,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     /**
      * 认证配置
      */
-    private final AuthConfiguration authConfiguration;
+    private final AuthProperties authProperties;
 
     /**
      * 添加拦截器
@@ -37,7 +38,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        List<String> whiteList = authConfiguration.getWhiteList();
+        List<String> whiteList = authProperties.getWhiteList();
         // 注册拦截器，应用到所有路径
         registry.addInterceptor(requestHeaderInterceptor)
                 .addPathPatterns("/**")
