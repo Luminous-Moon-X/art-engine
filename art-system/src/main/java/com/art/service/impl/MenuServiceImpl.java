@@ -125,7 +125,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         // 菜单为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> {
             QueryWrapper wrapper = QueryHelper.buildQueryWrapper(vo);
-            wrapper.orderBy(Menu::getOrderNum, true);
+            // 顶层菜单按排序号升序，排序号相同时按ID升序保证顺序稳定
+            wrapper.orderBy(Menu::getOrderNum, true).orderBy(Menu::getId, true);
             if (StringUtil.isAllBlank(vo.getMenuName(), vo.getRoutePath())) {
                 wrapper.eq(Menu::getParentId, -1);
             }
@@ -140,6 +141,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /**
      * 处理子菜单
      *
+     * <p>子菜单查询必须显式按排序号升序返回，否则数据库返回顺序不确定，
+     * 前端树形表格中子菜单会出现与排序号不一致的情况。</p>
+     *
      * @param records 菜单信息
      * @return 处理后的菜单信息
      */
@@ -147,6 +151,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         for (MenuVO menuVO : records) {
             QueryWrapper wrapper = QueryWrapper.create();
             wrapper.eq(Menu::getParentId, menuVO.getId());
+            // 排序号升序，排序号相同时按ID升序保证顺序稳定
+            wrapper.orderBy(Menu::getOrderNum, true).orderBy(Menu::getId, true);
             List<MenuVO> children = this.getMapper().selectListByQueryAs(wrapper, MenuVO.class);
             if (!children.isEmpty()) {
                 menuVO.setChildren(children);
