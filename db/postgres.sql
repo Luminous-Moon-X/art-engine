@@ -690,3 +690,42 @@ CREATE INDEX "idx_sys_oss_file_config" ON "p_sys_oss_file" USING btree ("oss_con
 CREATE INDEX "idx_sys_oss_file_create_time" ON "p_sys_oss_file" USING btree ("create_time");
 CREATE UNIQUE INDEX "uk_sys_oss_file_object_key" ON "p_sys_oss_file" USING btree ("object_key");
 
+CREATE TABLE "p_sys_permission_row" (
+  "id" bigint NOT NULL,
+  "create_id" bigint,
+  "create_time" timestamp without time zone,
+  "update_id" bigint,
+  "update_time" timestamp without time zone,
+  "delete_flag" smallint NOT NULL DEFAULT 0,
+  "tenant_id" bigint,
+  "enable_flag" boolean,
+  "subject_type" character varying(255),
+  "permission_subject" character varying(255),
+  "permission_object" character varying(4000),
+  "permission_scope" character varying(255),
+  "custom_dept_scope" character varying(1000),
+  "column_condition" character varying(255),
+  "column_relation" character varying(255),
+  "column_value" character varying(500),
+  PRIMARY KEY ("id")
+);
+COMMENT ON TABLE "p_sys_permission_row" IS '数据行权限表';
+COMMENT ON COLUMN "p_sys_permission_row"."id" IS '主键ID';
+COMMENT ON COLUMN "p_sys_permission_row"."create_id" IS '创建人';
+COMMENT ON COLUMN "p_sys_permission_row"."create_time" IS '创建时间';
+COMMENT ON COLUMN "p_sys_permission_row"."update_id" IS '修改人';
+COMMENT ON COLUMN "p_sys_permission_row"."update_time" IS '修改时间';
+COMMENT ON COLUMN "p_sys_permission_row"."delete_flag" IS '删除标识';
+COMMENT ON COLUMN "p_sys_permission_row"."tenant_id" IS '租户id';
+COMMENT ON COLUMN "p_sys_permission_row"."enable_flag" IS '启用标识';
+COMMENT ON COLUMN "p_sys_permission_row"."subject_type" IS '授权主体类型：role-角色 dept-部门 user-用户';
+COMMENT ON COLUMN "p_sys_permission_row"."permission_subject" IS '授权主体';
+COMMENT ON COLUMN "p_sys_permission_row"."permission_object" IS '授权客体（多个表名逗号分隔，为空表示对所有表生效）';
+COMMENT ON COLUMN "p_sys_permission_row"."permission_scope" IS '授权范围：1-所属部门 2-所属部门及以下 3-本人创建数据 4-自定义部门范围 5-自定义字段';
+COMMENT ON COLUMN "p_sys_permission_row"."custom_dept_scope" IS '自定义部门权限范围（多个部门ID逗号分隔）';
+COMMENT ON COLUMN "p_sys_permission_row"."column_condition" IS '自定义权限字段';
+COMMENT ON COLUMN "p_sys_permission_row"."column_relation" IS '自定义权限字段关系';
+COMMENT ON COLUMN "p_sys_permission_row"."column_value" IS '自定义权限字段值';
+CREATE INDEX "idx_sys_permission_row_tenant" ON "p_sys_permission_row" USING btree ("tenant_id");
+CREATE INDEX "idx_sys_permission_row_subject" ON "p_sys_permission_row" USING btree ("subject_type", "permission_subject");
+
