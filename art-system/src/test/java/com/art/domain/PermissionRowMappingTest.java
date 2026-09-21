@@ -19,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>回归保护：{@link PermissionRow} 的列映射必须与 {@code p_sys_permission_row} 表结构一致，
  * 否则会在运行期报错：</p>
  * <ul>
- *     <li>{@code delete_flag} 必须是 smallint，映射为 {@link BaseEntity} 的 Integer，
- *     若库中为 boolean 则读取报 Bad value for type int、写入报 boolean = integer；</li>
+ *     <li>{@code delete_flag} 必须是 boolean，映射为 {@link BaseEntity} 的 Boolean；</li>
  *     <li>{@code enable_flag} 为 boolean，映射为 Boolean；</li>
  *     <li>租户列必须保留，保证多租户自动过滤生效。</li>
  * </ul>
@@ -36,15 +35,15 @@ class PermissionRowMappingTest {
     private final TableInfo tableInfo = TableInfoFactory.ofEntityClass(PermissionRow.class);
 
     /**
-     * delete_flag 应正常参与映射，且类型为 Integer（与库中 smallint 对应）
+     * delete_flag 应正常参与映射，且类型为 Boolean（与库中 boolean 对应）
      */
     @Test
-    void deleteFlagShouldMapAsInteger() {
+    void deleteFlagShouldMapAsBoolean() {
         List<String> columns = Arrays.asList(this.tableInfo.getColumns());
         assertTrue(columns.contains("delete_flag"), "delete_flag 应参与映射，实际列：" + columns);
 
         ColumnInfo columnInfo = this.columnInfo("delete_flag");
-        assertEquals(Integer.class, columnInfo.getPropertyType());
+        assertEquals(Boolean.class, columnInfo.getPropertyType());
         assertFalse(columnInfo.isIgnore());
     }
 

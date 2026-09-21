@@ -125,7 +125,7 @@ public class AuthServiceImpl implements AuthService {
         } else {
             user = userList.getFirst();
         }
-        if (user.getEnableFlag() == 0) {
+        if (Boolean.FALSE.equals(user.getEnableFlag())) {
             throw new ArtException("该用户已被禁用，请联系管理员！");
         }
         // 对比密码
@@ -262,7 +262,7 @@ public class AuthServiceImpl implements AuthService {
         if (currentUser == null) {
             throw new ArtException("用户不存在，请联系管理员！");
         }
-        if (currentUser.getEnableFlag() != null && currentUser.getEnableFlag() == 0) {
+        if (Boolean.FALSE.equals(currentUser.getEnableFlag())) {
             throw new ArtException("该用户已被禁用，请联系管理员！");
         }
         

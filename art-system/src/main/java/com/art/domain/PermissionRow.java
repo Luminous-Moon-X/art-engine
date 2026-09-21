@@ -1,5 +1,6 @@
 package com.art.domain;
 
+import com.art.annotation.Query;
 import com.art.common.BaseEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -30,11 +31,13 @@ public class PermissionRow extends BaseEntity {
      * </ul>
      */
     @Column("subject_type")
+    @Query(type = Query.Type.EQ)
     private String subjectType;
     /**
      * 授权主体
      */
     @Column("permission_subject")
+    @Query(type = Query.Type.EQ)
     private String permissionSubject;
     /**
      * 授权客体<br/>
@@ -42,6 +45,7 @@ public class PermissionRow extends BaseEntity {
      * 为空时，对所有数据表生效
      */
     @Column("permission_object")
+    @Query(type = Query.Type.LIKE)
     private String permissionObject;
     /**
      * 授权范围<br/>

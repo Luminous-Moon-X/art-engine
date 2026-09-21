@@ -22,7 +22,7 @@ public class UserVO {
     /**
      * 启用标识
      */
-    private Integer enableFlag;
+    private Boolean enableFlag;
     /**
      * 用户名
      */

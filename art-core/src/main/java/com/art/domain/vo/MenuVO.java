@@ -20,7 +20,7 @@ public class MenuVO {
     /**
      * 启用标识
      */
-    private Integer enableFlag;
+    private Boolean enableFlag;
     /**
      * 菜单类型
      */
