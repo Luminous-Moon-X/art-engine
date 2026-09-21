@@ -48,7 +48,7 @@ public class FlexAutoFillConfiguration {
                     baseEntity.setCreateTime(LocalDateTime.now());
                 }
                 if (baseEntity.getDeleteFlag() == null) {
-                    baseEntity.setDeleteFlag(0);
+                    baseEntity.setDeleteFlag(Boolean.FALSE);
                 }
             }
         }

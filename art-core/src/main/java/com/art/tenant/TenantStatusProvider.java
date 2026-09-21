@@ -26,10 +26,10 @@ public interface TenantStatusProvider {
     /**
      * 租户状态快照
      *
-     * @param enableFlag 启用标识（1启用 0禁用）
+     * @param enableFlag 启用标识（true启用 false禁用）
      * @param expireDate 到期日期（可为null，表示不限制）
      */
-    record TenantStatus(Integer enableFlag, LocalDate expireDate) {
+    record TenantStatus(Boolean enableFlag, LocalDate expireDate) {
 
         /**
          * 租户是否已禁用
@@ -37,7 +37,7 @@ public interface TenantStatusProvider {
          * @return 是否禁用
          */
         public boolean isDisabled() {
-            return enableFlag != null && enableFlag != 1;
+            return enableFlag != null && !enableFlag;
         }
 
         /**

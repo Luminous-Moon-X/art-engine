@@ -76,7 +76,7 @@ public class TenantPackageServiceImpl extends ServiceImpl<TenantPackageMapper, T
             List<TenantPackageVO> records = entityPage.getRecords().stream()
                     .map(this::convertToVO)
                     .toList();
-            return new Page<TenantPackageVO>(records, entityPage.getPageNumber(),
+            return new Page<>(records, entityPage.getPageNumber(),
                     entityPage.getPageSize(), entityPage.getTotalRow());
         });
     }
@@ -90,7 +90,7 @@ public class TenantPackageServiceImpl extends ServiceImpl<TenantPackageMapper, T
     public List<SelectVO> select() {
         // 租户套餐为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> {
-            List<TenantPackage> packageList = this.list(QueryWrapper.create().eq(TenantPackage::getEnableFlag, 1));
+            List<TenantPackage> packageList = this.list(QueryWrapper.create().eq(TenantPackage::getEnableFlag, Boolean.TRUE));
             return packageList.stream().map(tenantPackage -> {
                 SelectVO selectVO = new SelectVO();
                 selectVO.setLabel(tenantPackage.getPackageName());

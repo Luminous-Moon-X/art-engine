@@ -237,8 +237,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User entity = ConvertUtil.convert(vo, User.class);
         boolean result = this.updateById(entity);
         // 用户被禁用时立即踢出已有会话，避免禁用后仍可继续访问
-        if (result && vo.getEnableFlag() != null && vo.getEnableFlag() == 0
-                && (existing.getEnableFlag() == null || existing.getEnableFlag() != 0)) {
+        if (result && Boolean.FALSE.equals(vo.getEnableFlag())
+                && !Boolean.FALSE.equals(existing.getEnableFlag())) {
             this.kickoutUserSessions(vo.getId());
         }
         // 刷新角色关系

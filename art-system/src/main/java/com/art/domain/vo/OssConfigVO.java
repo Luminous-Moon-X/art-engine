@@ -49,10 +49,10 @@ public class OssConfigVO {
     private String bucketName;
 
     /**
-     * 启用标识：0-禁用 1-启用
+     * 启用标识：true-启用 false-禁用
      */
     @Query(type = Query.Type.EQ)
-    private Integer enableFlag;
+    private Boolean enableFlag;
 
     /**
      * 备注

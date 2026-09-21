@@ -42,7 +42,7 @@ public class DeptVO {
     /**
      * 启用状态
      */
-    private Integer enableFlag;
+    private Boolean enableFlag;
     /**
      * 上级部门ID
      */

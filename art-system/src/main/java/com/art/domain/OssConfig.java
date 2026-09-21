@@ -48,10 +48,10 @@ public class OssConfig extends BaseEntity {
     private String bucketName;
 
     /**
-     * 启用标识：0-禁用 1-启用
+     * 启用标识：true-启用 false-禁用
      */
     @Column("enable_flag")
-    private Integer enableFlag;
+    private Boolean enableFlag;
 
     /**
      * 备注

@@ -73,7 +73,7 @@ public class RuleCache extends ArtCache<List<RuleItemVO>> {
     protected List<RuleItemVO> loadFromDb() {
         // 规则为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> this.ruleMapper
-                .selectListByQueryAs(QueryWrapper.create().eq(Rule::getEnableFlag, 1), RuleItemVO.class));
+                .selectListByQueryAs(QueryWrapper.create().eq(Rule::getEnableFlag, Boolean.TRUE), RuleItemVO.class));
     }
 
     /**

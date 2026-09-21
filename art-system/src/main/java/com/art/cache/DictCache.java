@@ -78,7 +78,7 @@ public class DictCache extends ArtCache<Map<String, List<DictItemVO>>> {
         // 字典为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> {
             Map<String, List<DictItemVO>> dictMap = new ConcurrentHashMap<>();
-            List<Dict> allDictList = dictMapper.selectListByQuery(QueryWrapper.create().eq(Dict::getEnableFlag, 1));
+            List<Dict> allDictList = dictMapper.selectListByQuery(QueryWrapper.create().eq(Dict::getEnableFlag, true));
             List<Thread> threads = new ArrayList<>();
             for (Dict dict : allDictList) {
                 Thread thread = Thread.ofVirtual().start(() -> {
