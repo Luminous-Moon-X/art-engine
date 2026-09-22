@@ -1,5 +1,6 @@
 package com.art.config;
 
+import com.art.auth.DataAuthColumnProvider;
 import com.art.auth.DataAuthDialect;
 import com.art.auth.cache.PermissionRowCache;
 import com.art.context.IgnoreSqlLogContextHolder;
@@ -37,14 +38,26 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
     private final ObjectProvider<PermissionRowCache> permissionRowCacheProvider;
 
     /**
-     * 构造函数 - 注入数据行权限缓存的延迟提供者，并启用配置 MyBatis-Flex 审计功能<br/>
+     * 授权客体字段元数据提供者<br/>
+     * <p>
+     * 同样必须延迟解析：数据行权限在拼接条件前需要判断授权客体是否包含该授权范围依赖的字段，
+     * 元数据由 art-system 的 {@code TableColumnCache}（基于数据库系统目录 + 二级缓存）提供。
+     * </p>
+     */
+    private final ObjectProvider<DataAuthColumnProvider> dataAuthColumnProvider;
+
+    /**
+     * 构造函数 - 注入数据行权限相关依赖的延迟提供者，并启用配置 MyBatis-Flex 审计功能<br/>
      * 设置审计启用状态，并配置消息收集器以记录 SQL 执行详情，包括操作类型、执行时间和性能警告<br/>
      * 配置全局主键生成器为雪花算法
      *
      * @param permissionRowCacheProvider 数据行权限缓存提供者（延迟解析，避免循环依赖）
+     * @param dataAuthColumnProvider     授权客体字段元数据提供者（延迟解析，避免循环依赖）
      */
-    public MybatisFlexConfiguration(ObjectProvider<PermissionRowCache> permissionRowCacheProvider) {
+    public MybatisFlexConfiguration(ObjectProvider<PermissionRowCache> permissionRowCacheProvider,
+                                    ObjectProvider<DataAuthColumnProvider> dataAuthColumnProvider) {
         this.permissionRowCacheProvider = permissionRowCacheProvider;
+        this.dataAuthColumnProvider = dataAuthColumnProvider;
         // 启用审计功能
         AuditManager.setAuditEnable(true);
         // 设置消息收集器，用于记录 SQL 执行信息
@@ -128,6 +141,7 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
     @Override
     public void customize(FlexGlobalConfig globalConfig) {
         // 注册数据权限处理逻辑（方言内部按需延迟解析缓存，避免与 sqlSessionFactory 形成循环依赖）
-        DialectFactory.registerDialect(DbType.POSTGRE_SQL, new DataAuthDialect(permissionRowCacheProvider));
+        DialectFactory.registerDialect(DbType.POSTGRE_SQL,
+                new DataAuthDialect(permissionRowCacheProvider, dataAuthColumnProvider));
     }
 }
