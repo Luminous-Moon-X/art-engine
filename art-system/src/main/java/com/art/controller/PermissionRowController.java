@@ -1,5 +1,6 @@
 package com.art.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.art.annotation.ApiLog;
 import com.art.common.HttpResult;
 import com.art.common.TableRowVO;
@@ -91,6 +92,7 @@ public class PermissionRowController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页查询数据权限信息", description = "分页查询数据权限信息（自动限定当前租户）")
+    @SaCheckPermission("system:data-permission:list")
     public HttpResult<Page<PermissionRowVO>> page(Page<PermissionRowVO> page, PermissionRowVO vo) {
         return HttpResult.success(this.permissionRowService.queryPage(page, vo));
     }
@@ -104,6 +106,7 @@ public class PermissionRowController {
     @PostMapping("/add")
     @Operation(summary = "新增数据权限", description = "新增数据权限（自动归属当前租户）")
     @ApiLog(module = "数据权限管理", operationType = ApiOperationType.INSERT, description = "新增数据权限")
+    @SaCheckPermission("system:data-permission:add")
     public HttpResult<Boolean> add(@RequestBody PermissionRowVO vo) {
         return HttpResult.success(this.permissionRowService.add(vo));
     }
@@ -117,6 +120,7 @@ public class PermissionRowController {
     @PutMapping("/edit")
     @Operation(summary = "编辑数据权限", description = "编辑数据权限（自动限定当前租户）")
     @ApiLog(module = "数据权限管理", operationType = ApiOperationType.UPDATE, description = "编辑数据权限")
+    @SaCheckPermission("system:data-permission:edit")
     public HttpResult<Boolean> edit(@RequestBody PermissionRowVO vo) {
         return HttpResult.success(this.permissionRowService.edit(vo));
     }
@@ -131,6 +135,7 @@ public class PermissionRowController {
     @PutMapping("/status/{id}")
     @Operation(summary = "启用/禁用数据权限", description = "启用/禁用数据权限（自动限定当前租户）")
     @ApiLog(module = "数据权限管理", operationType = ApiOperationType.UPDATE, description = "启用/禁用数据权限")
+    @SaCheckPermission("system:data-permission:status")
     public HttpResult<Boolean> updateStatus(@PathVariable("id") Long id,
                                             @RequestParam("enableFlag") Boolean enableFlag) {
         return HttpResult.success(this.permissionRowService.updateStatus(id, enableFlag));
@@ -145,6 +150,7 @@ public class PermissionRowController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除数据权限", description = "删除数据权限（自动限定当前租户）")
     @ApiLog(module = "数据权限管理", operationType = ApiOperationType.DELETE, description = "删除数据权限")
+    @SaCheckPermission("system:data-permission:delete")
     public HttpResult<Boolean> delete(@RequestBody TableRowVO tableRowVO) {
         return HttpResult.success(this.permissionRowService.delete(tableRowVO.getIdList()));
     }
