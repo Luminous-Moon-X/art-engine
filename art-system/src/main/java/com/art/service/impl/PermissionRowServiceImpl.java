@@ -1,6 +1,8 @@
 package com.art.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.art.auth.cache.PermissionRowCache;
+import com.art.cache.support.CacheRefreshService;
 import com.art.domain.PermissionRow;
 import com.art.domain.vo.PermissionRowVO;
 import com.art.exception.ArtException;
@@ -22,6 +24,9 @@ import java.util.Objects;
  *
  * <p>数据权限为租户级数据，全部操作不进入系统级作用域，
  * 由 MyBatis-Flex 全局租户插件自动追加 tenant_id 过滤条件。</p>
+ *
+ * <p>规则变更后必须刷新 {@link PermissionRowCache}：方言在构建每条 SQL 时都会读取该缓存，
+ * 若不刷新，规则的新增/编辑/启停/删除要等到缓存过期才生效，且其他实例不会收到失效通知。</p>
  *
  * @author Luminous.X
  * @since 2.1.0
@@ -51,6 +56,28 @@ public class PermissionRowServiceImpl extends ServiceImpl<PermissionRowMapper, P
     private static final String COLUMN_RELATION_NOT_NULL = "not_null";
 
     /**
+     * 数据行权限缓存
+     */
+    private final PermissionRowCache permissionRowCache;
+
+    /**
+     * 缓存刷新服务（业务代码唯一的缓存生命周期入口）
+     */
+    private final CacheRefreshService cacheRefreshService;
+
+    /**
+     * 构造函数
+     *
+     * @param permissionRowCache  数据行权限缓存
+     * @param cacheRefreshService 缓存刷新服务
+     */
+    public PermissionRowServiceImpl(PermissionRowCache permissionRowCache,
+                                    CacheRefreshService cacheRefreshService) {
+        this.permissionRowCache = permissionRowCache;
+        this.cacheRefreshService = cacheRefreshService;
+    }
+
+    /**
      * 分页查询数据权限信息（自动限定当前租户）
      *
      * @param page 分页对象
@@ -78,7 +105,11 @@ public class PermissionRowServiceImpl extends ServiceImpl<PermissionRowMapper, P
         if (entity.getEnableFlag() == null) {
             entity.setEnableFlag(Boolean.TRUE);
         }
-        return this.save(entity);
+        boolean saved = this.save(entity);
+        if (saved) {
+            this.refreshCache();
+        }
+        return saved;
     }
 
     /**
@@ -102,7 +133,11 @@ public class PermissionRowServiceImpl extends ServiceImpl<PermissionRowMapper, P
         if (entity.getEnableFlag() == null) {
             entity.setEnableFlag(existing.getEnableFlag());
         }
-        return this.updateById(entity);
+        boolean updated = this.updateById(entity);
+        if (updated) {
+            this.refreshCache();
+        }
+        return updated;
     }
 
     /**
@@ -126,7 +161,11 @@ public class PermissionRowServiceImpl extends ServiceImpl<PermissionRowMapper, P
         if (count != distinctIds.size()) {
             throw new ArtException("包含非本租户的数据权限规则，操作失败！");
         }
-        return this.removeByIds(distinctIds);
+        boolean removed = this.removeByIds(distinctIds);
+        if (removed) {
+            this.refreshCache();
+        }
+        return removed;
     }
 
     /**
@@ -151,7 +190,18 @@ public class PermissionRowServiceImpl extends ServiceImpl<PermissionRowMapper, P
             return true;
         }
         entity.setEnableFlag(enableFlag);
-        return this.updateById(entity);
+        boolean updated = this.updateById(entity);
+        if (updated) {
+            this.refreshCache();
+        }
+        return updated;
+    }
+
+    /**
+     * 规则变更后刷新数据行权限缓存（事务提交后异步重载并广播失效）
+     */
+    private void refreshCache() {
+        this.cacheRefreshService.refreshAfterCommit(this.permissionRowCache);
     }
 
     /**

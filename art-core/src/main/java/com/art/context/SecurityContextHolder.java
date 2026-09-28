@@ -84,7 +84,11 @@ public class SecurityContextHolder {
         String roleIdsStr = get(SecurityConstants.ROLE_IDS);
         String[] roleIdStrArr = roleIdsStr.split(",");
         for (String roleIdStr : roleIdStrArr) {
-            roleIds.add(Long.parseLong(roleIdStr));
+            // 无角色时线程变量为空字符串，split 得到空串，直接跳过避免 NumberFormatException
+            if (StringUtils.isBlank(roleIdStr)) {
+                continue;
+            }
+            roleIds.add(Long.parseLong(roleIdStr.trim()));
         }
         return roleIds;
     }
@@ -110,7 +114,15 @@ public class SecurityContextHolder {
     public static List<String> getRoleCodes() {
         String roleCodesStr = get(SecurityConstants.ROLE_CODES);
         String[] roleCodeStrArr = roleCodesStr.split(",");
-        return new ArrayList<>(Arrays.asList(roleCodeStrArr));
+        List<String> roleCodes = new ArrayList<>(roleCodeStrArr.length);
+        for (String roleCode : roleCodeStrArr) {
+            // 无角色时线程变量为空字符串，split 得到空串，直接跳过避免空角色编码参与鉴权
+            if (StringUtils.isBlank(roleCode)) {
+                continue;
+            }
+            roleCodes.add(roleCode.trim());
+        }
+        return roleCodes;
     }
 
     /**

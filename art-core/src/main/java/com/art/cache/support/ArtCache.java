@@ -90,7 +90,7 @@ public abstract class ArtCache<V> {
         V data = load();
         if (data != null) {
             writeBoth(data);
-            log.info("缓存预热成功：{}", cacheName());
+            log.info("Cache warm-up successful：{}", cacheName());
         }
     }
 
