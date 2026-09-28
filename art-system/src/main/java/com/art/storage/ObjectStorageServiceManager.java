@@ -265,10 +265,10 @@ public class ObjectStorageServiceManager implements ObjectStorageService {
             List<OssConfig> tenantConfigs = tenantSupport.systemScope(() -> ossConfigMapper.selectListByQuery(
                     QueryWrapper.create()
                             .eq(OssConfig::getTenantId, tenantId)
-                            .eq(OssConfig::getDeleteFlag, 0)
+                            .eq(OssConfig::getDeleteFlag, Boolean.FALSE)
                             .orderBy(OssConfig::getId, false)));
             OssConfig config = tenantConfigs.stream()
-                    .filter(item -> Integer.valueOf(1).equals(item.getEnableFlag()))
+                    .filter(item -> Boolean.TRUE.equals(item.getEnableFlag()))
                     .findFirst()
                     .orElse(null);
             if (config == null) {
@@ -324,8 +324,8 @@ public class ObjectStorageServiceManager implements ObjectStorageService {
     private OssConfig selectEnabledConfig(boolean globalOnly) {
         return tenantSupport.systemScope(() -> {
             QueryWrapper wrapper = QueryWrapper.create()
-                    .eq(OssConfig::getEnableFlag, 1)
-                    .eq(OssConfig::getDeleteFlag, 0)
+                    .eq(OssConfig::getEnableFlag, Boolean.TRUE)
+                    .eq(OssConfig::getDeleteFlag, Boolean.FALSE)
                     .orderBy(OssConfig::getId, false);
             if (globalOnly) {
                 wrapper.isNull(OssConfig::getTenantId);

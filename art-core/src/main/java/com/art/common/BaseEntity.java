@@ -41,10 +41,10 @@ public class BaseEntity {
     @Column("update_time")
     private LocalDateTime updateTime;
     /**
-     * 删除标识
+     * 删除标识：true-已删除 false-未删除
      */
     @Column("delete_flag")
-    private Integer deleteFlag;
+    private Boolean deleteFlag;
     /**
      * 租户ID
      */

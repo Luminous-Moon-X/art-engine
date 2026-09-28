@@ -121,9 +121,9 @@ public class OssConfigServiceImpl extends ServiceImpl<OssConfigMapper, OssConfig
         OssConfig entity = ConvertUtil.convert(vo, OssConfig.class);
         entity.setSecretKey(ossSecretCrypto.encrypt(vo.getSecretKey()));
         if (entity.getEnableFlag() == null) {
-            entity.setEnableFlag(0);
+            entity.setEnableFlag(Boolean.FALSE);
         }
-        if (entity.getEnableFlag() == 1) {
+        if (Boolean.TRUE.equals(entity.getEnableFlag())) {
             disableOthers(null);
         }
         boolean result = this.save(entity);
@@ -159,7 +159,7 @@ public class OssConfigServiceImpl extends ServiceImpl<OssConfigMapper, OssConfig
         if (entity.getEnableFlag() == null) {
             entity.setEnableFlag(existing.getEnableFlag());
         }
-        if (entity.getEnableFlag() == 1) {
+        if (Boolean.TRUE.equals(entity.getEnableFlag())) {
             disableOthers(vo.getId());
         }
         boolean result = this.updateById(entity);
@@ -209,11 +209,11 @@ public class OssConfigServiceImpl extends ServiceImpl<OssConfigMapper, OssConfig
         if (entity == null) {
             throw new ArtException("对象存储配置不存在");
         }
-        if (entity.getEnableFlag() != null && entity.getEnableFlag() == 1) {
+        if (Boolean.TRUE.equals(entity.getEnableFlag())) {
             return true;
         }
         disableOthers(id);
-        entity.setEnableFlag(1);
+        entity.setEnableFlag(Boolean.TRUE);
         boolean result = this.updateById(entity);
         if (result) {
             refreshAfterCommit();
@@ -255,8 +255,8 @@ public class OssConfigServiceImpl extends ServiceImpl<OssConfigMapper, OssConfig
      */
     private void disableOthers(Long excludeId) {
         OssConfig update = new OssConfig();
-        update.setEnableFlag(0);
-        QueryWrapper wrapper = QueryWrapper.create().eq(OssConfig::getEnableFlag, 1);
+        update.setEnableFlag(Boolean.FALSE);
+        QueryWrapper wrapper = QueryWrapper.create().eq(OssConfig::getEnableFlag, Boolean.TRUE);
         if (excludeId != null) {
             wrapper.ne(OssConfig::getId, excludeId);
         }

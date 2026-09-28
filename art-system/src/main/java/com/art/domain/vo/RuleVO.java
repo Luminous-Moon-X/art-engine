@@ -33,9 +33,9 @@ public class RuleVO {
      */
     private Long updateId;
     /**
-     * 删除标识
+     * 启用标识
      */
-    private Integer enableFlag;
+    private Boolean enableFlag;
     /**
      * 规则编码
      */

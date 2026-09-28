@@ -178,7 +178,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         // 租户为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> this.getOne(QueryWrapper.create()
                 .eq(Tenant::getId, tenantId)
-                .eq(Tenant::getEnableFlag, 1)));
+                .eq(Tenant::getEnableFlag, Boolean.TRUE)));
     }
 
     /**
@@ -265,7 +265,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
             // 套餐存在且启用
             TenantPackage tenantPackage = tenantPackageMapper.selectOneByQuery(QueryWrapper.create()
                     .eq(TenantPackage::getId, vo.getPackageId())
-                    .eq(TenantPackage::getEnableFlag, 1));
+                    .eq(TenantPackage::getEnableFlag, Boolean.TRUE));
             if (tenantPackage == null) {
                 throw new ArtException("租户套餐不存在或已禁用！");
             }
@@ -279,7 +279,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
             tenant.setTenantCode(vo.getTenantCode());
             tenant.setTenantName(vo.getTenantName());
             tenant.setPackageId(vo.getPackageId());
-            tenant.setEnableFlag(vo.getEnableFlag() == null ? 1 : vo.getEnableFlag());
+            tenant.setEnableFlag(vo.getEnableFlag() == null ? Boolean.TRUE : vo.getEnableFlag());
             tenant.setExpireDate(vo.getExpireDate());
             tenant.setRemark(vo.getRemark());
             if (!this.save(tenant)) {
@@ -313,7 +313,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         user.setNickName(tenant.getTenantName());
         user.setPassword(encodePwd);
         user.setUserType(TenantConstants.USER_TYPE_ADMIN);
-        user.setEnableFlag(1);
+        user.setEnableFlag(Boolean.TRUE);
         user.setFirstLoginFlag(1);
         if (userMapper.insert(user) <= 0) {
             throw new ArtException("租户管理员创建失败，请联系管理员！");
@@ -351,7 +351,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
             if (vo.getPackageId() != null && !vo.getPackageId().equals(oldTenant.getPackageId())) {
                 TenantPackage tenantPackage = tenantPackageMapper.selectOneByQuery(QueryWrapper.create()
                         .eq(TenantPackage::getId, vo.getPackageId())
-                        .eq(TenantPackage::getEnableFlag, 1));
+                        .eq(TenantPackage::getEnableFlag, Boolean.TRUE));
                 if (tenantPackage == null) {
                     throw new ArtException("租户套餐不存在或已禁用！");
                 }
@@ -407,7 +407,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         // 租户为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> {
             List<Tenant> tenantList = this.list(QueryWrapper.create()
-                    .eq(Tenant::getEnableFlag, 1)
+                    .eq(Tenant::getEnableFlag, Boolean.TRUE)
                     .orderBy(Tenant::getId, true));
             return tenantList.stream().map(this::convertToVO).toList();
         });
@@ -429,7 +429,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
             throw new ArtException("租户ID不能为空！");
         }
         Tenant tenant = tenantSupport.systemScope(() -> this.getById(tenantId));
-        if (tenant == null || !Integer.valueOf(1).equals(tenant.getEnableFlag())) {
+        if (tenant == null || !Boolean.TRUE.equals(tenant.getEnableFlag())) {
             throw new ArtException("租户不存在或已禁用！");
         }
         // 与登录路径保持一致：已到期租户不允许切换进入
@@ -474,7 +474,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
             }
             TenantPackage tenantPackage = tenantPackageMapper.selectOneByQuery(QueryWrapper.create()
                     .eq(TenantPackage::getId, tenant.getPackageId())
-                    .eq(TenantPackage::getEnableFlag, 1));
+                    .eq(TenantPackage::getEnableFlag, Boolean.TRUE));
             if (tenantPackage == null) {
                 return Collections.emptyList();
             }

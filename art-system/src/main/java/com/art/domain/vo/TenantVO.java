@@ -41,7 +41,7 @@ public class TenantVO {
     /**
      * 启用标识
      */
-    private Integer enableFlag;
+    private Boolean enableFlag;
     /**
      * 到期时间
      */

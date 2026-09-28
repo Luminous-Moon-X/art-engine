@@ -37,5 +37,5 @@ public class RoleVO {
     /**
      * 是否启用
      */
-    private Integer enableFlag;
+    private Boolean enableFlag;
 }

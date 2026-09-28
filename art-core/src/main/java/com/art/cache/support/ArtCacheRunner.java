@@ -46,16 +46,16 @@ public class ArtCacheRunner implements SmartInitializingSingleton {
      */
     @Override
     public void afterSingletonsInstantiated() {
-        log.info("--- 开始预热二级缓存（共 {} 个） ---", artCaches.size());
+        log.info("--- Start warming up the level 2 cache ---");
         for (ArtCache<?> cache : artCaches) {
             try {
                 registry.register(cache);
                 cache.warmUp();
             } catch (Exception e) {
-                log.error("缓存预热失败：{}", cache.getClass().getName(), e);
+                log.error("warming up the level 2 cache failed：{}", cache.getClass().getName(), e);
             }
         }
         broadcaster.start();
-        log.info("--- 二级缓存预热完成 ---");
+        log.info("--- Level 2 cache warming up completed ---");
     }
 }

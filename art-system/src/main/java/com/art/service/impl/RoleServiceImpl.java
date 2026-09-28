@@ -216,7 +216,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      */
     @Override
     public List<SelectVO> select() {
-        List<Role> roleList = this.list(QueryWrapper.create().eq(Role::getEnableFlag, 1));
+        List<Role> roleList = this.list(QueryWrapper.create().eq(Role::getEnableFlag, Boolean.TRUE));
         return roleList.stream().map(role -> {
             SelectVO selectVO = new SelectVO();
             selectVO.setLabel(role.getRoleName());

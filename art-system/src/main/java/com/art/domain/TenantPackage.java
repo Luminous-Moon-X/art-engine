@@ -30,7 +30,7 @@ public class TenantPackage extends BaseEntity {
      * 启用标识
      */
     @Column("enable_flag")
-    private Integer enableFlag;
+    private Boolean enableFlag;
     /**
      * 备注
      */

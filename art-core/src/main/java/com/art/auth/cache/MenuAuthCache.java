@@ -74,7 +74,7 @@ public class MenuAuthCache extends ArtCache<List<String>> {
     protected List<String> loadFromDb() {
         // 菜单权限标识为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() -> this.menuMapper
-                .selectListByQueryAs(QueryWrapper.create().eq(Menu::getEnableFlag, 1), MenuVO.class))
+                .selectListByQueryAs(QueryWrapper.create().eq(Menu::getEnableFlag, Boolean.TRUE), MenuVO.class))
                 .stream()
                 .map(MenuVO::getPermissionSign)
                 .toList();

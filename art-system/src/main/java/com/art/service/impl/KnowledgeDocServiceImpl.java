@@ -384,7 +384,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
                 contentEntity.setParseEndTime(LocalDateTime.now());
                 contentEntity.setCreateId(userId);
                 contentEntity.setCreateTime(LocalDateTime.now());
-                contentEntity.setDeleteFlag(0);
+                contentEntity.setDeleteFlag(Boolean.FALSE);
                 knowledgeDocContentMapper.insert(contentEntity);
                 // 4. 解析状态改为complete
                 KnowledgeDoc complete = new KnowledgeDoc();
@@ -557,13 +557,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
      * @return 分割后的文档列表
      */
     public static List<String> splitFixedLength(String documentText, int chunkSize) {
-        int len = documentText.length();
-        List<String> chunks = new ArrayList<>((len + chunkSize - 1) / chunkSize);
-        for (int i = 0; i < len; i += chunkSize) {
-            int end = Math.min(len, i + chunkSize);
-            chunks.add(documentText.substring(i, end));
-        }
-        return chunks;
+        return AIChatServiceImpl.splitFixedLength(documentText, chunkSize);
     }
 
     /**

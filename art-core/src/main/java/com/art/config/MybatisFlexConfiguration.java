@@ -1,9 +1,17 @@
 package com.art.config;
 
+import com.art.auth.DataAuthColumnProvider;
+import com.art.auth.DataAuthDialect;
+import com.art.auth.cache.PermissionRowCache;
 import com.art.context.IgnoreSqlLogContextHolder;
+import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
+import com.mybatisflex.core.dialect.DbType;
+import com.mybatisflex.core.dialect.DialectFactory;
+import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -14,16 +22,42 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.0.0
  */
 @Configuration
-public class MybatisFlexConfiguration {
+public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
     // 用于记录 MyBatis-Flex SQL 日志的专用 Logger
     private static final Logger logger = LoggerFactory.getLogger("mybatis-flex-sql");
 
     /**
-     * 构造函数 - 启用并配置 MyBatis-Flex 审计功能<br/>
+     * 数据行权限缓存提供者<br/>
+     * <p>
+     * 必须使用 {@link ObjectProvider} 延迟解析：本类作为 {@link MyBatisFlexCustomizer} 会在
+     * sqlSessionFactory 创建过程中被实例化，而 {@code PermissionRowCache} 依赖
+     * {@code PermissionRowMapper}、Mapper 又反向依赖 sqlSessionFactory，
+     * 直接注入会形成循环依赖（Requested bean is currently in creation）。
+     * </p>
+     */
+    private final ObjectProvider<PermissionRowCache> permissionRowCacheProvider;
+
+    /**
+     * 授权客体字段元数据提供者<br/>
+     * <p>
+     * 同样必须延迟解析：数据行权限在拼接条件前需要判断授权客体是否包含该授权范围依赖的字段，
+     * 元数据由 art-system 的 {@code TableColumnCache}（基于数据库系统目录 + 二级缓存）提供。
+     * </p>
+     */
+    private final ObjectProvider<DataAuthColumnProvider> dataAuthColumnProvider;
+
+    /**
+     * 构造函数 - 注入数据行权限相关依赖的延迟提供者，并启用配置 MyBatis-Flex 审计功能<br/>
      * 设置审计启用状态，并配置消息收集器以记录 SQL 执行详情，包括操作类型、执行时间和性能警告<br/>
      * 配置全局主键生成器为雪花算法
+     *
+     * @param permissionRowCacheProvider 数据行权限缓存提供者（延迟解析，避免循环依赖）
+     * @param dataAuthColumnProvider     授权客体字段元数据提供者（延迟解析，避免循环依赖）
      */
-    public MybatisFlexConfiguration() {
+    public MybatisFlexConfiguration(ObjectProvider<PermissionRowCache> permissionRowCacheProvider,
+                                    ObjectProvider<DataAuthColumnProvider> dataAuthColumnProvider) {
+        this.permissionRowCacheProvider = permissionRowCacheProvider;
+        this.dataAuthColumnProvider = dataAuthColumnProvider;
         // 启用审计功能
         AuditManager.setAuditEnable(true);
         // 设置消息收集器，用于记录 SQL 执行信息
@@ -97,5 +131,17 @@ public class MybatisFlexConfiguration {
             return ""; // SQL 为 null 时返回空字符串
         }
         return sql.replaceAll("\\s+", " ").trim(); // 将多个空白字符替换为单个空格并去除首尾空白
+    }
+
+    /**
+     * 自定义全局配置
+     *
+     * @param globalConfig 全局配置
+     */
+    @Override
+    public void customize(FlexGlobalConfig globalConfig) {
+        // 注册数据权限处理逻辑（方言内部按需延迟解析缓存，避免与 sqlSessionFactory 形成循环依赖）
+        DialectFactory.registerDialect(DbType.POSTGRE_SQL,
+                new DataAuthDialect(permissionRowCacheProvider, dataAuthColumnProvider));
     }
 }

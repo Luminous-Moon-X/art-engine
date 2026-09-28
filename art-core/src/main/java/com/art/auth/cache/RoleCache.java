@@ -73,7 +73,7 @@ public class RoleCache extends ArtCache<List<Role>> {
     protected List<Role> loadFromDb() {
         // 角色为系统级数据，不受租户过滤
         return tenantSupport.systemScope(() ->
-                this.roleMapper.selectListByQuery(QueryWrapper.create().eq(Role::getEnableFlag, 1)));
+                this.roleMapper.selectListByQuery(QueryWrapper.create().eq(Role::getEnableFlag, Boolean.TRUE)));
     }
 
     /**
