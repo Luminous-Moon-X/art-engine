@@ -3,26 +3,37 @@ package com.art.auth;
 import com.art.auth.cache.PermissionRowCache;
 import com.art.context.SecurityContextHolder;
 import com.art.domain.PermissionRow;
+import com.mybatisflex.core.dialect.OperateType;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.table.TableInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * 数据行权限条件拼接测试
  *
  * <p>覆盖 {@link DataAuthDialect#prepareAuth(QueryWrapper, com.mybatisflex.core.dialect.OperateType)}
- * 的规则命中、授权范围拼接、管理员豁免与幂等性。</p>
+ * 的规则命中、授权范围拼接、管理员豁免与幂等性，并固化以下实现边界：</p>
+ * <ul>
+ *     <li>非 SELECT 操作不做数据行权限处理；</li>
+ *     <li>原始 SQL 路径与 {@code TableInfo} 路径（{@code getById} / {@code listByIds}）未接入数据行权限；</li>
+ *     <li>JOIN 关联表不参与授权客体匹配；</li>
+ *     <li>命中规则因授权客体缺字段被全部跳过时不做任何限制。</li>
+ * </ul>
  *
  * @author Luminous.X
  * @since 2.1.0
@@ -499,6 +510,347 @@ class DataAuthDialectTest {
     }
 
     /**
+     * 非查询操作不做数据行权限处理，且不会消费掉权限条件
+     */
+    @Test
+    @DisplayName("非查询操作：UPDATE 不拼接条件")
+    void shouldSkipWhenOperateTypeIsNotSelect() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        QueryWrapper wrapper = QueryWrapper.create().from(TABLE_NAME);
+        this.dialect.prepareAuth(wrapper, OperateType.UPDATE);
+        assertThat(normalize(this.dialect.buildSelectSql(wrapper))).isEqualTo("SELECT * FROM \"p_sys_user\"");
+        assertThat(CPI.getValueArray(wrapper)).isEmpty();
+        // 未消费权限条件：随后按查询方式构建时仍会正常拼接
+        assertThat(normalize(this.dialect.forSelectByQuery(wrapper)))
+                .isEqualTo("SELECT * FROM \"p_sys_user\" WHERE \"dept_id\" = ?");
+    }
+
+    /**
+     * 未指定查询表（无 FROM）时无法判断授权客体，不拼接条件
+     */
+    @Test
+    @DisplayName("无查询表：不拼接条件")
+    void shouldSkipWhenQueryTableMissing() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        QueryWrapper wrapper = QueryWrapper.create().select("1");
+        assertThat(this.dialect.forSelectByQuery(wrapper)).doesNotContain("dept_id");
+        assertThat(CPI.getValueArray(wrapper)).isEmpty();
+    }
+
+    /**
+     * 直接拼接 SQL 文本的查询路径（{@code forSelectOneById} 等）当前不接入数据行权限<br/>
+     * <p>守护用例：数据行权限仅覆盖 {@link QueryWrapper} 查询路径，若后续接入该路径，
+     * 本用例会失败并提示同步补充实现与用例。</p>
+     */
+    @Test
+    @DisplayName("原始SQL路径：不拼接条件（当前实现边界）")
+    void shouldNotFilterRawSqlPath() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        StringBuilder sql = new StringBuilder("SELECT * FROM \"p_sys_user\" WHERE \"id\" = ?");
+        this.dialect.prepareAuth(null, TABLE_NAME, sql, OperateType.SELECT);
+        assertThat(sql.toString()).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE \"id\" = ?");
+    }
+
+    /**
+     * 基于 {@link TableInfo} 的查询路径（{@code selectOneById} / {@code selectListByIds}，
+     * 即 {@code getById}）当前不接入数据行权限<br/>
+     * <p>守护用例：与原始 SQL 路径同理，此处固化「未接入」这一实现边界，
+     * 避免误以为按主键查询也受数据行权限约束。</p>
+     */
+    @Test
+    @DisplayName("TableInfo路径(getById)：不拼接条件（当前实现边界）")
+    void shouldNotFilterTableInfoPath() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        StringBuilder sql = new StringBuilder("SELECT * FROM \"p_sys_user\" WHERE \"id\" = ?");
+        this.dialect.prepareAuth(mock(TableInfo.class), sql, OperateType.SELECT);
+        assertThat(sql.toString()).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE \"id\" = ?");
+    }
+
+    /**
+     * 规则按当前租户加载：其他租户的规则不生效
+     */
+    @Test
+    @DisplayName("租户隔离：其他租户的规则不生效")
+    void shouldNotApplyOtherTenantRules() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        SecurityContextHolder.setTenantId(9999L);
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+        verify(this.permissionRowCache).getByTenantId(9999L);
+    }
+
+    /**
+     * 无租户上下文（如白名单请求）时不抛异常且不拼接条件
+     */
+    @Test
+    @DisplayName("无租户上下文：不拼接条件")
+    void shouldSkipWhenTenantIdMissing() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        SecurityContextHolder.setTenantId(null);
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+    }
+
+    /**
+     * 无租户上下文时「所属部门及以下」不拼租户条件，绑定参数仅剩部门ID
+     */
+    @Test
+    @DisplayName("无租户上下文：部门子树不拼租户条件")
+    void shouldBuildDeptAndChildConditionWithoutTenant() {
+        this.mockRulesForTenant(null,
+                this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "2", null, null, null, null));
+        SecurityContextHolder.setTenantId(null);
+        assertThat(normalize(this.selectSql()))
+                .contains("\"p_sys_user\".\"dept_id\" IN (")
+                .doesNotContain("tenant_id");
+        assertThat(this.selectParams()).containsExactly(DEPT_ID);
+    }
+
+    /**
+     * 授权主体类型为空时不命中任何登录人
+     */
+    @Test
+    @DisplayName("授权主体类型为空：不拼接条件")
+    void shouldSkipWhenSubjectTypeBlank() {
+        this.mockRules(this.rule(" ", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+    }
+
+    /**
+     * 授权主体为空时不命中任何登录人
+     */
+    @Test
+    @DisplayName("授权主体为空：不拼接条件")
+    void shouldSkipWhenPermissionSubjectBlank() {
+        this.mockRules(this.rule("role", " ", TABLE_NAME, "1", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+    }
+
+    /**
+     * 授权主体类型不在 role/dept/user 之内时不命中
+     */
+    @Test
+    @DisplayName("授权主体类型未知：不拼接条件")
+    void shouldSkipWhenSubjectTypeUnknown() {
+        this.mockRules(this.rule("org", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+    }
+
+    /**
+     * 授权主体为部门但未命中当前登录人部门
+     */
+    @Test
+    @DisplayName("授权主体为部门但未命中：不拼接条件")
+    void shouldSkipWhenDeptSubjectNotMatched() {
+        this.mockRules(this.rule("dept", "999999", TABLE_NAME, "1", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+    }
+
+    /**
+     * 授权主体为用户但未命中当前登录人
+     */
+    @Test
+    @DisplayName("授权主体为用户但未命中：不拼接条件")
+    void shouldSkipWhenUserSubjectNotMatched() {
+        this.mockRules(this.rule("user", "999999", TABLE_NAME, "1", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+    }
+
+    /**
+     * 「本人创建数据」规则已命中但登录人无用户ID（内部任务线程）时兜底拒绝
+     */
+    @Test
+    @DisplayName("无登录人：本人创建数据兜底拒绝")
+    void shouldDenyWhenUserIdMissing() {
+        SecurityContextHolder.setUserId(null);
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "3", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0");
+    }
+
+    /**
+     * 用户类型为空/未知时不属于管理员，不豁免数据行权限
+     */
+    @Test
+    @DisplayName("用户类型未知：不豁免")
+    void shouldNotSkipForUnknownUserType() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null));
+        SecurityContextHolder.setUserType(null);
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE \"dept_id\" = ?");
+    }
+
+    /**
+     * 授权客体匹配忽略大小写
+     */
+    @Test
+    @DisplayName("授权客体大小写不敏感：命中")
+    void shouldMatchPermissionObjectIgnoringCase() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), "P_SYS_User", "1", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE \"dept_id\" = ?");
+    }
+
+    /**
+     * 授权客体支持逗号分隔多值
+     */
+    @Test
+    @DisplayName("授权客体多值：任一命中即生效")
+    void shouldMatchAnyPermissionObjectValue() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), "p_sys_dept, p_sys_user",
+                "1", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE \"dept_id\" = ?");
+    }
+
+    /**
+     * 多表查询时命中非首表的授权客体，条件以该表限定
+     */
+    @Test
+    @DisplayName("多表查询：命中非首表")
+    void shouldApplyRuleOnSecondQueryTable() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), "p_sys_dept", "1", null, null, null, null));
+        QueryWrapper wrapper = QueryWrapper.create().from(TABLE_NAME, "p_sys_dept");
+        assertThat(normalize(this.dialect.forSelectByQuery(wrapper)))
+                .contains("WHERE \"p_sys_dept\".\"dept_id\" = ?");
+    }
+
+    /**
+     * 关联表（JOIN）不在授权客体匹配范围内<br/>
+     * <p>行为固化：方言只取 FROM 表（{@code CPI.getQueryTables}），JOIN 进来的表不参与授权客体匹配，
+     * 针对关联表配置的规则会被静默忽略（不放行也不拒绝）。此用例用于暴露该边界，
+     * 避免把规则配到关联表上却误以为已生效。</p>
+     */
+    @Test
+    @DisplayName("关联表(JOIN)：规则被忽略（当前实现边界）")
+    void shouldIgnoreRuleConfiguredOnJoinedTable() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), "p_sys_dept", "1", null, null, null, null));
+        QueryWrapper wrapper = QueryWrapper.create().from(TABLE_NAME).as("u")
+                .leftJoin("p_sys_dept").as("d").on("d.id = u.dept_id");
+        String sql = normalize(this.dialect.forSelectByQuery(wrapper));
+        assertThat(sql).contains("LEFT JOIN").contains("\"p_sys_dept\"");
+        assertThat(sql).doesNotContain("WHERE");
+    }
+
+    /**
+     * 授权范围为空时规则已命中但无法解析过滤条件，兜底拒绝
+     */
+    @Test
+    @DisplayName("授权范围为空：兜底拒绝")
+    void shouldDenyWhenPermissionScopeBlank() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "  ", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0");
+    }
+
+    /**
+     * 授权范围取值未知（如脏数据）时兜底拒绝
+     */
+    @Test
+    @DisplayName("授权范围未知：兜底拒绝")
+    void shouldDenyWhenPermissionScopeUnknown() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "9", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0");
+    }
+
+    /**
+     * 授权范围为自定义部门范围但未配置部门时兜底拒绝
+     */
+    @Test
+    @DisplayName("自定义部门范围为空：兜底拒绝")
+    void shouldDenyWhenCustomDeptScopeBlank() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "4", "  ", null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0");
+    }
+
+    /**
+     * 自定义部门范围中的非法部门ID被忽略，不影响整条规则
+     */
+    @Test
+    @DisplayName("自定义部门范围含非法值：忽略非法项")
+    void shouldIgnoreIllegalDeptIdInCustomDeptScope() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "4", "11,abc,22", null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE \"dept_id\" IN (?, ?)");
+        assertThat(this.selectParams()).containsExactly(11L, 22L);
+    }
+
+    /**
+     * 授权范围为自定义字段但未配置权限字段时兜底拒绝
+     */
+    @Test
+    @DisplayName("自定义字段-权限字段为空：兜底拒绝")
+    void shouldDenyWhenColumnConditionBlank() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "5", null, " ", "eq", "1"));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0");
+    }
+
+    /**
+     * 授权范围为自定义字段但未配置字段关系时兜底拒绝
+     */
+    @Test
+    @DisplayName("自定义字段-字段关系为空：兜底拒绝")
+    void shouldDenyWhenColumnRelationBlank() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "5", null, "amount", " ", "1"));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0");
+    }
+
+    /**
+     * 字段关系取值未知（如脏数据）时兜底拒绝
+     */
+    @Test
+    @DisplayName("自定义字段-字段关系未知：兜底拒绝")
+    void shouldDenyWhenColumnRelationUnknown() {
+        this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "5", null, "amount", "between", "1,2"));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0");
+    }
+
+    /**
+     * 授权范围5-自定义字段：不等于、不包含与大小比较关系
+     */
+    @Test
+    @DisplayName("授权范围5-自定义字段：不等于/不包含/大小比较")
+    void shouldBuildCustomColumnOtherRelations() {
+        // 字段关系 → 期望条件（均为字面量拼接，不占用绑定参数）
+        Map<String, String> cases = new LinkedHashMap<>();
+        cases.put("ne", "\"amount\" != E'20'");
+        cases.put("not_like", "\"user_name\" NOT LIKE E'%admin%'");
+        cases.put("gt", "\"amount\" > E'20'");
+        cases.put("lt", "\"amount\" < E'20'");
+        cases.put("ge", "\"amount\" >= E'20'");
+        cases.put("le", "\"amount\" <= E'20'");
+        for (Map.Entry<String, String> entry : cases.entrySet()) {
+            String relation = entry.getKey();
+            boolean textRelation = "not_like".equals(relation);
+            this.mockRules(this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "5", null,
+                    textRelation ? "user_name" : "amount", relation, textRelation ? "admin" : "20"));
+            assertThat(normalize(this.selectSql())).as("字段关系[%s]的拼接结果", relation)
+                    .isEqualTo("SELECT * FROM \"p_sys_user\" WHERE " + entry.getValue());
+            assertThat(this.selectParams()).as("字段关系[%s]不应占用绑定参数", relation).isEmpty();
+        }
+    }
+
+    /**
+     * 兜底拒绝的规则与正常规则按并集合并，不阻断其他规则放行的数据
+     */
+    @Test
+    @DisplayName("多规则：兜底拒绝与命中规则并集")
+    void shouldUnionDenyAllWithMatchedRule() {
+        this.mockRules(
+                this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "5", null, "1=1 OR id", "eq", "1"),
+                this.rule("user", String.valueOf(USER_ID), TABLE_NAME, "3", null, null, null, null));
+        assertThat(normalize(this.selectSql()))
+                .isEqualTo("SELECT * FROM \"p_sys_user\" WHERE 1 = 0 OR \"create_id\" = ?");
+    }
+
+    /**
+     * 命中的规则全部因授权客体缺少所需字段而跳过时不做任何限制<br/>
+     * <p>行为固化：字段缺失走「跳过规则」而非「兜底拒绝」，因此当所有命中规则都被跳过时
+     * 该查询不受数据行权限约束。此用例用于暴露该放开行为，便于评审是否需要改为拒绝。</p>
+     */
+    @Test
+    @DisplayName("命中的规则全部跳过：不拼接条件（当前实现边界）")
+    void shouldNotAppendWhenAllMatchedRulesSkipped() {
+        when(this.columnProvider.hasColumn(anyString(), anyString())).thenReturn(false);
+        this.mockRules(
+                this.rule("role", String.valueOf(ROLE_ID), TABLE_NAME, "1", null, null, null, null),
+                this.rule("user", String.valueOf(USER_ID), TABLE_NAME, "3", null, null, null, null));
+        assertThat(normalize(this.selectSql())).isEqualTo("SELECT * FROM \"p_sys_user\"");
+    }
+
+    /**
      * 构建单表查询 SQL
      *
      * @return 生成的查询 SQL
@@ -519,12 +871,22 @@ class DataAuthDialectTest {
     }
 
     /**
-     * 模拟缓存返回指定规则
+     * 模拟缓存返回指定租户的规则
      *
      * @param rules 数据行权限规则
      */
     private void mockRules(PermissionRow... rules) {
-        when(this.permissionRowCache.getByTenantId(TENANT_ID)).thenReturn(List.of(rules));
+        this.mockRulesForTenant(TENANT_ID, rules);
+    }
+
+    /**
+     * 模拟缓存返回指定租户的数据行权限规则
+     *
+     * @param tenantId 租户ID
+     * @param rules    数据行权限规则
+     */
+    private void mockRulesForTenant(Long tenantId, PermissionRow... rules) {
+        when(this.permissionRowCache.getByTenantId(tenantId)).thenReturn(List.of(rules));
     }
 
     /**

@@ -6,6 +6,7 @@ import com.art.context.DataAuthContextHolder;
 import com.art.domain.PermissionRow;
 import com.art.mapper.PermissionRowMapper;
 import com.art.tenant.TenantSupport;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  * @author Luminous.X
  * @since 2.1.0
  */
+@Slf4j
 @Component("permissionRowCache")
 public class PermissionRowCache extends ArtCache<Map<Long, List<PermissionRow>>> {
     /**
@@ -60,10 +62,27 @@ public class PermissionRowCache extends ArtCache<Map<Long, List<PermissionRow>>>
             tenantSupport.systemScope(() -> {
                 List<PermissionRow> allPermissionRows = permissionRowMapper.selectAll();
                 tenantPermissionRow.set(allPermissionRows.stream()
+                        // 租户ID为空的规则无法归属任何租户（方言按当前租户取用），必须先过滤：
+                        // Collectors.groupingBy 遇到 null key 会抛 NPE，导致所有经由方言的查询整体失败
+                        .filter(this::isTenantRow)
                         .collect(Collectors.groupingBy(PermissionRow::getTenantId)));
             });
             return tenantPermissionRow.get();
         });
+    }
+
+    /**
+     * 判断规则是否归属某个租户（租户ID不为空）
+     *
+     * @param permissionRow 数据行权限规则
+     * @return 是否可用于租户匹配
+     */
+    private boolean isTenantRow(PermissionRow permissionRow) {
+        if (permissionRow.getTenantId() != null) {
+            return true;
+        }
+        log.warn("数据权限规则[{}]缺少租户ID，已忽略（不会对任何租户生效）", permissionRow.getId());
+        return false;
     }
 
     /**
