@@ -165,8 +165,7 @@ public class WarmFlow implements Serializable {
                 "    ██ ██▀ ▄▀▀▀█   █     █ █ █         █        █    █   █  █▄█▄█     \n" +
                 "    █   █  ▀▄▄▀█   █     █ █ █         █        █▄▄  ▀█▄█▀   █ █      \n" +
                 "\n" +
-                "\033[32m   :: Warm-Flow ::     (v" + WarmFlow.class.getPackage()
-                .getImplementationVersion() + ")\033[0m\n");
+                "\033[32m   :: Warm-Flow ::     (v1.8.9" + ")\033[0m\n");
         }
     }
 
