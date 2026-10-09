@@ -1,0 +1,3 @@
+dependencies {
+    api project(':art-workflow:art-workflow-core:warm-flow-orm:warm-flow-mybatis-flex')
+}

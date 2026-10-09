@@ -1,0 +1,4 @@
+dependencies {
+    api project(':art-workflow:art-workflow-core')
+    api project(':art-workflow:art-workflow-interface')
+}

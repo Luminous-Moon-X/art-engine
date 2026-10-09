@@ -1,0 +1,4 @@
+dependencies {
+    api project(':art-workflow:art-workflow-core:warm-flow-orm:warm-flow-mybatis-flex:warm-flow-mybatis-flex-core')
+    api project(':art-workflow:art-workflow-core:warm-flow-orm:warm-flow-mybatis-flex:warm-flow-mybatis-flex-sb-starter')
+}

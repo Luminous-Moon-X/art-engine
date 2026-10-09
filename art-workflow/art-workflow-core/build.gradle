@@ -1,0 +1,5 @@
+dependencies {
+    api project(':art-workflow:art-workflow-core:warm-flow-core')
+    api project(':art-workflow:art-workflow-core:warm-flow-orm')
+    api project(':art-workflow:art-workflow-core:warm-flow-plugin')
+}

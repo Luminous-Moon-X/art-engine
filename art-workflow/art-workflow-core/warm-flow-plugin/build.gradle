@@ -1,0 +1,4 @@
+dependencies {
+    api project(':art-workflow:art-workflow-core:warm-flow-plugin:warm-flow-plugin-modes')
+    api project(':art-workflow:art-workflow-core:warm-flow-plugin:warm-flow-plugin-json')
+}
