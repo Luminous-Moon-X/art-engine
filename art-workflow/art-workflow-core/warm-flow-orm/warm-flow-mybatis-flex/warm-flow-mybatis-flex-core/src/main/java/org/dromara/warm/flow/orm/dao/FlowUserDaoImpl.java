@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowUserDao;
 import org.dromara.warm.flow.core.utils.ArrayUtil;
@@ -47,35 +48,36 @@ public class FlowUserDaoImpl extends WarmDaoImpl<FlowUser> implements FlowUserDa
 
     @Override
     public int deleteByTaskIds(List<Long> taskIdList) {
-        return getMapper().delete(new LambdaQueryWrapper<FlowUser>().in(FlowUser::getAssociated, taskIdList));
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowUser::getAssociated).in(taskIdList);
+        return getMapper().deleteByQuery(queryWrapper);
     }
 
     @Override
     public List<FlowUser> listByAssociatedAndTypes(List<Long> associatedList, String[] types) {
-        LambdaQueryWrapper<FlowUser> queryWrapper = new LambdaQueryWrapper<>();
+        QueryWrapper queryWrapper = QueryWrapper.create();
         if (CollUtil.isNotEmpty(associatedList)) {
             if (associatedList.size() == 1) {
-                queryWrapper.eq(FlowUser::getAssociated, associatedList.get(0));
+                queryWrapper.where(FlowUser::getAssociated).eq(associatedList.get(0));
             } else {
-                queryWrapper.in(FlowUser::getAssociated, associatedList);
+                queryWrapper.where(FlowUser::getAssociated).in(associatedList);
             }
         }
-        queryWrapper.in(ArrayUtil.isNotEmpty(types), FlowUser::getType, Arrays.asList(types));
-        return getMapper().selectList(queryWrapper);
+        queryWrapper.and(FlowUser::getType).in(Arrays.asList(types), ArrayUtil.isNotEmpty(types));
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
     @Override
     public List<FlowUser> listByProcessedBys(Long associated, List<String> processedBys, String[] types) {
-        LambdaQueryWrapper<FlowUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ObjectUtil.isNotNull(associated), FlowUser::getAssociated, associated);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.where(FlowUser::getAssociated).eq(associated, ObjectUtil.isNotNull(associated));
         if (CollUtil.isNotEmpty(processedBys)) {
             if (processedBys.size() == 1) {
-                queryWrapper.eq(FlowUser::getProcessedBy, processedBys.get(0));
+                queryWrapper.and(FlowUser::getProcessedBy).eq(processedBys.get(0));
             } else {
-                queryWrapper.in(FlowUser::getProcessedBy, processedBys);
+                queryWrapper.and(FlowUser::getProcessedBy).in(processedBys);
             }
         }
-        queryWrapper.in(ArrayUtil.isNotEmpty(types), FlowUser::getType, types);
-        return getMapper().selectList(queryWrapper);
+        queryWrapper.and(FlowUser::getType).in(Arrays.asList(types), ArrayUtil.isNotEmpty(types));
+        return getMapper().selectListByQuery(queryWrapper);
     }
 }

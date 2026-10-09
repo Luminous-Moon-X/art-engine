@@ -1,3 +1,5 @@
 dependencies {
+    implementation project(':art-workflow:art-workflow-core:warm-flow-core')
+    implementation project(':art-workflow:art-workflow-core:warm-flow-orm:warm-flow-mybatis-flex:warm-flow-mybatis-flex-core')
     implementation project(':art-workflow:art-workflow-core:warm-flow-plugin:warm-flow-plugin-modes:warm-flow-plugin-modes-sb')
 }

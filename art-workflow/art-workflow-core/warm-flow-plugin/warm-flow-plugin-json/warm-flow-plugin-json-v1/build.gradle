@@ -1,3 +1,7 @@
 dependencies {
     implementation project(':art-workflow:art-workflow-core:warm-flow-core')
+    // 以下 json 库均为可选的 SPI 实现依赖（对应上游 pom 的 optional 依赖）：
+    // 编译期需要其类型，运行期缺失时 JsonConvert 的 SPI 实现类会因加载失败而被跳过
+    compileOnly 'org.noear:snack3:3.2.139'
+    compileOnly 'org.noear:snack4:4.0.8'
 }

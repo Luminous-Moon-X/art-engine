@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowTaskDao;
 import org.dromara.warm.flow.orm.entity.FlowTask;
@@ -49,14 +50,15 @@ public class FlowTaskDaoImpl extends WarmDaoImpl<FlowTask> implements FlowTaskDa
      */
     @Override
     public int deleteByInsIds(List<Long> instanceIds) {
-        return getMapper().delete(new LambdaQueryWrapper<FlowTask>().in(FlowTask::getInstanceId, instanceIds));
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowTask::getInstanceId).in(instanceIds);
+        return getMapper().deleteByQuery(queryWrapper);
     }
 
     @Override
     public List<FlowTask> getByInsIdAndNodeCodes(Long instanceId, List<String> nodeCodes) {
-        LambdaQueryWrapper<FlowTask> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(FlowTask::getInstanceId, instanceId);
-        queryWrapper.in(FlowTask::getNodeCode, nodeCodes);
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .where(FlowTask::getInstanceId).eq(instanceId)
+            .and(FlowTask::getNodeCode).in(nodeCodes);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 }

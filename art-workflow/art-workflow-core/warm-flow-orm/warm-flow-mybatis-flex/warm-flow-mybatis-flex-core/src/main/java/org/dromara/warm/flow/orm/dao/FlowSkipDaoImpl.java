@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowSkipDao;
 import org.dromara.warm.flow.orm.entity.FlowSkip;
@@ -50,6 +51,7 @@ public class FlowSkipDaoImpl extends WarmDaoImpl<FlowSkip> implements FlowSkipDa
      */
     @Override
     public int deleteSkipByDefIds(Collection<? extends Serializable> defIds) {
-        return getMapper().delete(new LambdaQueryWrapper<FlowSkip>().in(FlowSkip::getDefinitionId, defIds));
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowSkip::getDefinitionId).in(defIds);
+        return getMapper().deleteByQuery(queryWrapper);
     }
 }

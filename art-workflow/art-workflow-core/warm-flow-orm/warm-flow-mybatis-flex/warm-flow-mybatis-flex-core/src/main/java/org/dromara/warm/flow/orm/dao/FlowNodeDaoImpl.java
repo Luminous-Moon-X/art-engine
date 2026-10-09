@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowNodeDao;
 import org.dromara.warm.flow.core.utils.CollUtil;
@@ -47,10 +48,10 @@ public class FlowNodeDaoImpl extends WarmDaoImpl<FlowNode> implements FlowNodeDa
 
     @Override
     public List<FlowNode> getByNodeCodes(List<String> nodeCodes, Long definitionId) {
-        LambdaQueryWrapper<FlowNode> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(CollUtil.isNotEmpty(nodeCodes), FlowNode::getNodeCode, nodeCodes)
-            .eq(FlowNode::getDefinitionId, definitionId);
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .where(FlowNode::getNodeCode).in(nodeCodes, CollUtil.isNotEmpty(nodeCodes))
+            .and(FlowNode::getDefinitionId).eq(definitionId);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
     /**
@@ -61,7 +62,8 @@ public class FlowNodeDaoImpl extends WarmDaoImpl<FlowNode> implements FlowNodeDa
      */
     @Override
     public int deleteNodeByDefIds(Collection<? extends Serializable> defIds) {
-        return getMapper().delete(new LambdaQueryWrapper<FlowNode>().in(FlowNode::getDefinitionId, defIds));
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowNode::getDefinitionId).in(defIds);
+        return getMapper().deleteByQuery(queryWrapper);
     }
 
 }

@@ -13,9 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.dromara.warm.flow.core.entity.Skip;
@@ -31,25 +36,23 @@ import java.util.Date;
  */
 @Data
 @Accessors(chain = true)
-@TableName("flow_skip")
+@Table("flow_skip")
 public class FlowSkip implements Skip {
 
     /**
      * 主键
      */
-    @TableId
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long id;
 
     /**
      * 创建时间
      */
-    @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
     /**
      * 更新时间
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
 
     /**
@@ -70,7 +73,7 @@ public class FlowSkip implements Skip {
     /**
      * 删除标记
      */
-    @TableLogic(value = "0", delval = "1")
+    @Column(isLogicDelete = true)
     private String delFlag;
 
     /**
@@ -81,7 +84,7 @@ public class FlowSkip implements Skip {
     /**
      * 节点id
      */
-    @TableField(exist = false)
+    @Column(ignore = true)
     private Long nodeId;
 
     /**

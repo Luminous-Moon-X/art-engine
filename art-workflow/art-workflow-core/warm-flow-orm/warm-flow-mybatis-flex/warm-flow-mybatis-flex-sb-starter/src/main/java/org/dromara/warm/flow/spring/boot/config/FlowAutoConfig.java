@@ -13,11 +13,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.spring.boot.config;
 
 import org.dromara.warm.flow.core.config.WarmFlow;
 import org.dromara.warm.flow.core.utils.IdUtils;
-import org.dromara.warm.flow.orm.keygen.MybatisPlusIdGen;
+import org.dromara.warm.flow.orm.keygen.MybatisFlexIdGen;
 import org.dromara.warm.plugin.modes.sb.config.BeanConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,7 +37,7 @@ public class FlowAutoConfig extends BeanConfig {
 
     @Override
     public void after(WarmFlow flowConfig) {
-        // 设置Mybatis-Plus默认主键生成器
-        IdUtils.setInstanceNative(new MybatisPlusIdGen());
+        // 设置 MyBatis-Flex 默认主键生成器
+        IdUtils.setInstanceNative(new MybatisFlexIdGen());
     }
 }

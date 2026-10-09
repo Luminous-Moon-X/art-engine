@@ -1,3 +1,4 @@
 dependencies {
     implementation project(':art-workflow:art-workflow-core:warm-flow-core')
+    api "${lib.'mybatis-flex'}"
 }

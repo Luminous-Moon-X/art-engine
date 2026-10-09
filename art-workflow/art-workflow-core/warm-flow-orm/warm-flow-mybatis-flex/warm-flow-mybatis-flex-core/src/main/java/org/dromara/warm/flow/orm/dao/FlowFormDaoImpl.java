@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowFormDao;
 import org.dromara.warm.flow.orm.entity.FlowForm;
@@ -38,9 +39,8 @@ public class FlowFormDaoImpl extends WarmDaoImpl<FlowForm> implements FlowFormDa
 
     @Override
     public List<FlowForm> queryByCodeList(List<String> formCodeList) {
-        LambdaQueryWrapper<FlowForm> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(FlowForm::getFormCode, formCodeList);
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowForm::getFormCode).in(formCodeList);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
 

@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowDefinitionDao;
 import org.dromara.warm.flow.orm.entity.FlowDefinition;
@@ -43,16 +44,14 @@ public class FlowDefinitionDaoImpl extends WarmDaoImpl<FlowDefinition> implement
 
     @Override
     public List<FlowDefinition> queryByCodeList(List<String> flowCodeList) {
-        LambdaQueryWrapper<FlowDefinition> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(FlowDefinition::getFlowCode, flowCodeList);
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowDefinition::getFlowCode).in(flowCodeList);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
     @Override
     public void updatePublishStatus(List<Long> ids, Integer publishStatus) {
-        LambdaQueryWrapper<FlowDefinition> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(FlowDefinition::getId, ids);
-        getMapper().update(new FlowDefinition().setIsPublish(publishStatus), queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowDefinition::getId).in(ids);
+        getMapper().updateByQuery(new FlowDefinition().setIsPublish(publishStatus), queryWrapper);
     }
 
 }

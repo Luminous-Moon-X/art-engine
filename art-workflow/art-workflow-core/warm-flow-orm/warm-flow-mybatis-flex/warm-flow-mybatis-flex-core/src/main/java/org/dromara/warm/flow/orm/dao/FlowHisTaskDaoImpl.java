@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowHisTaskDao;
@@ -46,32 +47,34 @@ public class FlowHisTaskDaoImpl extends WarmDaoImpl<FlowHisTask> implements Flow
 
     @Override
     public List<FlowHisTask> getNoReject(Long instanceId) {
-        LambdaQueryWrapper<FlowHisTask> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(FlowHisTask::getInstanceId, instanceId)
-            .eq(FlowHisTask::getSkipType, SkipType.PASS.getKey())
-            .orderByDesc(FlowHisTask::getCreateTime);
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .where(FlowHisTask::getInstanceId).eq(instanceId)
+            .and(FlowHisTask::getSkipType).eq(SkipType.PASS.getKey())
+            .orderBy(FlowHisTask::getCreateTime, false);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
     @Override
     public List<FlowHisTask> getByInsAndNodeCodes(Long instanceId, List<String> nodeCodes) {
-        LambdaQueryWrapper<FlowHisTask> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(FlowHisTask::getInstanceId, instanceId)
-            .in(CollUtil.isNotEmpty(nodeCodes), FlowHisTask::getNodeCode, nodeCodes)
-            .orderByDesc(FlowHisTask::getCreateTime);
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .where(FlowHisTask::getInstanceId).eq(instanceId)
+            .and(FlowHisTask::getNodeCode).in(nodeCodes, CollUtil.isNotEmpty(nodeCodes))
+            .orderBy(FlowHisTask::getCreateTime, false);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
     @Override
     public int deleteByInsIds(List<Long> instanceIds) {
-        return getMapper().delete(new LambdaQueryWrapper<FlowHisTask>().in(FlowHisTask::getInstanceId, instanceIds));
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowHisTask::getInstanceId).in(instanceIds);
+        return getMapper().deleteByQuery(queryWrapper);
     }
 
     @Override
     public List<FlowHisTask> listByTaskIdAndCooperateTypes(Long taskId, Integer[] cooperateTypes) {
-        LambdaQueryWrapper<FlowHisTask> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(FlowHisTask::getTaskId, taskId).in(FlowHisTask::getCooperateType, Arrays.asList(cooperateTypes));
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+            .where(FlowHisTask::getTaskId).eq(taskId)
+            .and(FlowHisTask::getCooperateType).in(Arrays.asList(cooperateTypes));
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
 }

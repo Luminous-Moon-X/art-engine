@@ -13,9 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+// Modified by Luminous.X on 2026.10.09
 package org.dromara.warm.flow.orm.dao;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.orm.dao.FlowInstanceDao;
 import org.dromara.warm.flow.orm.entity.FlowInstance;
@@ -43,8 +44,7 @@ public class FlowInstanceDaoImpl extends WarmDaoImpl<FlowInstance> implements Fl
 
     @Override
     public List<FlowInstance> getByDefIds(List<Long> defIds) {
-        LambdaQueryWrapper<FlowInstance> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(FlowInstance::getDefinitionId, defIds);
-        return getMapper().selectList(queryWrapper);
+        QueryWrapper queryWrapper = QueryWrapper.create().where(FlowInstance::getDefinitionId).in(defIds);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 }
