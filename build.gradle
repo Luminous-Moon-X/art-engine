@@ -102,14 +102,17 @@ configure(subprojects) { project ->
     // 依赖引用
     dependencies {
         implementation platform(lib['spring-boot-dependencies'])
+
         annotationProcessor "${lib.'spring-boot-configuration-processor'}"
         annotationProcessor "com.mybatis-flex:mybatis-flex-processor:${mybatisFlexVersion}"
         annotationProcessor "${lib.'lombok'}"
+
         implementation "${lib.'mybatis'}"
         implementation "org.springframework.boot:spring-boot-starter-data-redis"
-        testImplementation "org.springframework.boot:spring-boot-starter-test"
         implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
         implementation 'org.apache.commons:commons-pool2'
+
+        testImplementation "org.springframework.boot:spring-boot-starter-test"
     }
 
     test {
