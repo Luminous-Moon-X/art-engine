@@ -23,7 +23,7 @@ hs_err_pid*
 .gradle/*
 .idea/*
 .vscode/*
-*/build/*
+**/build/*
 build/*
 
 # AI init file
