@@ -119,12 +119,9 @@ configure(subprojects) { project ->
         useJUnitPlatform()
     }
 
-    // 配置缓存实时更新
     configurations.configureEach {
-        resolutionStrategy {
-            cacheChangingModulesFor 0, TimeUnit.SECONDS
-            cacheDynamicVersionsFor 0, TimeUnit.SECONDS
-        }
+        // 排除commons-logging包，解决和Spring的spring-jcl冲突
+        exclude group: 'commons-logging', module: 'commons-logging'
     }
 }
 
