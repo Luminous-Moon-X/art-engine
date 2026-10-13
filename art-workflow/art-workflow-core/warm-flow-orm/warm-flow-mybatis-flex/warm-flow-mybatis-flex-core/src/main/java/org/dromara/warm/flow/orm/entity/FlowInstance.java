@@ -74,7 +74,7 @@ public class FlowInstance implements Instance {
      * 删除标记
      */
     @Column(isLogicDelete = true)
-    private String delFlag;
+    private Integer delFlag;
 
     /**
      * 对应flow_definition表的id

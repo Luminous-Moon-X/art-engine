@@ -54,10 +54,10 @@ public interface HisTask extends RootEntity {
     HisTask setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    HisTask setDelFlag(String delFlag);
+    HisTask setDelFlag(Integer delFlag);
 
     /**
      * 获取流程定义ID

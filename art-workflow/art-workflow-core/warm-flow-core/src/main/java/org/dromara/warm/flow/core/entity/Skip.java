@@ -64,10 +64,10 @@ public interface Skip extends RootEntity {
     Skip setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    Skip setDelFlag(String delFlag);
+    Skip setDelFlag(Integer delFlag);
 
     Long getDefinitionId();
 

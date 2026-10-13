@@ -62,10 +62,10 @@ public interface User extends RootEntity {
     User setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    User setDelFlag(String delFlag);
+    User setDelFlag(Integer delFlag);
 
     /**
      * 获取人员类型

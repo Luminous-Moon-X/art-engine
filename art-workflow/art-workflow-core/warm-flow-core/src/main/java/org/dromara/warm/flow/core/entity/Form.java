@@ -62,10 +62,10 @@ public interface Form extends RootEntity {
     Form setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    Form setDelFlag(String delFlag);
+    Form setDelFlag(Integer delFlag);
 
     /**
      * 获取表单编码

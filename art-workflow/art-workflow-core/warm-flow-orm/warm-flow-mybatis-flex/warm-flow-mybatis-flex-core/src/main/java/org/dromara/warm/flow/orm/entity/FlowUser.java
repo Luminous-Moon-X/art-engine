@@ -75,7 +75,7 @@ public class FlowUser implements User {
      * 删除标记
      */
     @Column(isLogicDelete = true)
-    private String delFlag;
+    private Integer delFlag;
 
     /**
      * 人员类型（1待办任务的审批人权限 2待办任务的转办人权限 3待办任务的委托人权限）

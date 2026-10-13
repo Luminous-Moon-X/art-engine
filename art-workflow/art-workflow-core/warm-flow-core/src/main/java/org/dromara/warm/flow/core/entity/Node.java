@@ -66,10 +66,10 @@ public interface Node extends RootEntity {
     Node setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    Node setDelFlag(String delFlag);
+    Node setDelFlag(Integer delFlag);
 
     Integer getNodeType();
 

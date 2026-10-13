@@ -63,10 +63,10 @@ public interface Task extends RootEntity {
     Task setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    Task setDelFlag(String delFlag);
+    Task setDelFlag(Integer delFlag);
 
     /**
      * 获取流程定义ID

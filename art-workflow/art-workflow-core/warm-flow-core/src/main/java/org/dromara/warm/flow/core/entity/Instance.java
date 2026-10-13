@@ -65,10 +65,10 @@ public interface Instance extends RootEntity {
     Instance setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    Instance setDelFlag(String delFlag);
+    Instance setDelFlag(Integer delFlag);
 
     /**
      * flow_definition.id

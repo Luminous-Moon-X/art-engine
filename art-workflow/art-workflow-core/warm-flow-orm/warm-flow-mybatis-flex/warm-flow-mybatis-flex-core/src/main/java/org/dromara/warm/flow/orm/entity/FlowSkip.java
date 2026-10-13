@@ -75,7 +75,7 @@ public class FlowSkip implements Skip {
      * 删除标记
      */
     @Column(isLogicDelete = true)
-    private String delFlag;
+    private Integer delFlag;
 
     /**
      * 流程id

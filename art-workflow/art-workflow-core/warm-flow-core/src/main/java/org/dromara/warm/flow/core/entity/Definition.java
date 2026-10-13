@@ -65,10 +65,10 @@ public interface Definition extends RootEntity {
     Definition setTenantId(Long tenantId);
 
     @Override
-    String getDelFlag();
+    Integer getDelFlag();
 
     @Override
-    Definition setDelFlag(String delFlag);
+    Definition setDelFlag(Integer delFlag);
 
     /**
      * 获取流程编码

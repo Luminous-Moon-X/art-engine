@@ -67,7 +67,7 @@ public class FlowForm implements Form {
      * 删除标记
      */
     @Column(isLogicDelete = true)
-    private String delFlag;
+    private Integer delFlag;
 
     /**
      * 表单编码
