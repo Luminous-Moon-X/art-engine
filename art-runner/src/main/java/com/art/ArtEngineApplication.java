@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"com.art.**"})
 @MapperScan("com.art.mapper")
-public class ArtApplication {
+public class ArtEngineApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ArtApplication.class, args);
+        SpringApplication.run(ArtEngineApplication.class, args);
     }
 
 }
