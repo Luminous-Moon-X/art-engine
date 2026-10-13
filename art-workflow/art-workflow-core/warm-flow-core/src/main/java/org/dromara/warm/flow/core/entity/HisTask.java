@@ -48,10 +48,10 @@ public interface HisTask extends RootEntity {
     HisTask setUpdateTime(Date updateTime);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    HisTask setTenantId(String tenantId);
+    HisTask setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();

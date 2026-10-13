@@ -112,7 +112,8 @@ public class FlowForm implements Form {
     /**
      * 租户ID
      */
-    private String tenantId;
+    @Column(value = "tenant_id", tenantId = true)
+    private Long tenantId;
 
 
 }

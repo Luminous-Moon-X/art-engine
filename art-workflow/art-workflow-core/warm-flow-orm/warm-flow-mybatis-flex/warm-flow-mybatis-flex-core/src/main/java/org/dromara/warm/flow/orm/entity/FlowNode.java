@@ -75,7 +75,8 @@ public class FlowNode implements Node {
     /**
      * 租户ID
      */
-    private String tenantId;
+    @Column(value = "tenant_id", tenantId = true)
+    private Long tenantId;
 
     /**
      * 删除标记

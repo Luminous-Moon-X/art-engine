@@ -59,10 +59,10 @@ public interface Definition extends RootEntity {
     Definition setUpdateBy(String updateBy);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    Definition setTenantId(String tenantId);
+    Definition setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();

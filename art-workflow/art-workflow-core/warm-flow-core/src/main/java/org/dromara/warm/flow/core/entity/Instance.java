@@ -59,10 +59,10 @@ public interface Instance extends RootEntity {
     Instance setUpdateBy(String updateBy);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    Instance setTenantId(String tenantId);
+    Instance setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();

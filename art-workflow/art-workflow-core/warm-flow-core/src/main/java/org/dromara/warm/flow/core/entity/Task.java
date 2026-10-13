@@ -57,10 +57,10 @@ public interface Task extends RootEntity {
     Task setUpdateBy(String updateBy);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    Task setTenantId(String tenantId);
+    Task setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();

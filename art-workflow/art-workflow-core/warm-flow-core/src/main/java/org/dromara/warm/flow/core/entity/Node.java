@@ -60,10 +60,10 @@ public interface Node extends RootEntity {
     Node setUpdateBy(String updateBy);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    Node setTenantId(String tenantId);
+    Node setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();

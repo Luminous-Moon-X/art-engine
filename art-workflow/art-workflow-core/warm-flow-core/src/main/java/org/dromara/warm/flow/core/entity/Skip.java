@@ -58,10 +58,10 @@ public interface Skip extends RootEntity {
     Skip setUpdateBy(String updateBy);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    Skip setTenantId(String tenantId);
+    Skip setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();

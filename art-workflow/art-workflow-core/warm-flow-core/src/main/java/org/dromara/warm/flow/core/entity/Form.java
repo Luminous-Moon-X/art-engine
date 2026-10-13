@@ -56,10 +56,10 @@ public interface Form extends RootEntity {
     Form setUpdateBy(String updateBy);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    Form setTenantId(String tenantId);
+    Form setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();

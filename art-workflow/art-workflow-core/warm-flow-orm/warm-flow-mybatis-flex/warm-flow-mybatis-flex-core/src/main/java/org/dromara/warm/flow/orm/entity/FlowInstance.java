@@ -67,7 +67,8 @@ public class FlowInstance implements Instance {
     /**
      * 租户ID
      */
-    private String tenantId;
+    @Column(value = "tenant_id", tenantId = true)
+    private Long tenantId;
 
     /**
      * 删除标记

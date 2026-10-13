@@ -54,9 +54,9 @@ public interface RootEntity extends Serializable {
         return this;
     }
 
-    String getTenantId();
+    Long getTenantId();
 
-    RootEntity setTenantId(String tenantId);
+    RootEntity setTenantId(Long tenantId);
 
     String getDelFlag();
 

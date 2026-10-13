@@ -56,10 +56,10 @@ public interface User extends RootEntity {
     User setUpdateBy(String updateBy);
 
     @Override
-    String getTenantId();
+    Long getTenantId();
 
     @Override
-    User setTenantId(String tenantId);
+    User setTenantId(Long tenantId);
 
     @Override
     String getDelFlag();
