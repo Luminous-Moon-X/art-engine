@@ -1,3 +1,7 @@
 dependencies {
+    // 平台基础能力：统一返回值、查询助手、异常、登录上下文、多租户支持等
+    api project(':art-core')
+    // 操作日志注解（@ApiLog）
+    implementation project(':art-log')
     implementation project(':art-workflow:art-workflow-core')
 }
