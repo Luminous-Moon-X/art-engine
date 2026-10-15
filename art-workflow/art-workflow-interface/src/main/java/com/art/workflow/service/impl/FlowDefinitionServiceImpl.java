@@ -280,7 +280,7 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
         }
         return defService.list(entity).stream()
                 .map(this::toVO)
-                .sorted(Comparator.comparing(DefinitionVO::getCreateTime,
+                .sorted(Comparator.comparing(definitionVO -> definitionVO != null ? definitionVO.getCreateTime() : null,
                         Comparator.nullsLast(Comparator.reverseOrder())))
                 .collect(Collectors.toList());
     }
@@ -300,7 +300,9 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
             throw new ArtException("流程定义不存在或已被删除！");
         }
         return definition;
-    }    /**
+    }
+
+    /**
      * 校验流程编码是否重复<br/>
      * 流程编码为流程的唯一业务标识，新增后不可修改；同一编码下的多版本由「复制」操作产生
      *
