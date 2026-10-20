@@ -292,7 +292,7 @@ public class AIChatServiceImpl implements AIChatService {
             conversation.setTurnCount(1);
             conversation.setCreateId(userId);
             conversation.setCreateTime(LocalDateTime.now());
-            conversation.setDeleteFlag(Boolean.FALSE);
+            conversation.setDeleteFlag(0);
             aiConversationMapper.insert(conversation);
             turnCount = 1;
         } else {
@@ -580,7 +580,7 @@ public class AIChatServiceImpl implements AIChatService {
         message.setContent(content);
         message.setCreateId(userId);
         message.setCreateTime(LocalDateTime.now());
-        message.setDeleteFlag(Boolean.FALSE);
+        message.setDeleteFlag(0);
         aiChatMessageMapper.insert(message);
     }
 

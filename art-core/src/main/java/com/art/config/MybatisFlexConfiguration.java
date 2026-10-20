@@ -27,6 +27,16 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
     private static final Logger logger = LoggerFactory.getLogger("mybatis-flex-sql");
 
     /**
+     * 逻辑未删除值：0（delete_flag / del_flag 均为 smallint）
+     */
+    private static final int LOGIC_NOT_DELETE_VALUE = 0;
+
+    /**
+     * 逻辑已删除值：1（delete_flag / del_flag 均为 smallint）
+     */
+    private static final int LOGIC_DELETE_VALUE = 1;
+
+    /**
      * 数据行权限缓存提供者<br/>
      * <p>
      * 必须使用 {@link ObjectProvider} 延迟解析：本类作为 {@link MyBatisFlexCustomizer} 会在
@@ -143,5 +153,14 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         // 注册数据权限处理逻辑（方言内部按需延迟解析缓存，避免与 sqlSessionFactory 形成循环依赖）
         DialectFactory.registerDialect(DbType.POSTGRE_SQL,
                 new DataAuthDialect(permissionRowCacheProvider, dataAuthColumnProvider));
+
+        // 全局逻辑删除统一使用数字 0/1 标记：
+        // 1. 业务表 p_* 的 delete_flag 为 smallint（0=未删除，1=已删除），由 BaseEntity 上的
+        //    @Column(isLogicDelete = true) 标记；
+        // 2. warm-flow 各流程表的 del_flag 同为 smallint，实体同样通过 @Column(isLogicDelete = true) 标记。
+        // 此处显式指定整型 0/1，保证框架生成 delete_flag = 0 / delete_flag = 1（数字值不加引号），
+        // 与 smallint 列类型完全匹配，避免 PostgreSQL 下的类型不匹配问题。
+        globalConfig.setNormalValueOfLogicDelete(LOGIC_NOT_DELETE_VALUE);
+        globalConfig.setDeletedValueOfLogicDelete(LOGIC_DELETE_VALUE);
     }
 }

@@ -265,7 +265,6 @@ public class ObjectStorageServiceManager implements ObjectStorageService {
             List<OssConfig> tenantConfigs = tenantSupport.systemScope(() -> ossConfigMapper.selectListByQuery(
                     QueryWrapper.create()
                             .eq(OssConfig::getTenantId, tenantId)
-                            .eq(OssConfig::getDeleteFlag, Boolean.FALSE)
                             .orderBy(OssConfig::getId, false)));
             OssConfig config = tenantConfigs.stream()
                     .filter(item -> Boolean.TRUE.equals(item.getEnableFlag()))
@@ -325,7 +324,6 @@ public class ObjectStorageServiceManager implements ObjectStorageService {
         return tenantSupport.systemScope(() -> {
             QueryWrapper wrapper = QueryWrapper.create()
                     .eq(OssConfig::getEnableFlag, Boolean.TRUE)
-                    .eq(OssConfig::getDeleteFlag, Boolean.FALSE)
                     .orderBy(OssConfig::getId, false);
             if (globalOnly) {
                 wrapper.isNull(OssConfig::getTenantId);

@@ -384,7 +384,7 @@ public class KnowledgeDocServiceImpl extends ServiceImpl<KnowledgeDocMapper, Kno
                 contentEntity.setParseEndTime(LocalDateTime.now());
                 contentEntity.setCreateId(userId);
                 contentEntity.setCreateTime(LocalDateTime.now());
-                contentEntity.setDeleteFlag(Boolean.FALSE);
+                contentEntity.setDeleteFlag(0);
                 knowledgeDocContentMapper.insert(contentEntity);
                 // 4. 解析状态改为complete
                 KnowledgeDoc complete = new KnowledgeDoc();

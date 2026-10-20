@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>回归保护：{@link PermissionRow} 的列映射必须与 {@code p_sys_permission_row} 表结构一致，
  * 否则会在运行期报错：</p>
  * <ul>
- *     <li>{@code delete_flag} 必须是 boolean，映射为 {@link BaseEntity} 的 Boolean；</li>
+ *     <li>{@code delete_flag} 必须是 smallint，映射为 {@link BaseEntity} 的 Integer；</li>
  *     <li>{@code enable_flag} 为 boolean，映射为 Boolean；</li>
  *     <li>租户列必须保留，保证多租户自动过滤生效。</li>
  * </ul>
@@ -35,16 +35,17 @@ class PermissionRowMappingTest {
     private final TableInfo tableInfo = TableInfoFactory.ofEntityClass(PermissionRow.class);
 
     /**
-     * delete_flag 应正常参与映射，且类型为 Boolean（与库中 boolean 对应）
+     * delete_flag 应正常参与映射，类型为 Integer，并作为逻辑删除列（smallint，0=未删除，1=已删除）
      */
     @Test
-    void deleteFlagShouldMapAsBoolean() {
+    void deleteFlagShouldMapAsInteger() {
         List<String> columns = Arrays.asList(this.tableInfo.getColumns());
         assertTrue(columns.contains("delete_flag"), "delete_flag 应参与映射，实际列：" + columns);
 
         ColumnInfo columnInfo = this.columnInfo("delete_flag");
-        assertEquals(Boolean.class, columnInfo.getPropertyType());
+        assertEquals(Integer.class, columnInfo.getPropertyType());
         assertFalse(columnInfo.isIgnore());
+        assertEquals("delete_flag", this.tableInfo.getLogicDeleteColumn());
     }
 
     /**

@@ -173,7 +173,7 @@ public class DataAuthDialect extends CommonsDialectImpl {
      */
     private static final String COLUMN_TENANT_ID = "tenant_id";
     /**
-     * 逻辑删除-未删除值（与 MyBatis-Flex 默认逻辑删除处理器保持一致）
+     * 逻辑删除-未删除值（smallint 0，与 MyBatis-Flex 全局逻辑删除配置一致）
      */
     private static final String LOGIC_DELETE_NORMAL_VALUE = "0";
 

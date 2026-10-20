@@ -48,7 +48,8 @@ public class FlexAutoFillConfiguration {
                     baseEntity.setCreateTime(LocalDateTime.now());
                 }
                 if (baseEntity.getDeleteFlag() == null) {
-                    baseEntity.setDeleteFlag(Boolean.FALSE);
+                    // 0-未删除（delete_flag 为 smallint）
+                    baseEntity.setDeleteFlag(0);
                 }
             }
         }
