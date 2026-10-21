@@ -2,13 +2,16 @@
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
     <!-- 日志存放路径 -->
     <property name="log.path" value="logs"/>
-    <!-- 日志输出格式 -->
+    <!-- 文件日志输出格式（文件不输出 ANSI 颜色控制符） -->
     <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n"/>
+    <!-- 控制台日志输出格式：时间/线程/级别/类名/方法行号使用不同颜色，便于快速区分 -->
+    <property name="console.log.pattern"
+              value="%green(%d{HH:mm:ss.SSS}) %magenta([%thread]) %highlight(%-5level) %cyan(%logger{20}) - [%yellow(%method),%yellow(%line)] - %msg%n"/>
 
     <!-- 控制台输出 -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${log.pattern}</pattern>
+            <pattern>${console.log.pattern}</pattern>
         </encoder>
     </appender>
 
