@@ -45,7 +45,7 @@ public class BannerRunner implements ApplicationRunner {
             String bannerContent = contentBuilder.toString();
             System.out.print(bannerContent);
         }
-        System.out.printf(":: Startup Successful ::        - version：%s%n", version);
+        System.out.printf(" :: Art Engine ::      (v%s)%n", version);
     }
 
 }
