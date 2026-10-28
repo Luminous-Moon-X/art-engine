@@ -27,4 +27,5 @@ dependencies {
     api "${lib.'hutool'}"
     api "${lib.'hikari-cp'}"
     api "${lib.'caffeine'}"
+    api "${lib.'spring-state-machine'}"
 }
