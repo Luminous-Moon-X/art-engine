@@ -30,4 +30,9 @@ public class AuthProperties {
      * 请求白名单
      */
     private List<String> whiteList;
+    /**
+     * 会话续期节流间隔（秒）：同一 Token 在该时间内最多触发一次 Sa-Token 会话续期<br/>
+     * 默认 300 秒，远小于 token 过期时间，不会使会话提前失效；配置为 0 或负数表示每个请求都续期
+     */
+    private Long sessionRenewIntervalSeconds = 300L;
 }

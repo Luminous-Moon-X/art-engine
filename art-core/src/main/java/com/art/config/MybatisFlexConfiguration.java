@@ -72,6 +72,10 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         AuditManager.setAuditEnable(true);
         // 设置消息收集器，用于记录 SQL 执行信息
         AuditManager.setMessageCollector(auditMessage -> {
+            // 日志级别未开启时直接跳过：避免无谓的 SQL 参数拼接（getFullSql）与格式化开销
+            if (!logger.isInfoEnabled()) {
+                return;
+            }
             // 如果当前线程已启用忽略 SQL 日志，则不记录日志
             if (IgnoreSqlLogContextHolder.ignore() != null && IgnoreSqlLogContextHolder.ignore()) {
                 return;

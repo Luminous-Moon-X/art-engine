@@ -14,19 +14,28 @@ import com.art.tenant.TenantStatusProvider;
 import com.art.tenant.TenantSupport;
 import com.art.utils.StringUtil;
 import com.alibaba.fastjson2.JSON;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 请求统一拦截器
+ *
+ * <p>性能约定：本拦截器处于每个请求的必经路径，Redis 往返次数直接决定接口耗时，
+ * 因此登录态与租户上下文通过一次 pipeline 批量读取/续期，Sa-Token 的会话续期按
+ * 配置间隔节流（会话有效期为 60 分钟，节流不会使会话提前失效）。</p>
  *
  * @author Luminous.X
  * @since 1.0.0
@@ -35,6 +44,16 @@ import java.util.List;
 @Component
 @SuppressWarnings("unused")
 public class RequestHeaderInterceptor implements HandlerInterceptor {
+    /**
+     * 默认会话续期间隔（秒）：同一 Token 在该时间内最多触发一次 Sa-Token 续期
+     */
+    private static final long DEFAULT_SESSION_RENEW_INTERVAL_SECONDS = 300L;
+
+    /**
+     * 会话续期标记缓存的最大条目数
+     */
+    private static final int SESSION_RENEW_CACHE_MAX_SIZE = 100_000;
+
     /**
      * Redis客户端
      */
@@ -59,6 +78,11 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
      * 租户状态提供者（校验租户是否启用/未到期）
      */
     private final TenantStatusProvider tenantStatusProvider;
+    /**
+     * 最近一次会话续期时间标记（key：Token；配置的间隔内不再重复续期）<br/>
+     * 间隔配置为 0 或负数时不做节流，退化为每个请求都续期（保持旧行为）
+     */
+    private final Cache<String, Boolean> renewedTokens;
 
     /**
      * 构造器注入
@@ -79,6 +103,14 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         this.roleCache = roleCache;
         this.tenantSupport = tenantSupport;
         this.tenantStatusProvider = tenantStatusProvider;
+        Long renewInterval = authProperties.getSessionRenewIntervalSeconds();
+        long intervalSeconds = renewInterval == null ? DEFAULT_SESSION_RENEW_INTERVAL_SECONDS : renewInterval;
+        this.renewedTokens = intervalSeconds > 0
+                ? Caffeine.newBuilder()
+                        .maximumSize(SESSION_RENEW_CACHE_MAX_SIZE)
+                        .expireAfterWrite(intervalSeconds, TimeUnit.SECONDS)
+                        .build()
+                : null;
     }
 
     /**
@@ -106,16 +138,29 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
 
         // 根据token获取当前用户信息，并将用户信息存储到线程变量中
         String tokenKey = "access_token:" + token;
+        String tenantContextKey = TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token;
+        long timeoutSeconds = Duration.ofMinutes(authProperties.getTokenExpireTime()).getSeconds();
 
+        // 一次 pipeline 完成「读取登录用户 + 续期登录态 + 读取租户上下文 + 续期租户上下文」：
+        // 原先为 4 次串行 Redis 往返，在跨网络（VPN/跨机房）环境下每次往返 20~150ms，是接口耗时的主要来源。
+        // 命令与执行效果和逐条调用完全一致（EXPIRE 对不存在的键无副作用）。
+        List<Object> sessionValues = redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            byte[] tokenKeyBytes = tokenKey.getBytes(StandardCharsets.UTF_8);
+            byte[] tenantContextKeyBytes = tenantContextKey.getBytes(StandardCharsets.UTF_8);
+            connection.stringCommands().get(tokenKeyBytes);
+            connection.keyCommands().expire(tokenKeyBytes, timeoutSeconds);
+            connection.stringCommands().get(tenantContextKeyBytes);
+            connection.keyCommands().expire(tenantContextKeyBytes, timeoutSeconds);
+            return null;
+        });
         // 优化：直接获取用户信息，如果为空则说明Token无效或已过期
-        String userInfoJson = redisTemplate.opsForValue().get(tokenKey);
+        String userInfoJson = this.pipelinedString(sessionValues, 0);
         if (StringUtil.isBlank(userInfoJson)) {
             throw new ArtException(401, ArtErrorMessageConstants.USER_STATUS_EXPIRE);
         }
 
-        // Token续期
-        redisTemplate.expire(tokenKey, Duration.ofMinutes(authProperties.getTokenExpireTime()));
-        StpUtil.renewTimeout(authProperties.getTokenExpireTime() * 60L);
+        // Token续期（Sa-Token 会话续期，按配置间隔节流）
+        this.renewSessionTimeout(token);
 
         LoginUser loginUser = JSON.parseObject(userInfoJson, LoginUser.class);
         if (loginUser == null) {
@@ -127,7 +172,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         SecurityContextHolder.setUserAllName(loginUser.getNickName());
         SecurityContextHolder.setDeptId(loginUser.getDeptId());
         SecurityContextHolder.setUserType(loginUser.getUserType());
-        Long tenantId = this.resolveTenantId(token, loginUser);
+        Long tenantId = this.resolveTenantId(this.pipelinedString(sessionValues, 2), loginUser);
         // 多租户开启时，每个请求校验生效租户是否仍可用（禁用/到期立即失效）
         this.validateTenantStatus(tenantId);
         SecurityContextHolder.setTenantId(tenantId);
@@ -139,23 +184,53 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
     }
 
     /**
+     * 会话续期（带节流）
+     *
+     * <p>Sa-Token 的 {@code renewTimeout} 内部需要读取会话、续期 Token、读取 Token-Session
+     * 并回写会话，共 4 次 Redis 往返。会话有效期默认为 60 分钟，而节流间隔默认为 5 分钟，
+     * 因此同一 Token 在间隔内只需续期一次即可保证会话不提前失效，登录态有效时间不受影响。</p>
+     *
+     * @param token 当前Token
+     */
+    private void renewSessionTimeout(String token) {
+        if (this.renewedTokens != null) {
+            if (this.renewedTokens.getIfPresent(token) != null) {
+                return;
+            }
+            this.renewedTokens.put(token, Boolean.TRUE);
+        }
+        StpUtil.renewTimeout(authProperties.getTokenExpireTime() * 60L);
+    }
+
+    /**
+     * 从 pipeline 结果中读取字符串值
+     *
+     * @param values pipeline 结果
+     * @param index  命令序号（从 0 开始，与提交顺序一致）
+     * @return 字符串值；不存在时返回 {@code null}
+     */
+    private String pipelinedString(List<Object> values, int index) {
+        if (values == null || values.size() <= index) {
+            return null;
+        }
+        Object value = values.get(index);
+        return value == null ? null : String.valueOf(value);
+    }
+
+    /**
      * 解析当前请求生效的租户ID<br/>
      * 超级管理员登录后切换租户时会写入 tenant_context:{token}，优先使用该值；
      * 其他情况使用用户自身归属的租户ID
      *
-     * @param token      Token
-     * @param loginUser  当前登录用户
+     * @param tenantContext 租户上下文（已随登录态一起从 Redis 取得）
+     * @param loginUser     当前登录用户
      * @return 生效租户ID
      */
-    private Long resolveTenantId(String token, LoginUser loginUser) {
+    private Long resolveTenantId(String tenantContext, LoginUser loginUser) {
         Long sessionTenantId = null;
         try {
-            String tenantContextKey = TenantConstants.TENANT_CONTEXT_KEY_PREFIX + token;
-            String tenantContext = redisTemplate.opsForValue().get(tenantContextKey);
             if (StringUtil.isNotBlank(tenantContext)) {
                 sessionTenantId = Long.parseLong(tenantContext.trim());
-                // 与登录态同步续期，避免上下文键在会话仍有效时提前过期或长期残留
-                redisTemplate.expire(tenantContextKey, Duration.ofMinutes(authProperties.getTokenExpireTime()));
             }
         } catch (NumberFormatException ignored) {
             // 租户上下文非法时回退到用户自身租户

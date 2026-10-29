@@ -44,6 +44,9 @@ art:
   auth:
     # token过期时间 单位：分钟
     token-expire-time: 60
+    # 会话续期节流间隔（秒）：同一Token在该时间内最多触发一次Sa-Token会话续期；
+    # 需远小于token过期时间（默认300秒 < 3600秒），不会使会话提前失效
+    session-renew-interval-seconds: 300
     white-list:
       - /auth/login
       - /auth/logout
